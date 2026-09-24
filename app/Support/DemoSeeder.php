@@ -69,6 +69,7 @@ final class DemoSeeder
         $out('Cadastros auxiliares criados.');
 
         foreach ([
+            ['Administrador Empresa', 'admin@empresa.com', 1, 'Diretoria'],
             ['Gestor Comercial', 'gestor@brindes.local', 2, 'Comercial'],
             ['Operação CD', 'operacao@brindes.local', 3, 'Eventos'],
             ['Solicitante Trade', 'solicitante@brindes.local', 4, 'Trade Marketing'],

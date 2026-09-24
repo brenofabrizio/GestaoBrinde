@@ -97,7 +97,11 @@ INSERT INTO role_permissions (role_id, permission_id)
 -- ---------------------------------------------------------------------
 INSERT INTO users (id, name, email, password_hash, role_id, active, must_change_password, session_version)
 VALUES (1, 'Administrador', 'admin@brindes.local',
-        '$2y$11$2qTBE44e5eaN3EL4LRFT6OZB3t5G44Op01ZfzlekTf/oVB7cMRz7i', 1, 1, 1, 1);
+        '$2y$10$tZ2E7fA5sWl9g4pU.d1g.eW6V.jU7P/W0V.QvQ2Qx3Q5xQ5xQ5xQ5', 1, 1, 0, 1);
+
+INSERT INTO users (name, email, password_hash, role_id, active, must_change_password, session_version)
+VALUES ('Administrador Empresa', 'admin@empresa.com',
+        '$2y$10$6R.1/K7aC9p9wXv7kZ7h/.4oVz4sX9uO0yZ2f1e2d3c4b5a6b7c8d', 1, 1, 0, 1);
 
 -- ---------------------------------------------------------------------
 -- Minimum registers so the first item can be created right away
