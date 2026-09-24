@@ -105,7 +105,12 @@ final class ImageService
     public static function absolute(string $relative): string
     {
         $relative = str_replace(['..', '\\'], ['', '/'], $relative);
-        return Config::get('paths.storage') . '/' . ltrim($relative, '/');
+        $abs = Config::get('paths.storage') . '/' . ltrim($relative, '/');
+        $dir = dirname($abs);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        return $abs;
     }
 
     public static function delete(?string ...$paths): void

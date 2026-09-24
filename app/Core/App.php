@@ -242,8 +242,8 @@ final class App
             $h['Cache-Control'] ??= 'no-store';
         } elseif (str_starts_with($h['Content-Type'] ?? '', 'text/html')) {
             $h['Cache-Control'] = 'no-store';
-            $h['Content-Security-Policy'] = "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; "
-                . "script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' data:; connect-src 'self'; "
+            $h['Content-Security-Policy'] = "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                . "script-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'; "
                 . "media-src 'self' blob: mediastream:; worker-src 'self' blob:; "
                 . "frame-ancestors 'self'; base-uri 'self'; form-action 'self' mailto:";
         }

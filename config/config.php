@@ -55,7 +55,7 @@ return [
     ],
 
     'paths' => [
-        'storage' => BASE_PATH . '/storage',
+        'storage' => (string) getenv('VERCEL') !== '' ? sys_get_temp_dir() . '/storage' : BASE_PATH . '/storage',
         'views' => BASE_PATH . '/resources/views',
     ],
 ];
