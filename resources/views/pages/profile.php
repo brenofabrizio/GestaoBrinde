@@ -18,13 +18,13 @@
       <?php if (!empty($app['user']['must_change_password']) || (($app['page']['query']['trocar-senha'] ?? '') === '1')): ?>
         <div class="alert alert-warning">Troca de senha obrigatória no primeiro acesso.</div>
       <?php endif; ?>
-      <form @submit.prevent="savePassword">
+        <form x-ref="passwordForm" @submit.prevent="savePassword">
         <div class="mb-3"><label class="form-label">Senha atual</label>
-          <input class="form-control" type="password" x-model="current" required></div>
+          <input class="form-control" name="current_password" type="password" x-model="current" required></div>
         <div class="mb-3"><label class="form-label">Nova senha</label>
-          <input class="form-control" type="password" x-model="newp" required></div>
+          <input class="form-control" name="new_password" type="password" x-model="newp" required></div>
         <div class="mb-3"><label class="form-label">Confirmar</label>
-          <input class="form-control" type="password" x-model="conf" required></div>
+          <input class="form-control" name="new_password_confirmation" type="password" x-model="conf" required></div>
         <button class="btn btn-primary" type="submit">Salvar nova senha</button>
       </form>
     </div>
@@ -44,13 +44,17 @@ function profilePage() {
       catch (e) { UI.toast(e.message, 'err'); }
     },
     async savePassword() {
+      UI.clearErrors(this.$refs.passwordForm);
       try {
         await Api.post('/api/auth/change-password', {
           current_password: this.current, new_password: this.newp, new_password_confirmation: this.conf
         });
         UI.toast('Senha alterada.', 'ok');
         if (new URLSearchParams(location.search).get('trocar-senha')) location.href = Api.url('/dashboard');
-      } catch (e) { UI.toast(e.message, 'err'); }
+      } catch (e) {
+        if (e.code === 'VALIDATION_ERROR') UI.fieldErrors(this.$refs.passwordForm, e.fields);
+        UI.toast(e.message, 'err');
+      }
     }
   };
 }

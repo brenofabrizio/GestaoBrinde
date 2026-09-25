@@ -16,6 +16,9 @@
     </select>
     <?php if (can('requests.create') && !is_cd_operations()): ?>
     <a class="btn btn-primary ms-auto" href="<?= e(url('/solicitacoes-trade/nova')) ?>">Nova solicitação</a>
+    <a class="btn btn-outline-primary" href="<?= e(url('/abrir-chamado?codigo=26&versao=10')) ?>">
+      <i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Abrir chamado
+    </a>
     <?php endif; ?>
     <?php if (can('stock.exit') && !is_cd_operations()): ?>
     <a class="btn btn-outline-primary" href="<?= e(url('/estoque/saida')) ?>">Registrar saída de brindes</a>

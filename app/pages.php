@@ -18,6 +18,7 @@ return [
     // --- Step 1 ---------------------------------------------------------
     ['path' => '/dashboard', 'view' => 'pages/dashboard', 'title' => 'Dashboard', 'perm' => 'dashboard.view'],
     ['path' => '/perfil', 'view' => 'pages/profile', 'title' => 'Meu perfil'],
+    ['path' => '/abrir-chamado', 'view' => 'pages/open-ticket', 'title' => 'Abrir chamado'],
     ['path' => '/notificacoes', 'view' => 'pages/notifications', 'title' => 'Notificações'],
 
     ['path' => '/brindes', 'view' => 'pages/items/index', 'title' => 'Brindes', 'perm' => 'items.view'],

@@ -31,7 +31,7 @@
   <div class="mb-3">
     <label class="form-label">URL do formulário Lecom de suprimentos</label>
     <input class="form-control" type="url" x-model="f.lecom_supply_form_url" placeholder="https://.../formulario?brinde_id={id}&codigo={code}">
-    <div class="form-text">Placeholders disponíveis: {id}, {code}, {name}, {quantity}, {unit_value}, {category}.</div>
+    <div class="form-text">Placeholders disponíveis: {id}, {code}, {name}, {quantity}, {unit_value}, {category}, {codigo}, {versao}. Para o processo de suprimentos, use {codigo}=26 e {versao}=10 na URL.</div>
   </div>
   <div class="alert" :class="f.mail_smtp ? 'alert-success' : 'alert-warning'" x-show="f.mail_driver">
     <span x-show="f.mail_smtp">Envio de e-mail por SMTP ativo.</span>

@@ -36,7 +36,7 @@
     <template x-for="(line, i) in items" :key="line.item_id">
       <div class="row g-2 align-items-center mb-2">
         <div class="col-md-5" x-text="line.name"></div>
-        <div class="col-md-2"><input class="form-control" name="items" type="number" min="1" x-model.number="line.qty_requested" placeholder="Qtd"></div>
+        <div class="col-md-2"><input class="form-control" :name="'items.' + i + '.qty_requested'" type="number" min="1" x-model.number="line.qty_requested" placeholder="Qtd"></div>
         <div class="col-md-3"><input class="form-control" x-model="line.unit_value" placeholder="Valor unit. R$"></div>
         <div class="col-md-1 small text-muted" x-text="Api.fmt.money((Number(line.qty_requested)||0) * (Number(String(line.unit_value).replace(',','.'))||0))"></div>
         <div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger" @click="items.splice(i,1)">×</button></div>
@@ -63,7 +63,13 @@ function tradeForm() {
     search() {
       clearTimeout(this.t);
       this.t = setTimeout(async () => {
-        this.opts = this.q ? (await Api.get('/api/items/options', { q: this.q })).data : [];
+        if (!this.q) { this.opts = []; return; }
+        try {
+          this.opts = (await Api.get('/api/items/options', { q: this.q })).data || [];
+        } catch (e) {
+          this.opts = [];
+          this.formError = e.message || 'Não foi possível buscar os brindes.';
+        }
       }, 250);
     },
     add(o) {
@@ -91,7 +97,7 @@ function tradeForm() {
       }
       this.saving = true;
       try {
-        const { data } = await Api.post('/api/trade/requests', {
+        const { data } = await Api.postIdem('/api/trade/requests', {
           ...this.f,
           industry_id: Number(this.f.industry_id),
           items: this.items.map(i => ({

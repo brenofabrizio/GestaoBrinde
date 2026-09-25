@@ -109,6 +109,7 @@
   }
 
   function initNotifications() {
+    if (document.body?.dataset?.mustChangePassword === '1') return;
     const btn = document.getElementById('bellBtn');
     const pop = document.getElementById('notificationPopover');
     const list = document.getElementById('notificationList');

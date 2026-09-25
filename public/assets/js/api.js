@@ -37,6 +37,9 @@
       }
     },
     passwordChangeRequired() {
+      // The profile page is the one allowed to clear the flag. Redirecting
+      // from its own notification/bootstrap calls creates an infinite reload.
+      if (location.pathname === BASE + '/perfil' || location.pathname === '/perfil') return;
       location.href = BASE + '/perfil?trocar-senha=1';
     },
   };

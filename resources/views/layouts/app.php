@@ -5,6 +5,7 @@ $settings = $app['settings'];
 $color = e($settings['primary_color'] ?? '#2563EB');
 $title = $app['page']['title'] ?? '';
 $unread = 0;
+$mustChangePassword = !empty($user['must_change_password']);
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -22,7 +23,7 @@ $unread = 0;
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
   <style>:root { --brand-primary: <?= $color ?>; }</style>
 </head>
-<body>
+<body data-must-change-password="<?= $mustChangePassword ? '1' : '0' ?>">
 <div class="app-shell">
   <aside class="sidebar d-none d-lg-flex" role="complementary" aria-label="Menu lateral">
     <a class="sidebar-brand" href="<?= e(url('/dashboard')) ?>" aria-label="Ir para o painel">
@@ -63,6 +64,7 @@ $unread = 0;
         <input class="form-control form-control-sm" type="search" name="q"
                placeholder="Buscar brinde, código…" aria-label="Buscar brinde">
       </form>
+      <?php if (!$mustChangePassword): ?>
       <div class="position-relative">
         <button class="btn btn-light" type="button" id="bellBtn"
                 aria-label="Notificações" aria-haspopup="dialog" aria-expanded="false" aria-controls="notificationPopover">
@@ -82,6 +84,7 @@ $unread = 0;
           </div>
         </div>
       </div>
+      <?php endif; ?>
       <div class="dropdown">
         <button class="btn btn-light dropdown-toggle user-chip" data-bs-toggle="dropdown"
                 aria-expanded="false" aria-haspopup="true" id="userMenuBtn">
@@ -129,12 +132,14 @@ document.getElementById('logoutBtn')?.addEventListener('click', async function (
   try { await Api.post('/api/auth/logout', {}); } catch (e) {}
   location.href = <?= json_script(url('/login')) ?>;
 });
+<?php if (!$mustChangePassword): ?>
 (async function () {
   try {
     const { meta } = await Api.get('/api/notifications', { per_page: 1, unread: 1 });
     if (meta && meta.unread > 0) document.getElementById('bellDot')?.classList.remove('d-none');
   } catch (e) {}
 })();
+<?php endif; ?>
 </script>
 <?= $scripts ?? '' ?>
 <script src="<?= e(asset('vendor/alpinejs/alpine.min.js')) ?>"></script>
