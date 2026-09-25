@@ -42,6 +42,14 @@ final class SettingsController
             'event_email_mode' => $all['event_email_mode'],
             'alert_emails' => $all['alert_emails'] === '' ? [] : explode(',', $all['alert_emails']),
             'lecom_supply_form_url' => $all['lecom_supply_form_url'] ?? '',
+            'lecom_portal_url' => $all['lecom_portal_url'] ?? '',
+            'lecom_api_base_url' => $all['lecom_api_base_url'] ?? SettingsService::DEFAULTS['lecom_api_base_url'],
+            'lecom_process_id' => (int) ($all['lecom_process_id'] ?? SettingsService::DEFAULTS['lecom_process_id']),
+            'lecom_process_version' => (int) ($all['lecom_process_version'] ?? SettingsService::DEFAULTS['lecom_process_version']),
+            'lecom_instance_form_url' => SettingsService::lecomFormUrl(),
+            'lecom_api_start_url' => SettingsService::lecomApiStartUrl(),
+            'lecom_api_x_server' => SettingsService::lecomApiServer(),
+            'lecom_workspace_start_url' => SettingsService::lecomWorkspaceStartUrl(),
             'mail_driver' => \App\Services\Mailer::driver(),
             'mail_smtp' => \App\Services\Mailer::isSmtp(),
         ]);
@@ -70,6 +78,16 @@ final class SettingsController
         }
         if (isset($data['primary_color'])) {
             $data['primary_color'] = strtoupper($data['primary_color']);
+        }
+        foreach (['lecom_portal_url', 'lecom_api_base_url'] as $urlField) {
+            if (array_key_exists($urlField, $data) && $data[$urlField] !== null && $data[$urlField] !== '') {
+                $value = trim((string) $data[$urlField]);
+                $parsed = parse_url($value);
+                if ($parsed === false || !in_array(strtolower((string) ($parsed['scheme'] ?? '')), ['http', 'https'], true) || empty($parsed['host'])) {
+                    throw HttpException::validation([$urlField => 'Informe uma URL válida iniciando com http:// ou https://.']);
+                }
+                $data[$urlField] = rtrim($value, '/');
+            }
         }
         SettingsService::set($data);
         return $this->index($request);

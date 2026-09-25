@@ -19,6 +19,12 @@ final class SettingsService
         'alert_emails' => '',
         // URL template configured by the administrator; placeholders are resolved on the item page.
         'lecom_supply_form_url' => '',
+        // Lecom process settings used by the "Abrir chamado" flow.
+        // Homologation portal found in the local Lecom library; replace in Settings for production.
+        'lecom_portal_url' => 'https://cp-hom.grupoemefarma.com.br',
+        'lecom_api_base_url' => 'https://api.lecom.com.br/service/bpm/api',
+        'lecom_process_id' => '26',
+        'lecom_process_version' => '10',
     ];
 
     /** Keys editable through PUT /api/settings with their validation rules. */
@@ -29,6 +35,10 @@ final class SettingsService
         'event_email_mode' => 'sometimes|required|in:por_retirada,consolidado',
         'alert_emails' => 'sometimes|nullable|string|max:500',
         'lecom_supply_form_url' => 'sometimes|nullable|string|max:500',
+        'lecom_portal_url' => 'sometimes|nullable|string|max:500',
+        'lecom_api_base_url' => 'sometimes|nullable|string|max:500',
+        'lecom_process_id' => 'sometimes|required|int|min:1|max:999999',
+        'lecom_process_version' => 'sometimes|required|int|min:1|max:999999',
     ];
 
     private static ?array $cache = null;
@@ -52,6 +62,65 @@ final class SettingsService
     public static function get(string $key, ?string $default = null): ?string
     {
         return self::all()[$key] ?? $default;
+    }
+
+    /** Normalized base URL of the Lecom portal, or null when not configured. */
+    public static function lecomPortalUrl(): ?string
+    {
+        $value = trim((string) self::get('lecom_portal_url', ''));
+        return $value === '' ? null : rtrim($value, '/');
+    }
+
+    /** Normalized base URL of the Lecom API documented in the local library. */
+    public static function lecomApiBaseUrl(): string
+    {
+        $value = trim((string) self::get('lecom_api_base_url', self::DEFAULTS['lecom_api_base_url']));
+        return rtrim($value !== '' ? $value : self::DEFAULTS['lecom_api_base_url'], '/');
+    }
+
+    /** URL for the published Lecom form that lets the user start the process. */
+    public static function lecomFormUrl(?int $processId = null, ?int $version = null): ?string
+    {
+        $portal = self::lecomPortalUrl();
+        if ($portal === null) {
+            return null;
+        }
+        $processId ??= (int) self::get('lecom_process_id', self::DEFAULTS['lecom_process_id']);
+        $version ??= (int) self::get('lecom_process_version', self::DEFAULTS['lecom_process_version']);
+        return $portal . '/form-web/?' . http_build_query([
+            'processId' => $processId,
+            'version' => $version,
+            'newWS' => 'true',
+        ], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /** API endpoint used to create a process instance, without exposing credentials. */
+    public static function lecomApiStartUrl(): string
+    {
+        return self::lecomApiBaseUrl() . '/v1/process-instances';
+    }
+
+    /** Workspace endpoint used by the local Lecom scripts with the portal SSO ticket. */
+    public static function lecomWorkspaceStartUrl(?int $processId = null, ?int $version = null): ?string
+    {
+        $portal = self::lecomPortalUrl();
+        if ($portal === null) {
+            return null;
+        }
+        $processId ??= (int) self::get('lecom_process_id', self::DEFAULTS['lecom_process_id']);
+        $version ??= (int) self::get('lecom_process_version', self::DEFAULTS['lecom_process_version']);
+        return $portal . '/workspace/api/process/start?' . http_build_query([
+            'processId' => $processId,
+            'version' => $version,
+        ], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /** X-Server value required by the Lecom API, derived from the portal host. */
+    public static function lecomApiServer(): ?string
+    {
+        $portal = self::lecomPortalUrl();
+        $host = $portal !== null ? parse_url($portal, PHP_URL_HOST) : null;
+        return is_string($host) && $host !== '' ? $host : null;
     }
 
     /** Branding values used by every page and the login screen. */
