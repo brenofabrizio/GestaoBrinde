@@ -172,8 +172,8 @@ Role slugs: `admin` Administrador · `approver` Gestor/Aprovador · `operations`
 |---|---|---|
 | `GET /api/settings/public` | public | `{company_name, primary_color, logo_url}` — for the login page |
 | `GET /api/settings/logo` | public | PNG image |
-| `GET /api/settings` | settings.manage | `{company_name, primary_color, logo_url, stalled_days, event_email_mode, alert_emails: []}` |
-| `PUT /api/settings` | settings.manage | any subset: `company_name` (≤100), `primary_color` (`#RRGGBB`), `stalled_days` (1–60), `event_email_mode` (`por_retirada`/`consolidado`), `alert_emails` (array or "a@b.com, c@d.com") |
+| `GET /api/settings` | settings.manage | `{company_name, primary_color, logo_url, stalled_days, event_email_mode, alert_emails: [], lecom_supply_form_url}` |
+| `PUT /api/settings` | settings.manage | any subset: `company_name` (≤100), `primary_color` (`#RRGGBB`), `stalled_days` (1–60), `event_email_mode` (`por_retirada`/`consolidado`), `alert_emails` (array or "a@b.com, c@d.com"), `lecom_supply_form_url` (template with `{id}`, `{code}`, `{name}`, `{quantity}`, `{unit_value}`, `{category}`) |
 | `POST /api/settings/logo` | settings.manage | multipart, field `logo` (PNG/JPG/WEBP ≤ 5 MB; stored as PNG ≤ 600px) |
 | `DELETE /api/settings/logo` | settings.manage | — |
 

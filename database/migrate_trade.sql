@@ -76,7 +76,7 @@ INSERT INTO roles (id, slug, name, description) VALUES
 ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description);
 
 UPDATE roles SET name = 'TRADE / Gestor', description = 'Cria solicitações TRADE, consulta estoque, retiradas e relatórios.' WHERE slug = 'approver';
-UPDATE roles SET name = 'CD / Estoque', description = 'Recebimento no CD, saídas, transferências, retiradas e consulta ao estoque.' WHERE slug = 'operations';
+UPDATE roles SET name = 'CD / Estoque', description = 'Recebimento no CD, entrada, confirmação de saída, transferência, retirada por QR e comprovantes.' WHERE slug = 'operations';
 UPDATE roles SET name = 'TRADE', description = 'Cria e acompanha solicitações de compra de brindes.' WHERE slug = 'requester';
 
 INSERT INTO permissions (slug, name, module) VALUES

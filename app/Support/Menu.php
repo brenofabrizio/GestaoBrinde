@@ -21,7 +21,7 @@ final class Menu
             ['label' => 'Recebimento no CD', 'icon' => 'box-arrow-in-down', 'url' => '/recebimento', 'perm' => ['stock.receive', 'stock.entry']],
             ['label' => 'Estoque por indústria', 'icon' => 'building', 'url' => '/estoque/por-industria', 'perm' => 'stock.view'],
             ['label' => 'Transferência', 'icon' => 'arrow-left-right', 'url' => '/estoque/transferencia', 'perm' => ['stock.transfer', 'stock.exit']],
-            ['label' => 'Retirada / QR Code', 'icon' => 'qr-code', 'url' => '/retirada', 'perm' => ['requests.process', 'stock.exit', 'events.withdraw']],
+            ['label' => 'Retirada / QR Code', 'icon' => 'qr-code', 'url' => '/retirada', 'perm' => ['requests.process', 'stock.exit', 'events.withdraw', 'stock.exit_confirm']],
             ['label' => 'Eventos / Feirões', 'icon' => 'calendar-event', 'url' => '/eventos', 'perm' => 'events.view'],
             ['label' => 'Comprovantes', 'icon' => 'file-earmark-check', 'url' => '/protocolos', 'perm' => 'deliveries.view'],
         ]],

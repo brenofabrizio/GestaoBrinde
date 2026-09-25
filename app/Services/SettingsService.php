@@ -17,6 +17,8 @@ final class SettingsService
         'stalled_days' => '3',
         'event_email_mode' => 'por_retirada',
         'alert_emails' => '',
+        // URL template configured by the administrator; placeholders are resolved on the item page.
+        'lecom_supply_form_url' => '',
     ];
 
     /** Keys editable through PUT /api/settings with their validation rules. */
@@ -26,6 +28,7 @@ final class SettingsService
         'stalled_days' => 'sometimes|required|int|min:1|max:60',
         'event_email_mode' => 'sometimes|required|in:por_retirada,consolidado',
         'alert_emails' => 'sometimes|nullable|string|max:500',
+        'lecom_supply_form_url' => 'sometimes|nullable|string|max:500',
     ];
 
     private static ?array $cache = null;

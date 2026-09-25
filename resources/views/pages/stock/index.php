@@ -78,7 +78,7 @@
               <div class="fw-semibold text-dark" x-text="m.item.name"></div>
               <div class="small text-muted" x-text="m.item.code"></div>
             </td>
-            <td class="text-end fw-bold" :class="m.qty > 0 ? 'text-success' : 'text-danger'" x-text="(m.qty > 0 ? '+' : '') + Api.fmt.qty(m.qty)"></td>
+            <td class="text-end fw-bold" :class="m.qty > 0 ? 'text-success' : 'text-danger'" x-text="(m.quantity > 0 ? '+' : '') + Api.fmt.qty(m.quantity)"></td>
             <td class="text-end fw-semibold" x-text="m.balance_after"></td>
             <td x-text="m.user.name" class="small"></td>
             <td class="small text-muted" x-text="m.purpose || m.reason || m.recipient || m.document_ref || '—'"></td>

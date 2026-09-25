@@ -10,7 +10,9 @@
 /storage/backups/**
 /storage/logs/**
 /storage/cache/**
+/storage/json/*.json
 !/storage/**/.gitkeep
+!/storage/json/fixtures/**
 /.idea/
 /.vscode/
 Thumbs.db

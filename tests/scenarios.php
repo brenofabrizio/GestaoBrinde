@@ -193,7 +193,7 @@ check('A13 método errado -> 405', $r['status'] === 405, $r);
 section('B. Usuários, perfis e permissões');
 // ==========================================================================
 $mk = fn (string $name, string $email, int $role) => $admin->post('/api/users', [
-    'name' => $name, 'email' => $email, 'password' => 'Senha1234', 'role_id' => $role, 'must_change_password' => false,
+    'name' => $name, 'email' => $email, 'password' => 'Senha1234!', 'role_id' => $role, 'must_change_password' => false,
 ]);
 $r = $mk('Operador Teste', 'op@teste.local', 3);
 check('B1 admin cria usuário Operação', $r['status'] === 201 && $r['json']['data']['role']['slug'] === 'operations', $r);
@@ -209,9 +209,9 @@ check('B3 e-mail duplicado (maiúsculas) recusado', $r['status'] === 422 && isse
 $op = new TestClient($app, '10.0.0.3');
 $sol = new TestClient($app, '10.0.0.4');
 $gestor = new TestClient($app, '10.0.0.22');
-$r1 = $op->login('op@teste.local', 'Senha1234');
-$r2 = $sol->login('sol@teste.local', 'Senha1234');
-$r3 = $gestor->login('gestor@teste.local', 'Senha1234');
+$r1 = $op->login('op@teste.local', 'Senha1234!');
+$r2 = $sol->login('sol@teste.local', 'Senha1234!');
+$r3 = $gestor->login('gestor@teste.local', 'Senha1234!');
 check('B4 novos usuários fazem login', $r1['status'] === 200 && $r2['status'] === 200 && $r3['status'] === 200, [$r1, $r2, $r3]);
 
 $r = $sol->post('/api/items', ['name' => 'X', 'category_id' => 1]);
@@ -244,11 +244,11 @@ check('B10 sempre existe ao menos um administrador ativo', $r['status'] === 422 
 
 $mk('Temporário', 'temp@teste.local', 4);
 $tmp = new TestClient($app, '10.0.0.5');
-$tmp->login('temp@teste.local', 'Senha1234');
+$tmp->login('temp@teste.local', 'Senha1234!');
 $tmpId = (int) Db::value("SELECT id FROM users WHERE email = 'temp@teste.local'");
 $admin->post("/api/users/{$tmpId}/deactivate");
 $r1 = $tmp->get('/api/auth/me');
-$r2 = $tmp->login('temp@teste.local', 'Senha1234');
+$r2 = $tmp->login('temp@teste.local', 'Senha1234!');
 check('B11 inativar usuário encerra a sessão e bloqueia login', $r1['status'] === 401 && $r2['status'] === 403 && code($r2) === 'USER_INACTIVE', [$r1, $r2]);
 
 $r = $admin->post("/api/users/{$tmpId}/purge", ['confirm' => 'temp@teste.local']);
@@ -570,9 +570,9 @@ preg_match_all('/token=([a-f0-9]{64})/', $log, $m);
 $token = end($m[1]) ?: '';
 check('H1 "esqueci a senha" envia link por e-mail', $r['status'] === 200 && $token !== '', $r);
 
-$r = $guest->post('/api/auth/reset', ['token' => $token, 'password' => 'NovaSenha9', 'password_confirmation' => 'NovaSenha9']);
+$r = $guest->post('/api/auth/reset', ['token' => $token, 'password' => 'NovaSenha9!', 'password_confirmation' => 'NovaSenha9!']);
 $r1 = $sol->get('/api/auth/me');
-$r2 = $sol->login('sol@teste.local', 'NovaSenha9');
+$r2 = $sol->login('sol@teste.local', 'NovaSenha9!');
 $r3 = $guest->post('/api/auth/reset', ['token' => $token, 'password' => 'OutraSenha9', 'password_confirmation' => 'OutraSenha9']);
 check('H2 redefinição encerra sessões antigas; link não pode ser reutilizado', $r['status'] === 200 && $r1['status'] === 401
     && $r2['status'] === 200 && code($r3) === 'RESET_TOKEN_INVALID', [$r, $r1, $r2, $r3]);
@@ -584,7 +584,7 @@ $bf = new TestClient($app, '10.0.0.77');
 for ($i = 0; $i < 5; $i++) {
     $bf->login('gestor@teste.local', 'Errada123');
 }
-$r = $bf->login('gestor@teste.local', 'Senha1234');
+$r = $bf->login('gestor@teste.local', 'Senha1234!');
 check('H4 bloqueio após 5 senhas erradas (429)', $r['status'] === 429 && code($r) === 'TOO_MANY_ATTEMPTS', $r);
 
 // ==========================================================================
@@ -861,11 +861,11 @@ $trBeta = $admin->post('/api/trade/requests', [
     'items' => [['item_id' => $cafe, 'qty_requested' => 1]],
 ]);
 $admin->post('/api/users', [
-    'name' => 'Portal Alfa', 'email' => 'alfa@teste.local', 'password' => 'Senha1234',
+    'name' => 'Portal Alfa', 'email' => 'alfa@teste.local', 'password' => 'Senha1234!',
     'role_id' => 5, 'industry_id' => $indId, 'must_change_password' => false,
 ]);
 $portal = new TestClient($app, '10.0.0.9');
-$portal->login('alfa@teste.local', 'Senha1234');
+$portal->login('alfa@teste.local', 'Senha1234!');
 $seen = $portal->get('/api/requests?flow=trade&per_page=50');
 $seenIds = array_map('intval', array_column($seen['json']['data'] ?? [], 'id'));
 $spyBeta = $portal->get('/api/requests/' . ($trBeta['json']['data']['id'] ?? 0));

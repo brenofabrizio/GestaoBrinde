@@ -64,11 +64,23 @@ $unread = 0;
                placeholder="Buscar brinde, código…" aria-label="Buscar brinde">
       </form>
       <div class="position-relative">
-        <a class="btn btn-light" href="<?= e(url('/notificacoes')) ?>"
-           aria-label="Notificações" id="bellBtn">
+        <button class="btn btn-light" type="button" id="bellBtn"
+                aria-label="Notificações" aria-haspopup="dialog" aria-expanded="false" aria-controls="notificationPopover">
           <i class="bi bi-bell" aria-hidden="true"></i>
-        </a>
+        </button>
         <span class="bell-dot d-none" id="bellDot" aria-hidden="true"></span>
+        <div id="notificationPopover" class="notification-popover shadow" role="dialog" aria-label="Notificações" hidden>
+          <div class="notification-popover-header">
+            <strong>Notificações</strong>
+            <button type="button" class="btn btn-sm btn-link" id="notificationReadAll">Marcar todas como lidas</button>
+          </div>
+          <div id="notificationList" class="notification-list">
+            <div class="notification-empty">Carregando…</div>
+          </div>
+          <div class="notification-popover-footer">
+            <a href="<?= e(url('/notificacoes')) ?>" id="notificationSeeAll">Ver todas</a>
+          </div>
+        </div>
       </div>
       <div class="dropdown">
         <button class="btn btn-light dropdown-toggle user-chip" data-bs-toggle="dropdown"

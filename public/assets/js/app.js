@@ -108,5 +108,66 @@
     });
   }
 
-  global.UI = { toast, fieldErrors, clearErrors, confirmDialog, confirm: confirmDialog, purgeDialog, qs, debounce, badge, pager, catchApi, signaturePad };
+  function initNotifications() {
+    const btn = document.getElementById('bellBtn');
+    const pop = document.getElementById('notificationPopover');
+    const list = document.getElementById('notificationList');
+    const dot = document.getElementById('bellDot');
+    const readAll = document.getElementById('notificationReadAll');
+    if (!btn || !pop || !list) return;
+
+    let loaded = false;
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[c]));
+    const render = (rows) => {
+      list.innerHTML = rows.length ? rows.map((n) => `
+        <button type="button" class="notification-row${n.read_at ? '' : ' unread'}" data-notification-id="${n.id}">
+          <span class="notification-row-title">${escapeHtml(n.subject)}</span>
+          <span class="notification-row-time">${escapeHtml(Api.fmt.datetime(n.created_at))}</span>
+          <span class="notification-row-body">${escapeHtml(n.body)}</span>
+        </button>`).join('') : '<div class="notification-empty">Nenhuma notificação.</div>';
+      list.querySelectorAll('[data-notification-id]').forEach((row) => row.addEventListener('click', async () => {
+        const id = row.getAttribute('data-notification-id');
+        const target = rows.find((n) => String(n.id) === String(id));
+        if (target && !target.read_at) {
+          try { await Api.post('/api/notifications/' + id + '/read'); target.read_at = new Date().toISOString(); row.classList.remove('unread'); refreshUnread(); } catch (e) { toast(e.message, 'err'); }
+        }
+        if (target && target.link_url) location.href = Api.url(target.link_url);
+      }));
+    };
+    const refreshUnread = async () => {
+      try {
+        const { meta } = await Api.get('/api/notifications', { per_page: 1, unread: 1 });
+        if (meta && meta.unread > 0) dot?.classList.remove('d-none'); else dot?.classList.add('d-none');
+      } catch (_) {}
+    };
+    const load = async () => {
+      try {
+        const { data, meta } = await Api.get('/api/notifications', { per_page: 6 });
+        render(data || []);
+        loaded = true;
+        if (meta && meta.unread > 0) dot?.classList.remove('d-none'); else dot?.classList.add('d-none');
+      } catch (e) {
+        list.innerHTML = '<div class="notification-empty text-danger">Não foi possível carregar as notificações.</div>';
+      }
+    };
+    const close = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', async () => {
+      const opening = pop.hidden;
+      pop.hidden = !opening;
+      btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      if (opening && !loaded) await load();
+    });
+    readAll?.addEventListener('click', async () => {
+      try { await Api.post('/api/notifications/read-all'); await load(); await refreshUnread(); toast('Notificações marcadas como lidas.', 'ok'); }
+      catch (e) { toast(e.message, 'err'); }
+    });
+    document.addEventListener('click', (event) => {
+      if (!pop.hidden && !pop.contains(event.target) && !btn.contains(event.target)) close();
+    });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !pop.hidden) close(); });
+    refreshUnread();
+  }
+
+  global.UI = { toast, fieldErrors, clearErrors, confirmDialog, confirm: confirmDialog, purgeDialog, qs, debounce, badge, pager, catchApi, signaturePad, initNotifications };
+  document.addEventListener('DOMContentLoaded', initNotifications);
 })(window);

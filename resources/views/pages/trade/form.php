@@ -1,10 +1,11 @@
 <?php ob_start(); ?>
 <div class="card card-body" x-data="tradeForm()" x-init="init()">
   <p class="text-muted">Informe indústria, brinde, quantidade e finalidade. O número do chamado é preenchido só se o pedido for aprovado. A NF é anexada quando o material chegar no CD.</p>
-  <form @submit.prevent="save">
+  <form x-ref="form" @submit.prevent="save">
+    <div x-show="formError" class="alert alert-danger" x-text="formError" role="alert"></div>
     <div class="row g-3">
       <div class="col-md-6"><label class="form-label">Indústria *</label>
-        <select class="form-select" x-model="f.industry_id" required>
+        <select class="form-select" name="industry_id" x-model="f.industry_id" required>
           <option value="">Selecione</option>
           <template x-for="d in inds" :key="d.id"><option :value="d.id" x-text="d.name"></option></template>
         </select></div>
@@ -17,13 +18,13 @@
           <option value="outro">Outro</option>
         </select></div>
       <div class="col-md-6"><label class="form-label">Descrição / finalidade *</label>
-        <input class="form-control" x-model="f.purpose" required placeholder="Ex.: Air Fryer 5L — campanha setembro"></div>
+        <input class="form-control" name="purpose" x-model="f.purpose" required placeholder="Ex.: Air Fryer 5L — campanha setembro"></div>
       <div class="col-md-6"><label class="form-label">Para quem será entregue</label>
-        <input class="form-control" x-model="f.recipient" placeholder="Vendedor, cliente, evento…"></div>
+        <input class="form-control" name="recipient" x-model="f.recipient" placeholder="Vendedor, cliente, evento…"></div>
       <div class="col-md-6"><label class="form-label">Local de entrega</label>
-        <input class="form-control" x-model="f.delivery_place" placeholder="CD Belford Roxo"></div>
+        <input class="form-control" name="delivery_place" x-model="f.delivery_place" placeholder="CD Belford Roxo"></div>
       <div class="col-12"><label class="form-label">Observações</label>
-        <textarea class="form-control" x-model="f.notes"></textarea></div>
+        <textarea class="form-control" name="notes" x-model="f.notes"></textarea></div>
     </div>
     <h3 class="h6 mt-4">Brindes</h3>
     <input class="form-control mb-2" placeholder="Buscar brinde (físico, voucher, cartão…)" x-model="q" @input="search()">
@@ -35,7 +36,7 @@
     <template x-for="(line, i) in items" :key="line.item_id">
       <div class="row g-2 align-items-center mb-2">
         <div class="col-md-5" x-text="line.name"></div>
-        <div class="col-md-2"><input class="form-control" type="number" min="1" x-model.number="line.qty_requested" placeholder="Qtd"></div>
+        <div class="col-md-2"><input class="form-control" name="items" type="number" min="1" x-model.number="line.qty_requested" placeholder="Qtd"></div>
         <div class="col-md-3"><input class="form-control" x-model="line.unit_value" placeholder="Valor unit. R$"></div>
         <div class="col-md-1 small text-muted" x-text="Api.fmt.money((Number(line.qty_requested)||0) * (Number(String(line.unit_value).replace(',','.'))||0))"></div>
         <div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger" @click="items.splice(i,1)">×</button></div>
@@ -51,8 +52,14 @@ ob_start(); ?>
 function tradeForm() {
   return {
     f: { industry_id: '', purpose: '', recipient: '', action_type: 'campanha', delivery_place: 'CD Belford Roxo', notes: '' },
-    inds: [], q: '', opts: [], items: [], saving: false, t: null,
-    async init() { this.inds = (await Api.get('/api/industries', { all: 1 })).data; },
+    inds: [], q: '', opts: [], items: [], saving: false, formError: '', t: null,
+    async init() {
+      try {
+        this.inds = (await Api.get('/api/industries', { all: 1 })).data || [];
+      } catch (e) {
+        this.formError = 'Não foi possível carregar as indústrias. Atualize a página ou procure o Administrador.';
+      }
+    },
     search() {
       clearTimeout(this.t);
       this.t = setTimeout(async () => {
@@ -65,20 +72,46 @@ function tradeForm() {
       this.opts = []; this.q = '';
     },
     async save() {
+      this.formError = '';
+      UI.clearErrors(this.$refs.form);
+      const errors = {};
+      if (!this.f.industry_id) errors.industry_id = 'Selecione a indústria.';
+      if (!String(this.f.purpose || '').trim()) errors.purpose = 'Informe a finalidade da solicitação.';
+      if (this.items.length === 0) errors.items = 'Inclua pelo menos um brinde.';
+      this.items.forEach((line, index) => {
+        if (!Number.isInteger(Number(line.qty_requested)) || Number(line.qty_requested) < 1) {
+          errors.items = 'Informe uma quantidade maior que zero para todos os brindes.';
+          errors['items.' + index + '.qty_requested'] = 'Quantidade inválida.';
+        }
+      });
+      if (Object.keys(errors).length) {
+        this.formError = 'Verifique os campos destacados.';
+        UI.fieldErrors(this.$refs.form, errors);
+        return;
+      }
       this.saving = true;
       try {
         const { data } = await Api.post('/api/trade/requests', {
           ...this.f,
           industry_id: Number(this.f.industry_id),
           items: this.items.map(i => ({
-            item_id: i.item_id,
+            item_id: Number(i.item_id),
             qty_requested: Number(i.qty_requested),
             unit_value: i.unit_value === '' ? null : Number(String(i.unit_value).replace(',', '.'))
           }))
         });
         location.href = Api.url('/solicitacoes-trade/' + data.id);
-      } catch (e) { UI.toast(e.message, 'err'); }
-      this.saving = false;
+      } catch (e) {
+        if (e.code === 'VALIDATION_ERROR') {
+          this.formError = e.message || 'Verifique os campos destacados.';
+          UI.fieldErrors(this.$refs.form, e.fields);
+        } else {
+          this.formError = e.message || 'Não foi possível criar a solicitação.';
+          UI.toast(this.formError, 'err');
+        }
+      } finally {
+        this.saving = false;
+      }
     }
   };
 }

@@ -19,7 +19,7 @@ Admin no primeiro acesso (instalação sem `--admin-email`): `admin@brindes.loca
 |---|---|---|---|
 | 1 | `admin` | Administrador | Tudo: usuários, perfis, configurações, backup, auditoria, cadastros. |
 | 2 | `approver` | TRADE / Gestor | Cria e aprova TRADE, consulta estoque, eventos, relatórios, cadastros. |
-| 3 | `operations` | CD / Estoque | Recebimento, entrada/saída, transferência, retirada, comprovantes. **Não** cria solicitação e **não** vê Cadastros nem “Separação e entregas”. |
+| 3 | `operations` | CD / Estoque | Recebimento no CD, entrada, confirmação de saída por QR, transferência, retirada por QR e comprovantes. **Não** cria solicitação, não registra saída manual, não acessa Cadastros e não usa Separação e entregas. |
 | 4 | `requester` | TRADE | Abre e acompanha as próprias solicitações de compra. |
 | 5 | `industry` | Indústria | Só a indústria vinculada em `users.industry_id`. |
 
@@ -68,7 +68,7 @@ Definido em `permissions` (seed). A tela **Perfis e permissões** (`/perfis`) al
 ### Quem nasce com o quê
 
 - **Gestor:** dashboard, brindes (ver/editar), estoque ver/entrada/**registrar saída**/transferência, cadastros ver/editar, criar e ver todas as solicitações, aprovar, eventos, comprovantes, relatórios.
-- **CD / Estoque:** dashboard, brindes ver/editar, estoque ver/entrada/transferência/recebimento, **confirmar saída** (`stock.exit_confirm`), lookups só ver, ver solicitações, eventos ver + retirar, comprovantes, relatórios. **Sem** `requests.create`, **sem** `requests.process` e **sem** registrar saída (`stock.exit`).
+- **CD / Estoque:** dashboard, brindes somente para consulta, estoque ver/entrada/transferência/recebimento, **confirmar saída** (`stock.exit_confirm`), retirada TRADE por QR, eventos ver + retirar, comprovantes, relatórios. **Sem** `requests.create`, `requests.process`, `stock.exit`, `lookups.view` e sem a caixa de solicitações internas.
 - **TRADE (solicitante):** dashboard, ver brindes, ver cadastros, criar e ver as próprias solicitações.
 - **Indústria:** dashboard, ver brindes/estoque, ver as próprias solicitações, eventos, comprovantes, relatórios — filtrado pela indústria do usuário.
 

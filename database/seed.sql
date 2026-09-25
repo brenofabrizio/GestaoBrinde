@@ -73,9 +73,8 @@ INSERT INTO role_permissions (role_id, permission_id)
 -- CD / Estoque
 INSERT INTO role_permissions (role_id, permission_id)
   SELECT 3, id FROM permissions WHERE slug IN (
-    'dashboard.view', 'items.view', 'items.manage', 'stock.view', 'stock.entry',
+    'dashboard.view', 'items.view', 'stock.view', 'stock.entry',
     'stock.exit_confirm', 'stock.transfer', 'stock.receive',
-    'lookups.view', 'requests.view_own', 'requests.view_all',
     'events.view', 'events.withdraw', 'deliveries.view', 'reports.view', 'reports.export', 'alerts.stock'
   );
 
@@ -97,11 +96,7 @@ INSERT INTO role_permissions (role_id, permission_id)
 -- ---------------------------------------------------------------------
 INSERT INTO users (id, name, email, password_hash, role_id, active, must_change_password, session_version)
 VALUES (1, 'Administrador', 'admin@brindes.local',
-        '$2y$10$tZ2E7fA5sWl9g4pU.d1g.eW6V.jU7P/W0V.QvQ2Qx3Q5xQ5xQ5xQ5', 1, 1, 0, 1);
-
-INSERT INTO users (name, email, password_hash, role_id, active, must_change_password, session_version)
-VALUES ('Administrador Empresa', 'admin@empresa.com',
-        '$2y$10$6R.1/K7aC9p9wXv7kZ7h/.4oVz4sX9uO0yZ2f1e2d3c4b5a6b7c8d', 1, 1, 0, 1);
+        '$2y$10$DG.et4ms54lSIy2011zCr.pwmLa8R5kdaWiT94Tlpm/i95Kv7.i6i', 1, 1, 1, 1);
 
 -- ---------------------------------------------------------------------
 -- Minimum registers so the first item can be created right away

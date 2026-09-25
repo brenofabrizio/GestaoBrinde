@@ -34,6 +34,11 @@ final class RequestService
 
     public static function scope(): array
     {
+        // CD/Estoque needs to identify TRADE requests for receiving and QR pickup,
+        // but must not gain access to the internal-request inbox.
+        if (!Auth::isAdmin() && Auth::isCdOperations() && Auth::can(['stock.receive', 'stock.exit_confirm'])) {
+            return [' AND r.flow = ?', ['trade']];
+        }
         if ($iid = Auth::industryId()) {
             return [' AND r.industry_id = ?', [$iid]];
         }

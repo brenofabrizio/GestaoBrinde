@@ -28,6 +28,11 @@
     <label class="form-label">E-mails de alerta (separados por vírgula)</label>
     <input class="form-control" x-model="alertText">
   </div>
+  <div class="mb-3">
+    <label class="form-label">URL do formulário Lecom de suprimentos</label>
+    <input class="form-control" type="url" x-model="f.lecom_supply_form_url" placeholder="https://.../formulario?brinde_id={id}&codigo={code}">
+    <div class="form-text">Placeholders disponíveis: {id}, {code}, {name}, {quantity}, {unit_value}, {category}.</div>
+  </div>
   <div class="alert" :class="f.mail_smtp ? 'alert-success' : 'alert-warning'" x-show="f.mail_driver">
     <span x-show="f.mail_smtp">Envio de e-mail por SMTP ativo.</span>
     <span x-show="!f.mail_smtp">Nesta demonstração o e-mail fica registrado no sistema. No servidor de vocês, configure SMTP no arquivo .env (MAIL_DRIVER=smtp + host/usuário/senha) para o comprovante da retirada sair na hora.</span>
@@ -54,7 +59,8 @@ function settingsPage() {
           primary_color: this.f.primary_color,
           stalled_days: Number(this.f.stalled_days),
           event_email_mode: this.f.event_email_mode,
-          alert_emails: this.alertText
+          alert_emails: this.alertText,
+          lecom_supply_form_url: this.f.lecom_supply_form_url || ''
         });
         if (this.logo) {
           const fd = new FormData(); fd.append('logo', this.logo);

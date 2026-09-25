@@ -10,9 +10,10 @@ MySQL 8.0.16+ ou MariaDB 10.4+, Apache (mod_rewrite) ou Nginx. Nenhuma licença 
 1. Start the database (this machine: MariaDB 10.11 on port 3307):
    `Start-Process C:\Tools\mariadb-10.11.19-winx64\bin\mariadbd.exe -ArgumentList '--defaults-file=C:\Tools\mysqldata-brindes\my.ini' -WindowStyle Hidden`
 2. `.env` is already configured for it (copy `.env.example` on other machines).
-3. First time / reset with demo data: `C:\Tools\php82\php.exe bin/install.php --fresh --demo`
-4. Start the web server: `set PHP_BIN=C:\Tools\php82\php.exe` then `bin\serve.bat` → http://127.0.0.1:8000
-5. Demo logins (password `Demo@123`): `admin@brindes.local`, `gestor@brindes.local`, `operacao@brindes.local`, `solicitante@brindes.local`, `industria@brindes.local` (portal da indústria)
+3. First time / reset with demo data: `C:\Tools\php82\php.exe bin\install.php --fresh --demo`
+4. Reset seguro de homologação sem dados: `php bin/reset-homologation.php`; com demo: `php bin/reset-homologation.php --demo`
+5. Start the web server: `set PHP_BIN=C:\Tools\php82\php.exe` then `bin\serve.bat` → http://127.0.0.1:8000
+6. Demo logins (password `Demo@123`): `admin@brindes.local`, `gestor@brindes.local`, `operacao@brindes.local`, `solicitante@brindes.local`, `industria@brindes.local` (portal da indústria)
 
 ## Tests
 `php tests/scenarios.php` — business-rule scenarios on a separate database (`brindes_test`). Must end with "0 reprovados".

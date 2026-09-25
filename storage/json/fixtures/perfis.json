@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "profiles": [
+    {
+      "slug": "admin",
+      "name": "Administrador",
+      "summary": "Tudo: usuários, cadastros, ajustes, regras, configurações e auditoria",
+      "menus": ["*"],
+      "restrictions": []
+    },
+    {
+      "slug": "approver",
+      "name": "TRADE / Gestor",
+      "summary": "Solicitações TRADE, cadastros, aprovações, estoque, retiradas e relatórios",
+      "menus": ["dashboard", "trade", "stock", "requests", "reports", "events", "deliveries", "lookups", "items"],
+      "restrictions": []
+    },
+    {
+      "slug": "operations",
+      "name": "CD / Estoque",
+      "summary": "Recebimento, entrada, confirmação de saída por QR, transferência, retirada por QR e comprovantes",
+      "menus": ["dashboard", "stock", "trade-receive", "trade-pickup", "deliveries", "reports", "events"],
+      "restrictions": ["requests.create", "requests.process", "stock.exit", "lookups.view", "requests.view_own", "requests.view_department", "requests.view_all", "items.manage"]
+    },
+    {
+      "slug": "requester",
+      "name": "TRADE",
+      "summary": "Cria e acompanha solicitações de compra de brindes; consulta brindes e cadastros",
+      "menus": ["dashboard", "trade", "items", "lookups"],
+      "restrictions": ["requests.approve", "stock.exit", "stock.adjust"]
+    },
+    {
+      "slug": "industry",
+      "name": "Indústria",
+      "summary": "Acessa somente os dados da própria indústria parceira",
+      "menus": ["dashboard", "items", "stock", "requests", "events", "deliveries", "reports"],
+      "restrictions": ["cross_industry_data"]
+    }
+  ],
+  "operational_rules": {
+    "cd_can_receive_trade": true,
+    "cd_can_withdraw_trade_by_qr": true,
+    "cd_manual_exit_forbidden": true,
+    "cd_internal_picking_forbidden": true,
+    "industry_scope_is_backend_enforced": true
+  }
+}

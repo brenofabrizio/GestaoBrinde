@@ -220,7 +220,7 @@ final class LookupController
     private function assertNameFree(array $def, string $name, ?int $ignoreId = null): void
     {
         $exists = Db::value(
-            "SELECT 1 FROM `{$def['table']}` WHERE name = ? AND deleted_at IS NULL AND id <> ?",
+            "SELECT 1 FROM `{$def['table']}` WHERE LOWER(name) = LOWER(?) AND deleted_at IS NULL AND id <> ?",
             [$name, $ignoreId ?? 0]
         );
         if ($exists !== null) {

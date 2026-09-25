@@ -17,6 +17,7 @@ ob_start(); ?>
           <?php if (can('stock.exit') && !is_cd_operations()): ?><a class="btn btn-outline-primary" :href="'<?= e(url('/estoque/saida')) ?>?item_id=' + it.id">Registrar saída</a><?php endif; ?>
           <?php if (can('stock.adjust')): ?><a class="btn btn-outline-secondary" :href="'<?= e(url('/estoque/ajuste')) ?>?item_id=' + it.id">Ajuste</a><?php endif; ?>
           <?php if (can('items.manage')): ?><a class="btn btn-primary" :href="'<?= e(url('/brindes')) ?>/' + it.id + '/editar'">Editar</a><?php endif; ?>
+          <?php if (can('requests.create')): ?><button type="button" class="btn btn-outline-primary" @click="openLecom">Abrir formulário Lecom</button><?php endif; ?>
         </div>
       </div>
       <div class="row g-3 mb-3">
@@ -58,6 +59,7 @@ ob_start(); ?>
 function itemShow(id) {
   return {
     it: null, history: [], meta: null, page: 1,
+    lecomTemplate: <?= json_script(setting('lecom_supply_form_url', '')) ?>,
     async load() {
       const { data } = await Api.get('/api/items/' + id);
       this.it = data;
@@ -69,6 +71,22 @@ function itemShow(id) {
       this.history = this.history.concat(data);
       this.meta = meta;
       this.page++;
+    },
+    openLecom() {
+      if (!this.lecomTemplate) {
+        UI.toast('Configure uma URL do formulário Lecom em Configurações antes de abrir o suprimento.', 'err');
+        return;
+      }
+      const values = {
+        id: this.it.id,
+        code: this.it.code,
+        name: this.it.name,
+        quantity: this.it.stock?.available ?? 0,
+        unit_value: this.it.unit_value ?? '',
+        category: this.it.category?.name ?? ''
+      };
+      const url = this.lecomTemplate.replace(/\{(id|code|name|quantity|unit_value|category)\}/g, (_, key) => encodeURIComponent(String(values[key] ?? '')));
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 }
