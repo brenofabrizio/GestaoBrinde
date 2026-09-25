@@ -127,10 +127,10 @@ return static function (Router $r): void {
     $r->post("/api/trade/requests/{$id}/purchase", [TradeController::class, 'purchase'], ['perm' => 'requests.approve']);
     $r->post("/api/trade/requests/{$id}/await-receipt", [TradeController::class, 'awaitReceipt'], ['perm' => 'requests.create']);
     $r->post("/api/trade/requests/{$id}/receive", [TradeController::class, 'receive'], ['perm' => ['stock.receive', 'stock.entry'], 'idempotent' => true]);
-    $r->get("/api/trade/requests/{$id}/invoice", [TradeController::class, 'invoice'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']]);
-    $r->post("/api/trade/requests/{$id}/withdraw", [TradeController::class, 'withdraw'], ['perm' => ['requests.process', 'stock.exit', 'events.withdraw'], 'idempotent' => true]);
+    $r->get("/api/trade/requests/{$id}/invoice", [TradeController::class, 'invoice'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']]);
+    $r->post("/api/trade/requests/{$id}/withdraw", [TradeController::class, 'withdraw'], ['perm' => ['requests.process', 'stock.exit', 'events.withdraw', 'stock.exit_confirm'], 'idempotent' => true]);
     $r->post("/api/trade/requests/{$id}/delivered", [TradeController::class, 'delivered'], ['perm' => 'requests.process']);
-    $r->get("/api/trade/requests/{$id}/qr", [TradeController::class, 'qr'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']]);
+    $r->get("/api/trade/requests/{$id}/qr", [TradeController::class, 'qr'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']]);
     $r->get('/api/trade/lookup', [TradeController::class, 'lookup']);
 
     // --- Dashboard ----------------------------------------------------

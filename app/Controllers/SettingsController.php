@@ -41,6 +41,7 @@ final class SettingsController
             'stalled_days' => (int) $all['stalled_days'],
             'event_email_mode' => $all['event_email_mode'],
             'alert_emails' => $all['alert_emails'] === '' ? [] : explode(',', $all['alert_emails']),
+            'lecom_supply_form_url' => $all['lecom_supply_form_url'] ?? '',
             'mail_driver' => \App\Services\Mailer::driver(),
             'mail_smtp' => \App\Services\Mailer::isSmtp(),
         ]);

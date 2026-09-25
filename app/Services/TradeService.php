@@ -270,7 +270,7 @@ final class TradeService
      */
     public static function withdraw(int $id, array $input): array
     {
-        Auth::authorize(['requests.process', 'stock.exit', 'events.withdraw']);
+        Auth::authorize(['requests.process', 'stock.exit', 'events.withdraw', 'stock.exit_confirm']);
         $data = Validator::validate($input, [
             'received_by_name' => 'required|string|max:150',
             'received_by_email' => 'nullable|email|max:190',

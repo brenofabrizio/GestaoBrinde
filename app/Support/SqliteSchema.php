@@ -29,6 +29,8 @@ final class SqliteSchema
         $sql = preg_replace('/\bLONGTEXT\b/i', 'TEXT', $sql) ?? $sql;
         $sql = preg_replace('/\bLONGBLOB\b/i', 'BLOB', $sql) ?? $sql;
         $sql = preg_replace('/\bJSON\b/i', 'TEXT', $sql) ?? $sql;
+        // SQLite CURRENT_TIMESTAMP is UTC; the application contract is America/Sao_Paulo.
+        $sql = preg_replace("/DEFAULT\\s+CURRENT_TIMESTAMP\\b/i", "DEFAULT (datetime('now','-3 hours'))", $sql) ?? $sql;
         $sql = preg_replace('/UNIQUE KEY\s+[`\w]+\s+/i', 'UNIQUE ', $sql) ?? $sql;
         $sql = preg_replace('/,\s*KEY\s+[`\w]+\s+\([^)]+\)/i', '', $sql) ?? $sql;
         $sql = preg_replace('/,\s*INDEX\s+[`\w]+\s+\([^)]+\)/i', '', $sql) ?? $sql;

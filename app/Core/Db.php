@@ -69,18 +69,31 @@ final class Db
     public static function query(string $sql, array $params = []): PDOStatement
     {
         $sql = self::adapt($sql);
-        $stmt = self::pdo()->prepare($sql);
-        foreach ($params as $key => $value) {
-            $name = is_int($key) ? $key + 1 : (str_starts_with($key, ':') ? $key : ':' . $key);
-            $type = match (true) {
-                is_int($value) => PDO::PARAM_INT,
-                is_bool($value) => PDO::PARAM_INT,
-                $value === null => PDO::PARAM_NULL,
-                default => PDO::PARAM_STR,
-            };
-            $stmt->bindValue($name, is_bool($value) ? (int) $value : $value, $type);
+        $attempt = 0;
+        while (true) {
+            try {
+                $stmt = self::pdo()->prepare($sql);
+                foreach ($params as $key => $value) {
+                    $name = is_int($key) ? $key + 1 : (str_starts_with($key, ':') ? $key : ':' . $key);
+                    $type = match (true) {
+                        is_int($value) => PDO::PARAM_INT,
+                        is_bool($value) => PDO::PARAM_INT,
+                        $value === null => PDO::PARAM_NULL,
+                        default => PDO::PARAM_STR,
+                    };
+                    $stmt->bindValue($name, is_bool($value) ? (int) $value : $value, $type);
+                }
+                $stmt->execute();
+                break;
+            } catch (PDOException $e) {
+                $locked = self::isSqlite() && str_contains(strtolower($e->getMessage()), 'database is locked');
+                if (!$locked || $attempt >= 5) {
+                    throw $e;
+                }
+                usleep(50000 * (2 ** $attempt));
+                $attempt++;
+            }
         }
-        $stmt->execute();
         if (preg_match('/^\s*(INSERT|UPDATE|DELETE|REPLACE|CREATE|ALTER|DROP)\b/i', $sql)) {
             self::$mutated = true;
         }
@@ -130,10 +143,30 @@ final class Db
     }
 
     /**
-     * Run $fn inside a transaction. Nested calls join the outer transaction;
-     * any exception rolls everything back.
+     * Run $fn inside a transaction. SQLite homologation retries transient file locks;
+     * MySQL/MariaDB keeps the normal row-lock behavior.
      */
     public static function transaction(callable $fn): mixed
+    {
+        if (self::isSqlite() && self::$depth === 0) {
+            $attempt = 0;
+            while (true) {
+                try {
+                    return self::transactionOnce($fn);
+                } catch (PDOException $e) {
+                    $locked = str_contains(strtolower($e->getMessage()), 'database is locked');
+                    if (!$locked || $attempt >= 5) {
+                        throw $e;
+                    }
+                    usleep(100000 * (2 ** $attempt));
+                    $attempt++;
+                }
+            }
+        }
+        return self::transactionOnce($fn);
+    }
+
+    private static function transactionOnce(callable $fn): mixed
     {
         $pdo = self::pdo();
         if (self::$depth === 0) {

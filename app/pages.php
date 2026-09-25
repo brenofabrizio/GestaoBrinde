@@ -36,7 +36,7 @@ return [
     ['path' => '/solicitacoes-trade/nova', 'view' => 'pages/trade/form', 'title' => 'Nova solicitação TRADE', 'perm' => 'requests.create', 'deny_cd' => true],
     ['path' => '/solicitacoes-trade/{id:\d+}', 'view' => 'pages/trade/show', 'title' => 'Solicitação TRADE', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']],
     ['path' => '/recebimento', 'view' => 'pages/trade/receive', 'title' => 'Recebimento no CD', 'perm' => ['stock.receive', 'stock.entry']],
-    ['path' => '/retirada', 'view' => 'pages/trade/scan', 'title' => 'Retirada / QR Code', 'perm' => ['requests.process', 'stock.exit', 'events.withdraw']],
+    ['path' => '/retirada', 'view' => 'pages/trade/scan', 'title' => 'Retirada / QR Code', 'perm' => ['requests.process', 'stock.exit', 'events.withdraw', 'stock.exit_confirm']],
 
     ['path' => '/cadastros/{type:categorias|departamentos|industrias|locais|fornecedores}', 'view' => 'pages/lookups/index', 'title' => 'Cadastros', 'perm' => 'lookups.view', 'deny_cd' => true],
     ['path' => '/usuarios', 'view' => 'pages/users/index', 'title' => 'Usuários', 'perm' => 'users.view'],

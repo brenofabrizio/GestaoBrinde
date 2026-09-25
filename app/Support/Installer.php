@@ -337,7 +337,7 @@ final class Installer
             'Estoque'
         );
         foreach ($roleIds as $roleId) {
-            foreach (['requests.create', 'requests.process', 'stock.exit', 'items.manage', 'lookups.view', 'lookups.manage', 'lookups.delete', 'lookups.purge'] as $slug) {
+            foreach (['requests.create', 'requests.process', 'stock.exit', 'requests.view_own', 'requests.view_department', 'requests.view_all', 'items.manage', 'lookups.view', 'lookups.manage', 'lookups.delete', 'lookups.purge'] as $slug) {
                 $pid = Db::value('SELECT id FROM permissions WHERE slug = ?', [$slug]);
                 if (!$pid) {
                     continue;

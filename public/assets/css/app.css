@@ -381,6 +381,47 @@ a:hover { color: var(--brand-primary-dark); }
   border-radius: 50%;
   border: 1px solid var(--surface);
 }
+.notification-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(380px, calc(100vw - 24px));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: 1050;
+}
+.notification-popover-header,
+.notification-popover-footer {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.notification-popover-footer { border-bottom: 0; border-top: 1px solid var(--line); justify-content: center; }
+.notification-popover-header .btn { padding: 0; font-size: 12px; }
+.notification-list { max-height: 360px; overflow-y: auto; }
+.notification-row {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  text-align: left;
+  padding: 11px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  color: var(--text);
+}
+.notification-row:hover, .notification-row:focus-visible { background: var(--surface-alt); outline: none; }
+.notification-row.unread { background: hsl(var(--brand-hue), 83%, 97%); }
+.notification-row-title { font-weight: 650; font-size: 13px; }
+.notification-row-time { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.notification-row-body { grid-column: 1 / -1; color: var(--text-secondary); font-size: 12px; line-height: 1.35; }
+.notification-empty { padding: 24px 12px; color: var(--muted); text-align: center; font-size: 13px; }
 
 /* ─── Password Strength ────────────────────────────────────────────── */
 .pwd-strength { height: 4px; border-radius: 4px; transition: width 0.3s ease, background 0.3s ease; }
