@@ -13,7 +13,9 @@ use App\Core\Log;
  */
 final class DemoSqliteStore
 {
-    private const PATHNAME = 'brindes-demo.sqlite';
+    // Version bump intentionally starts a clean Vercel homologation dataset.
+    // Production MySQL is not affected by this demo-only namespace.
+    private const PATHNAME = 'brindes-demo-v2.sqlite';
 
     public static function hydrate(string $dst, string $bundled): void
     {
@@ -78,7 +80,7 @@ final class DemoSqliteStore
 
     private static function latestUrl(string $token): ?string
     {
-        $res = self::request('GET', 'https://blob.vercel-storage.com/?prefix=' . rawurlencode('brindes-demo'), $token, null, [
+        $res = self::request('GET', 'https://blob.vercel-storage.com/?prefix=' . rawurlencode(self::PATHNAME), $token, null, [
             'x-api-version: 10',
         ], 8);
         $json = json_decode((string) ($res['body'] ?? ''), true);
@@ -89,7 +91,7 @@ final class DemoSqliteStore
         $bestTime = '';
         foreach ($json['blobs'] ?? [] as $blob) {
             $name = (string) ($blob['pathname'] ?? '');
-            if ($name === '' || !str_starts_with($name, 'brindes-demo')) {
+            if ($name === '' || !str_starts_with($name, self::PATHNAME)) {
                 continue;
             }
             $when = (string) ($blob['uploadedAt'] ?? $blob['uploaded_at'] ?? '');

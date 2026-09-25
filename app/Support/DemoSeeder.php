@@ -25,6 +25,9 @@ final class DemoSeeder
 
     public static function run(callable $out): void
     {
+        // A previous interrupted seed must never leak its frozen clock into
+        // the new dataset. Every fresh demo starts with the current timezone.
+        Clock::set(null);
         $admin = Auth::loadUser(1);
         Auth::actingAs($admin);
         $hash = password_hash(self::PASSWORD, PASSWORD_DEFAULT);
@@ -36,6 +39,8 @@ final class DemoSeeder
                 return;
             }
         } catch (Throwable) {
+        } finally {
+            Clock::set(null);
         }
 
         // The seeded admin gets the demo password and no forced change.

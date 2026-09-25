@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "slug": "admin",
+    "nome": "Administrador",
+    "descricao": "Tudo: usuários, cadastros, ajustes, regras, configurações e auditoria.",
+    "menu": ["principal", "trade", "solicitacoes", "estoque", "gestao", "cadastros", "administracao"]
+  },
+  {
+    "id": 2,
+    "slug": "approver",
+    "nome": "TRADE / Gestor",
+    "descricao": "Solicitações TRADE, cadastros, aprovações, estoque, retiradas e relatórios.",
+    "menu": ["principal", "trade", "solicitacoes", "estoque", "gestao", "cadastros"]
+  },
+  {
+    "id": 3,
+    "slug": "operations",
+    "nome": "CD / Estoque",
+    "descricao": "Recebimento, entrada, confirmação de saída por QR, transferência, retirada por QR e comprovantes.",
+    "restricoes": ["sem_solicitacao_trade", "sem_registro_saida", "sem_cadastros", "sem_separacao_entregas"],
+    "menu": ["principal", "trade_recebimento", "estoque_cd", "retirada_qr", "comprovantes"]
+  },
+  {
+    "id": 4,
+    "slug": "requester",
+    "nome": "TRADE",
+    "descricao": "Cria e acompanha solicitações de compra de brindes; vê cadastros.",
+    "menu": ["principal", "trade", "cadastros"]
+  },
+  {
+    "id": 5,
+    "slug": "industry",
+    "nome": "Indústria",
+    "descricao": "Vê somente as informações da própria indústria parceira.",
+    "restricoes": ["escopo_industria_do_usuario"],
+    "menu": ["principal", "trade", "estoque_industria", "relatorios"]
+  }
+]

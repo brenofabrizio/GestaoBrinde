@@ -1,0 +1,5 @@
+{
+  "timezone": "America/Sao_Paulo",
+  "reset_strategy": "clean_homologation",
+  "passwords_in_json": false
+}

@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "purpose": "Estrutura da base JSON de homologação",
+  "runtime": "MySQL/SQLite",
+  "generated_at": null,
+  "files": [
+    "perfis.json",
+    "permissoes.json",
+    "usuarios.json",
+    "cadastros.json",
+    "brindes.json",
+    "estoque.json",
+    "movimentacoes.json",
+    "solicitacoes.json",
+    "solicitacao_itens.json",
+    "notificacoes.json",
+    "auditoria.json",
+    "configuracoes.json"
+  ]
+}

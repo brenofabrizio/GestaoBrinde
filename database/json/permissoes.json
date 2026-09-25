@@ -1,0 +1,10 @@
+[
+  "dashboard.view",
+  "items.view", "items.manage", "items.delete", "items.purge",
+  "stock.view", "stock.entry", "stock.exit", "stock.exit_confirm", "stock.adjust", "stock.transfer", "stock.receive",
+  "lookups.view", "lookups.manage", "lookups.delete", "lookups.purge",
+  "users.view", "users.manage", "roles.manage",
+  "requests.create", "requests.view_own", "requests.view_department", "requests.view_all", "requests.approve", "requests.process", "requests.cancel_any",
+  "events.view", "events.manage", "events.withdraw", "deliveries.view",
+  "rules.manage", "reports.view", "reports.export", "import.run", "alerts.stock", "audit.view", "settings.manage"
+]

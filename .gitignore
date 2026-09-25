@@ -10,6 +10,7 @@
 /storage/backups/**
 /storage/logs/**
 /storage/cache/**
+/storage/json/**
 !/storage/**/.gitkeep
 /.idea/
 /.vscode/

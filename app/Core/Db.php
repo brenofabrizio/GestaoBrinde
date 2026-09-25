@@ -145,6 +145,13 @@ final class Db
             self::$depth--;
             if (self::$depth === 0) {
                 $pdo->commit();
+                if (Env::get('JSON_DB_MIRROR', false) === true) {
+                    try {
+                        \App\Support\JsonDatabase::mirrorFromPdo();
+                    } catch (Throwable $mirrorError) {
+                        Log::error('JSON mirror failed', ['error' => $mirrorError->getMessage()]);
+                    }
+                }
             }
             return $result;
         } catch (Throwable $e) {
