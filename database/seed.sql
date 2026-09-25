@@ -73,9 +73,9 @@ INSERT INTO role_permissions (role_id, permission_id)
 -- CD / Estoque
 INSERT INTO role_permissions (role_id, permission_id)
   SELECT 3, id FROM permissions WHERE slug IN (
-    'dashboard.view', 'items.view', 'items.manage', 'stock.view', 'stock.entry',
+    'dashboard.view', 'items.view', 'stock.view', 'stock.entry',
     'stock.exit_confirm', 'stock.transfer', 'stock.receive',
-    'lookups.view', 'requests.view_own', 'requests.view_all',
+    'requests.view_own', 'requests.view_all',
     'events.view', 'events.withdraw', 'deliveries.view', 'reports.view', 'reports.export', 'alerts.stock'
   );
 

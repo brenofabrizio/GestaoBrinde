@@ -229,7 +229,11 @@ a:hover { color: var(--brand-primary-dark); }
   background: var(--brand-primary-dark) !important;
   border-color: var(--brand-primary-dark) !important;
 }
-.btn { border-radius: var(--radius-sm); font-weight: 500; transition: all var(--transition-fast); }
+.btn { min-height: 38px; border-radius: var(--radius-sm); font-weight: 500; transition: all var(--transition-fast); }
+.btn-sm { min-height: 31px; }
+.btn-lg { min-height: 48px; }
+.notification-preview-item { padding: 12px 10px; border-bottom: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); }
+.notification-preview-item:hover, .notification-preview-item.unread { background: var(--surface-alt); }
 
 /* ─── Form Controls ────────────────────────────────────────────────── */
 .form-control, .form-select {

@@ -16,7 +16,7 @@ final class Menu
             ['label' => 'Dashboard', 'icon' => 'speedometer2', 'url' => '/dashboard', 'perm' => 'dashboard.view'],
         ]],
         ['group' => 'TRADE', 'items' => [
-            ['label' => 'Solicitações TRADE', 'icon' => 'clipboard-check', 'url' => '/solicitacoes-trade', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']],
+            ['label' => 'Solicitações TRADE', 'icon' => 'clipboard-check', 'url' => '/solicitacoes-trade', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all'], 'hide_cd' => true],
             ['label' => 'Registrar saída', 'icon' => 'box-arrow-up', 'url' => '/estoque/saida', 'perm' => 'stock.exit', 'hide_cd' => true],
             ['label' => 'Recebimento no CD', 'icon' => 'box-arrow-in-down', 'url' => '/recebimento', 'perm' => ['stock.receive', 'stock.entry']],
             ['label' => 'Estoque por indústria', 'icon' => 'building', 'url' => '/estoque/por-industria', 'perm' => 'stock.view'],
@@ -26,7 +26,7 @@ final class Menu
             ['label' => 'Comprovantes', 'icon' => 'file-earmark-check', 'url' => '/protocolos', 'perm' => 'deliveries.view'],
         ]],
         ['group' => 'Solicitações', 'items' => [
-            ['label' => 'Solicitações internas', 'icon' => 'inbox', 'url' => '/solicitacoes', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']],
+            ['label' => 'Solicitações internas', 'icon' => 'inbox', 'url' => '/solicitacoes', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all'], 'hide_cd' => true],
             ['label' => 'Aprovações', 'icon' => 'check2-square', 'url' => '/aprovacoes', 'perm' => 'requests.approve'],
             ['label' => 'Separação e entregas', 'icon' => 'box-seam', 'url' => '/operacao', 'perm' => 'requests.process', 'hide_cd' => true],
         ]],

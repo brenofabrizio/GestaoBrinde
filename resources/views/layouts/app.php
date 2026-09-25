@@ -64,10 +64,10 @@ $unread = 0;
                placeholder="Buscar brinde, código…" aria-label="Buscar brinde">
       </form>
       <div class="position-relative">
-        <a class="btn btn-light" href="<?= e(url('/notificacoes')) ?>"
-           aria-label="Notificações" id="bellBtn">
+        <button class="btn btn-light" type="button"
+           aria-label="Notificações" id="bellBtn" aria-controls="notificationModal" aria-expanded="false">
           <i class="bi bi-bell" aria-hidden="true"></i>
-        </a>
+        </button>
         <span class="bell-dot d-none" id="bellDot" aria-hidden="true"></span>
       </div>
       <div class="dropdown">
@@ -108,6 +108,23 @@ $unread = 0;
     </div>
   </div>
 </div>
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-dialog-end">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="notificationModalTitle">Notificações</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" id="notificationPreview" aria-live="polite">
+        <div class="text-muted">Carregando notificações…</div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button class="btn btn-outline-secondary btn-sm" type="button" id="markAllNotifications">Marcar todas como lidas</button>
+        <a class="btn btn-primary btn-sm" href="<?= e(url('/notificacoes')) ?>">Ver todas</a>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="<?= e(asset('vendor/bootstrap/bootstrap.bundle.min.js')) ?>"></script>
 <script src="<?= e(asset('js/api.js')) ?>"></script>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
@@ -122,6 +139,57 @@ document.getElementById('logoutBtn')?.addEventListener('click', async function (
     const { meta } = await Api.get('/api/notifications', { per_page: 1, unread: 1 });
     if (meta && meta.unread > 0) document.getElementById('bellDot')?.classList.remove('d-none');
   } catch (e) {}
+})();
+(function () {
+  const bell = document.getElementById('bellBtn');
+  const dot = document.getElementById('bellDot');
+  const preview = document.getElementById('notificationPreview');
+  const modalEl = document.getElementById('notificationModal');
+  const markAll = document.getElementById('markAllNotifications');
+  if (!bell || !preview || !modalEl) return;
+  let modal = null;
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>\"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[ch]));
+  const setDot = (visible) => dot?.classList.toggle('d-none', !visible);
+  const render = (rows) => {
+    if (!rows.length) {
+      preview.innerHTML = '<div class="empty py-4">Nenhuma notificação nova.</div>';
+      return;
+    }
+    preview.innerHTML = rows.map((n) => {
+      const link = n.link_url ? Api.url(n.link_url) : '#';
+      return '<a class="notification-preview-item d-block text-decoration-none' + (n.read_at ? '' : ' unread') + '" href="' + escapeHtml(link) + '" data-notification-id="' + Number(n.id) + '">' +
+        '<div class="fw-semibold">' + escapeHtml(n.subject) + '</div>' +
+        '<div class="small text-muted">' + escapeHtml(n.body || '') + '</div>' +
+        '<div class="small text-muted mt-1">' + escapeHtml(Api.fmt.datetime(n.created_at)) + '</div></a>';
+    }).join('');
+  };
+  const load = async () => {
+    preview.innerHTML = '<div class="text-muted">Carregando notificações…</div>';
+    try {
+      const response = await Api.get('/api/notifications', { per_page: 5 });
+      render(Array.isArray(response.data) ? response.data : []);
+      setDot(Number(response.meta?.unread || 0) > 0);
+    } catch (e) { preview.innerHTML = '<div class="alert alert-danger mb-0">' + escapeHtml(e.message || 'Não foi possível carregar as notificações.') + '</div>'; }
+  };
+  bell.addEventListener('click', () => {
+    modal = modal || (window.bootstrap ? bootstrap.Modal.getOrCreateInstance(modalEl) : null);
+    if (modal) modal.show(); else modalEl.classList.add('show');
+    bell.setAttribute('aria-expanded', 'true');
+    load();
+  });
+  preview.addEventListener('click', async (event) => {
+    const link = event.target.closest('[data-notification-id]');
+    if (!link) return;
+    const id = Number(link.dataset.notificationId);
+    if (!id || !link.classList.contains('unread')) return;
+    try { await Api.post('/api/notifications/' + id + '/read'); link.classList.remove('unread'); } catch (e) {}
+  });
+  markAll?.addEventListener('click', async () => {
+    markAll.disabled = true;
+    try { await Api.post('/api/notifications/read-all'); await load(); setDot(false); } catch (e) { UI.toast(e.message || 'Não foi possível marcar as notificações.', 'err'); }
+    markAll.disabled = false;
+  });
+  modalEl.addEventListener('hidden.bs.modal', () => bell.setAttribute('aria-expanded', 'false'));
 })();
 </script>
 <?= $scripts ?? '' ?>

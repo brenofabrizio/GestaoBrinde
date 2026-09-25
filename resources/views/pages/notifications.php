@@ -1,5 +1,6 @@
 <?php ob_start(); ?>
 <div x-data="notifPage()" x-init="load()">
+  <div class="alert alert-danger" x-show="error" x-text="error"></div>
   <button class="btn btn-sm btn-outline-secondary mb-3" @click="readAll">Marcar todas como lidas</button>
   <template x-for="n in rows" :key="n.id">
     <a class="card card-body d-block mb-2 text-decoration-none" :href="n.link_url ? Api.url(n.link_url) : '#'" @click="read(n)">
@@ -18,10 +19,16 @@ ob_start(); ?>
 <script>
 function notifPage() {
   return {
-    rows: [],
-    async load() { this.rows = (await Api.get('/api/notifications')).data; },
+    rows: [], error: '',
+    async load() {
+      try { this.rows = (await Api.get('/api/notifications')).data || []; }
+      catch (e) { this.error = e.message || 'Não foi possível carregar as notificações.'; }
+    },
     async read(n) { if (!n.read_at) await Api.post('/api/notifications/' + n.id + '/read'); },
-    async readAll() { await Api.post('/api/notifications/read-all'); this.load(); }
+    async readAll() {
+      try { await Api.post('/api/notifications/read-all'); await this.load(); }
+      catch (e) { this.error = e.message || 'Não foi possível marcar as notificações.'; }
+    }
   };
 }
 </script>
