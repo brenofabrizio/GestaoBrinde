@@ -1,5 +1,6 @@
 <?php ob_start(); ?>
-<div class="card card-body" x-data="tradeForm()" x-init="init()">
+<div class="card card-body" x-data="tradeForm()" x-init="init()" x-ref="form">
+  <div class="alert alert-danger" x-show="error" x-text="error"></div>
   <p class="text-muted">Informe indústria, brinde, quantidade e finalidade. O número do chamado é preenchido só se o pedido for aprovado. A NF é anexada quando o material chegar no CD.</p>
   <form @submit.prevent="save">
     <div class="row g-3">
@@ -51,12 +52,19 @@ ob_start(); ?>
 function tradeForm() {
   return {
     f: { industry_id: '', purpose: '', recipient: '', action_type: 'campanha', delivery_place: 'CD Belford Roxo', notes: '' },
-    inds: [], q: '', opts: [], items: [], saving: false, t: null,
-    async init() { this.inds = (await Api.get('/api/industries', { all: 1 })).data; },
+    inds: [], q: '', opts: [], items: [], saving: false, t: null, error: '',
+    async init() {
+      try {
+        const { data } = await Api.get('/api/industries', { all: 1 });
+        this.inds = Array.isArray(data) ? data : [];
+      } catch (e) { this.error = e.message || 'Não foi possível carregar as indústrias.'; }
+    },
     search() {
       clearTimeout(this.t);
       this.t = setTimeout(async () => {
-        this.opts = this.q ? (await Api.get('/api/items/options', { q: this.q })).data : [];
+        try {
+          this.opts = this.q ? (await Api.get('/api/items/options', { q: this.q })).data : [];
+        } catch (e) { this.error = e.message || 'Não foi possível buscar os brindes.'; }
       }, 250);
     },
     add(o) {
@@ -65,19 +73,30 @@ function tradeForm() {
       this.opts = []; this.q = '';
     },
     async save() {
+      this.error = '';
+      const industryId = Number(this.f.industry_id);
+      const purpose = String(this.f.purpose || '').trim();
+      const validItems = this.items.filter(i => Number(i.item_id) > 0 && Number(i.qty_requested) >= 1);
+      if (!industryId) { this.error = 'Selecione a indústria.'; return; }
+      if (!purpose) { this.error = 'Informe a descrição / finalidade.'; return; }
+      if (!validItems.length) { this.error = 'Inclua pelo menos um brinde com quantidade maior que zero.'; return; }
       this.saving = true;
       try {
         const { data } = await Api.post('/api/trade/requests', {
           ...this.f,
-          industry_id: Number(this.f.industry_id),
-          items: this.items.map(i => ({
+          industry_id: industryId,
+          purpose,
+          items: validItems.map(i => ({
             item_id: i.item_id,
             qty_requested: Number(i.qty_requested),
             unit_value: i.unit_value === '' ? null : Number(String(i.unit_value).replace(',', '.'))
           }))
         });
         location.href = Api.url('/solicitacoes-trade/' + data.id);
-      } catch (e) { UI.toast(e.message, 'err'); }
+      } catch (e) {
+        this.error = e.message || 'Verifique os campos destacados.';
+        UI.fieldErrors(this.$refs.form, e.fields || {});
+      }
       this.saving = false;
     }
   };

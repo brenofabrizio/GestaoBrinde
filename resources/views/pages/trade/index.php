@@ -1,5 +1,7 @@
 <?php ob_start(); ?>
 <div x-data="tradeIndex()" x-init="load()">
+  <div class="alert alert-danger" x-show="error" x-text="error"></div>
+  <div class="text-muted py-3" x-show="loading">Carregando solicitações TRADE…</div>
   <div class="d-flex flex-wrap gap-2 mb-3">
     <input class="form-control" style="max-width:260px" placeholder="Buscar código, indústria…" x-model="q" @input="load()">
     <select class="form-select" style="max-width:220px" x-model="status" @change="load()">
@@ -24,7 +26,7 @@
       <thead><tr><th>Nº</th><th>Indústria</th><th>Ação</th><th>Status</th><th>Valor</th><th>Data</th></tr></thead>
       <tbody>
         <template x-for="r in rows" :key="r.id">
-          <tr role="button" @click="location.href = Api.url('/solicitacoes-trade/' + r.id)">
+          <tr role="button" tabindex="0" @click="location.href = Api.url('/solicitacoes-trade/' + r.id)" @keydown.enter="location.href = Api.url('/solicitacoes-trade/' + r.id)">
             <td class="fw-semibold" x-text="r.public_code || r.code"></td>
             <td x-text="r.industry?.name || '—'"></td>
             <td x-text="r.action_type_label || r.purpose"></td>
@@ -45,12 +47,18 @@ ob_start(); ?>
 function tradeIndex() {
   const qs = new URLSearchParams(location.search);
   return {
-    rows: [], q: qs.get('q') || '', status: qs.get('status') || '', t: null,
+    rows: [], q: qs.get('q') || '', status: qs.get('status') || '', t: null, loading: false, error: '',
     async load() {
       clearTimeout(this.t);
       this.t = setTimeout(async () => {
-        const { data } = await Api.get('/api/requests', { flow: 'trade', q: this.q, status: this.status, per_page: 50 });
-        this.rows = data;
+        this.loading = true; this.error = '';
+        try {
+          const { data } = await Api.get('/api/requests', { flow: 'trade', q: this.q, status: this.status, per_page: 50 });
+          this.rows = Array.isArray(data) ? data : [];
+        } catch (e) {
+          this.error = e.message || 'Não foi possível carregar as solicitações TRADE.';
+          this.rows = [];
+        } finally { this.loading = false; }
       }, 200);
     }
   };

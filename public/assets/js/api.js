@@ -113,7 +113,11 @@
     /** "2026-09-14 10:05:00" -> "14/09/2026 10:05" */
     datetime: (v) => (v ? fmt.date(v) + ' ' + String(v).slice(11, 16) : '—'),
     /** signed stock quantity: +10 / -3 */
-    qty: (v) => (v > 0 ? '+' + int.format(v) : int.format(v)),
+    qty: (v) => {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return '—';
+      return n > 0 ? '+' + int.format(n) : int.format(n);
+    },
   };
 
   // ---------------------------------------------------------------- shared labels / colors

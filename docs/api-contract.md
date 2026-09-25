@@ -59,6 +59,8 @@ Also: disable the submit button while the request is in flight.
 | datetime | `"2026-09-14 10:05:00"` (São Paulo time) | `14/09/2026 10:05` |
 | money | number `389.9` | `R$ 389,90` |
 | quantity | integer; movements are signed (`-2` = saída) | `+10` / `-2` |
+
+Movements also expose the legacy alias `qty` with the same integer value, so older screens remain compatible while `quantity` is the canonical field.
 | booleans | `true/false` | — |
 
 Money **inputs** accept `389.90`, `389,90`, `1.234,56` or numbers.

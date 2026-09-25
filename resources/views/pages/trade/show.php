@@ -2,6 +2,8 @@
 $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="tradeShow(<?= $id ?>)" x-init="load()">
+  <div class="alert alert-danger" x-show="error" x-text="error"></div>
+  <div class="text-muted py-3" x-show="loading">Carregando solicitação TRADE…</div>
   <template x-if="r">
     <div>
       <div class="d-flex flex-wrap gap-2 mb-3">
@@ -93,8 +95,17 @@ ob_start(); ?>
 <script>
 function tradeShow(id) {
   return {
-    r: null, ticket: '', saving: false,
-    async load() { this.r = (await Api.get('/api/requests/' + id)).data; this.ticket = this.r.purchase_ticket_no || ''; },
+    r: null, ticket: '', saving: false, loading: false, error: '',
+    async load() {
+      this.loading = true; this.error = '';
+      try {
+        this.r = (await Api.get('/api/requests/' + id)).data;
+        this.ticket = this.r.purchase_ticket_no || '';
+      } catch (e) {
+        this.r = null;
+        this.error = e.message || 'Não foi possível carregar esta solicitação TRADE.';
+      } finally { this.loading = false; }
+    },
     async approve() {
       if (!this.ticket.trim()) { UI.toast('Informe o número do chamado para aprovar.', 'err'); return; }
       this.saving = true;

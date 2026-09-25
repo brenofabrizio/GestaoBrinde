@@ -93,15 +93,19 @@ final class Present
             ? ['id' => (int) $m[$prefix . '_id'], 'name' => $m[$prefix . '_name'] ?? null]
             : null;
         $unit = self::money($m['unit_value']);
+        // Keep both names during the API transition. Older screens used qty,
+        // while the public contract uses quantity.
+        $quantity = (int) ($m['qty'] ?? $m['quantity'] ?? 0);
 
         return [
             'id' => (int) $m['id'],
             'type' => $m['type'],
             'type_label' => StockService::TYPE_LABELS[$m['type']] ?? $m['type'],
-            'quantity' => (int) $m['qty'],
+            'qty' => $quantity,
+            'quantity' => $quantity,
             'balance_after' => (int) $m['balance_after'],
             'unit_value' => $unit,
-            'total_value' => $unit !== null ? round(abs((int) $m['qty']) * $unit, 2) : null,
+            'total_value' => $unit !== null ? round(abs($quantity) * $unit, 2) : null,
             'item' => ['id' => (int) $m['item_id'], 'code' => $m['item_code'] ?? null, 'name' => $m['item_name'] ?? null],
             'user' => ['id' => (int) $m['user_id'], 'name' => $m['user_name'] ?? null],
             'requester' => $ref('requester'),
