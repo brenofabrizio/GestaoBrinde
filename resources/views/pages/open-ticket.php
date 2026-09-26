@@ -155,11 +155,10 @@ $scripts = '<script>
       try {
         target = await startWithWorkspaceSso();
       } catch (ssoError) {
-        // O fallback server-side só é seguro quando o portal e a aplicação
-        // compartilham a mesma origem. Em domínio separado, o navegador não
-        // consegue ler o cookie do Lecom.
-        const sameOrigin = portal && new URL(portal, window.location.href).origin === window.location.origin;
-        if (ssoError.code !== "LECOM_SSO_TICKET_MISSING" || !sameOrigin) throw ssoError;
+        // Em uma aplicação hospedada fora do domínio Lecom, o navegador não
+        // consegue ler o cookie SSO. Nesse caso, usa a API server-to-server,
+        // cuja chave fica somente no ambiente do PHP/Vercel.
+        if (ssoError.code !== "LECOM_SSO_TICKET_MISSING") throw ssoError;
         const fallback = await startWithServerFallback();
         target = fallback && fallback.data && fallback.data.url;
       }
