@@ -533,15 +533,22 @@ final class RequestService
               WHERE h.request_id = ? ORDER BY h.id ASC',
             [$requestId]
         );
-        return array_map(fn ($h) => [
-            'from' => $h['from_status'],
-            'from_label' => RequestWorkflow::LABELS[$h['from_status']] ?? $h['from_status'],
-            'to' => $h['to_status'],
-            'to_label' => RequestWorkflow::LABELS[$h['to_status']] ?? $h['to_status'],
-            'user' => ['id' => $h['user_id'] ? (int) $h['user_id'] : null, 'name' => $h['user_name']],
-            'comment' => $h['comment'],
-            'created_at' => $h['created_at'],
-        ], $rows);
+        return array_map(static function (array $h): array {
+            // The first history entry intentionally has no previous status.
+            // Normalize null before using it as an associative-array key;
+            // PHP 8.5 promotes the old implicit null offset to an exception.
+            $from = (string) ($h['from_status'] ?? '');
+            $to = (string) ($h['to_status'] ?? '');
+            return [
+                'from' => $from !== '' ? $from : null,
+                'from_label' => $from !== '' ? (RequestWorkflow::LABELS[$from] ?? $from) : null,
+                'to' => $to,
+                'to_label' => RequestWorkflow::LABELS[$to] ?? $to,
+                'user' => ['id' => $h['user_id'] ? (int) $h['user_id'] : null, 'name' => $h['user_name']],
+                'comment' => $h['comment'],
+                'created_at' => $h['created_at'],
+            ];
+        }, $rows);
     }
 
     public static function presentRow(array $r): array
