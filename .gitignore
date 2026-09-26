@@ -17,6 +17,7 @@
 /.idea/
 /.vscode/
 /database/demo.sqlite
+/database/demo.sqlite-*
 Thumbs.db
 .DS_Store
 .vercel

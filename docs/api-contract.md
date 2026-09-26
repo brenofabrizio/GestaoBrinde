@@ -180,6 +180,16 @@ Role slugs: `admin` Administrador · `approver` Gestor/Aprovador · `operations`
 | `DELETE /api/settings/logo` | settings.manage | — |
 
 ### 3.2.1 Lecom — abertura de chamado
+
+Na homologação, a tela também suporta o fluxo Workspace usado pela biblioteca
+Lecom. O navegador lê o cookie 'LecomSSOTicket' do documento, envia o mesmo
+valor no header 'ticket-sso' e chama 'PUT
+{portal}/workspace/api/process/start?processId={id}&version={version}' com
+'credentials: include'. A resposta é usada para abrir
+'/workspace/form-app/{processInstanceId}/{activityInstanceId}/{cycle}?isNewForm=true'.
+Esse fluxo precisa estar no mesmo domínio do portal Lecom, ou o portal precisa
+liberar CORS para a origem da aplicação. O ticket nunca é enviado para a API
+PHP nem gravado no banco.
 | Method & path | Permission | Body / returns |
 |---|---|---|
 | `POST /api/lecom/process/start` 🔑 | requests.create + `Idempotency-Key` | body `{}`; creates the configured Lecom process server-side and returns `{process_instance_id, activity_instance_id, cycle, url}` |
