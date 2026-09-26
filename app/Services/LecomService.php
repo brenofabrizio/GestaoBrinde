@@ -98,6 +98,7 @@ final class LecomService
                 'Content-Type: application/json',
                 'apikey: ' . $apiKey,
                 'X-Server: ' . $server,
+                ...self::testHeaders(),
             ],
             CURLOPT_POSTFIELDS => $body,
             CURLOPT_CONNECTTIMEOUT => max(1, (int) Config::get('lecom.connect_timeout', 8)),
@@ -131,15 +132,52 @@ final class LecomService
         }
 
         if ($httpStatus < 200 || $httpStatus >= 300) {
+            $remoteMessage = self::findRemoteMessage($decoded);
             Log::error('Lecom start rejected', [
                 'http_status' => $httpStatus,
                 'error_code' => is_scalar($decoded['code'] ?? null) ? (string) $decoded['code'] : null,
+                'remote_message' => $remoteMessage,
             ]);
+            if ($httpStatus === 403) {
+                throw new HttpException(
+                    502,
+                    'LECOM_FORBIDDEN',
+                    'O Lecom recusou a chave ou a permissão para este ambiente. Confirme a API key de homologação e a permissão para abrir o processo configurado.'
+                );
+            }
             throw new HttpException(502, 'LECOM_START_FAILED', 'O Lecom recusou a abertura do chamado. Confira o processo publicado e as credenciais da API.');
         }
 
         $decoded['_http_status'] = $httpStatus;
         return $decoded;
+    }
+
+    /** @return list<string> */
+    private static function testHeaders(): array
+    {
+        if (!(bool) Config::get('lecom.test_mode', false)) {
+            return [];
+        }
+
+        $headers = ['test-mode: true'];
+        $testUser = trim((string) Config::get('lecom.test_user', ''));
+        if ($testUser !== '' && ctype_digit($testUser)) {
+            $headers[] = 'test-user: ' . $testUser;
+        }
+        return $headers;
+    }
+
+    private static function findRemoteMessage(array $data): ?string
+    {
+        foreach (['message', 'error_description', 'detail', 'error'] as $key) {
+            if (isset($data[$key]) && is_scalar($data[$key])) {
+                $message = trim((string) $data[$key]);
+                if ($message !== '') {
+                    return substr($message, 0, 300);
+                }
+            }
+        }
+        return null;
     }
 
     private static function findValue(array $data, string $key): ?string

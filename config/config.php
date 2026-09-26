@@ -44,6 +44,11 @@ return [
     'lecom' => [
         // Never expose this value to the browser or include it in repository files.
         'api_key' => (string) Env::get('LECOM_API_KEY', ''),
+        // Homologation may require the same test-mode headers used by the
+        // Lecom Workspace flow. Keep it opt-in so production never enters
+        // test mode accidentally.
+        'test_mode' => (bool) Env::get('LECOM_TEST_MODE', false),
+        'test_user' => (string) Env::get('LECOM_TEST_USER', ''),
         'timeout' => (int) Env::get('LECOM_HTTP_TIMEOUT', 20),
         'connect_timeout' => (int) Env::get('LECOM_CONNECT_TIMEOUT', 8),
     ],

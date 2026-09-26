@@ -194,7 +194,7 @@ PHP nem gravado no banco.
 |---|---|---|
 | `POST /api/lecom/process/start` 🔑 | requests.create + `Idempotency-Key` | body `{}`; creates the configured Lecom process server-side and returns `{process_instance_id, activity_instance_id, cycle, url}` |
 
-The Lecom `apikey` is read from `LECOM_API_KEY` and is never sent to the browser. The server sends `apikey` and `X-Server` to `POST /v1/process-instances`, then builds the workspace URL returned to the user.
+The Lecom `apikey` is read from `LECOM_API_KEY` and is never sent to the browser. The server sends `apikey` and `X-Server` to `POST /v1/process-instances`, then builds the workspace URL returned to the user. For homologation environments that require Lecom test mode, set `LECOM_TEST_MODE=true`; `LECOM_TEST_USER` is optional and must contain the simulated Lecom user id.
 
 ### 3.3 Users
 | Method & path | Permission | Notes |
