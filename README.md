@@ -36,6 +36,7 @@ MySQL 8.0.16+ ou MariaDB 10.4+, Apache (mod_rewrite) ou Nginx. Nenhuma licença 
 - `docs/PRD.md`, `docs/TRD.md`, `docs/AppFlow.md`, `docs/UI-UX-Design.md` — definição do produto, técnica, fluxos e experiência
 - `docs/Esquema-Backend.md` e `docs/Plano-de-Implementacao.md` — arquitetura backend e próximas etapas
 - `docs/Apresentacao-Projeto-Controle-de-Brindes.pptx` — apresentação executiva/técnica do projeto
+- `output/pdf/Manual-Implantacao-VM-GitHub.pdf` — implantação em VM, banco, backups, Microsoft 365 e fluxo GitHub
 - `docs/modelos/` — planilhas modelo para importação
 - `VERSION` — número desta entrega (1.1.0)
 

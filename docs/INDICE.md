@@ -28,3 +28,4 @@ Versão **1.1.3** · entrega **21/09/2026**
 - [Esquema Backend](Esquema-Backend.md)
 - [Plano de implementação](Plano-de-Implementacao.md)
 - [Apresentação do projeto](Apresentacao-Projeto-Controle-de-Brindes.pptx)
+- [Manual PDF de implantação, VM e GitHub](../output/pdf/Manual-Implantacao-VM-GitHub.pdf)
