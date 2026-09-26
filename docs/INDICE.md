@@ -19,3 +19,12 @@ Versão **1.1.3** · entrega **21/09/2026**
 - [Modelo e diagrama do banco](database.md) · [diagrama visual](diagrama-banco.html)
 - [Dependências e versões](Dependencias.md)
 - [Contrato da API](api-contract.md)
+
+## Planejamento do produto
+- [PRD — requisitos do produto](PRD.md)
+- [TRD — requisitos técnicos](TRD.md)
+- [App Flow — fluxos da aplicação](AppFlow.md)
+- [UI/UX Design](UI-UX-Design.md)
+- [Esquema Backend](Esquema-Backend.md)
+- [Plano de implementação](Plano-de-Implementacao.md)
+- [Apresentação do projeto](Apresentacao-Projeto-Controle-de-Brindes.pptx)

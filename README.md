@@ -33,6 +33,9 @@ MySQL 8.0.16+ ou MariaDB 10.4+, Apache (mod_rewrite) ou Nginx. Nenhuma licença 
 - `docs/Apresentacao-Treinamento.html` (editável: troque `{{NOME_DA_EMPRESA}}`)
 - `docs/api-contract.md` — API
 - `docs/database.md` e `docs/diagrama-banco.html` — modelo de dados
+- `docs/PRD.md`, `docs/TRD.md`, `docs/AppFlow.md`, `docs/UI-UX-Design.md` — definição do produto, técnica, fluxos e experiência
+- `docs/Esquema-Backend.md` e `docs/Plano-de-Implementacao.md` — arquitetura backend e próximas etapas
+- `docs/Apresentacao-Projeto-Controle-de-Brindes.pptx` — apresentação executiva/técnica do projeto
 - `docs/modelos/` — planilhas modelo para importação
 - `VERSION` — número desta entrega (1.1.0)
 
