@@ -76,7 +76,16 @@
       res = await fetch(buildUrl(path, opts.query), { method, headers, body, credentials: 'same-origin', signal: opts.signal });
     } catch (e) {
       if (e && e.name === 'AbortError') throw e;
-      throw new ApiError(0, { code: 'NETWORK_ERROR', message: 'Sem conexão com o servidor. Verifique a internet e tente novamente.' });
+      const networkError = new ApiError(0, { code: 'NETWORK_ERROR', message: 'Sem conexão com o servidor. Verifique a internet e tente novamente.' });
+      if (!opts.skipOfflineQueue && global.Offline?.canQueue(method, path, opts.body, opts.idempotencyKey)) {
+        try {
+          await global.Offline.enqueue({ method, path, body: opts.body, idempotencyKey: opts.idempotencyKey });
+          throw new ApiError(202, { code: 'OFFLINE_QUEUED', message: 'Sem conexão. A operação foi guardada e será sincronizada quando a internet voltar.' });
+        } catch (queueError) {
+          if (queueError && queueError.code === 'OFFLINE_QUEUED') throw queueError;
+        }
+      }
+      throw networkError;
     }
 
     let json = null;
@@ -95,6 +104,19 @@
       throw err;
     }
     return json; // { ok: true, data, meta? }
+  }
+
+  async function refreshCsrf() {
+    const res = await fetch(buildUrl('/api/auth/csrf'), {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
+    const json = await res.json();
+    if (!res.ok || !json?.data?.csrf_token) throw new ApiError(res.status, json && json.error);
+    csrf = json.data.csrf_token;
+    return csrf;
   }
 
   /** New Idempotency-Key: create ONE per form opening, reuse it on retries of that same submission. */
@@ -167,6 +189,13 @@
     del: (path, body, opts) => request('DELETE', path, Object.assign({}, opts, { body })),
     upload: (path, formData, opts) => request('POST', path, Object.assign({}, opts, { body: formData })),
     newKey,
+    replay: (entry) => request(entry.method, entry.path, {
+      body: entry.body,
+      idempotencyKey: entry.idempotency_key,
+      skipOfflineQueue: true,
+      noRedirect: true,
+    }),
+    refreshCsrf,
     url: (path, query) => buildUrl(path, query),
     csrf: () => csrf,
     handlers,

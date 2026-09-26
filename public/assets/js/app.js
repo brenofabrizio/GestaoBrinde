@@ -1,6 +1,42 @@
 (function (global) {
   'use strict';
 
+  function initNavigationLoading() {
+    const loader = document.getElementById('pageLoader');
+    if (!loader) return;
+
+    const hide = () => {
+      loader.hidden = true;
+      document.body.classList.remove('is-page-loading');
+    };
+    const show = (link) => {
+      loader.hidden = false;
+      document.body.classList.add('is-page-loading');
+      link?.setAttribute('aria-busy', 'true');
+    };
+    const isModifiedClick = (event) => event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+
+    document.addEventListener('click', (event) => {
+      if (isModifiedClick(event)) return;
+      const link = event.target.closest?.('a[href]');
+      if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+      if (link.dataset.noLoading !== undefined || link.closest('[data-no-loading]')) return;
+
+      const rawHref = link.getAttribute('href') || '';
+      if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
+
+      let destination;
+      try { destination = new URL(link.href, window.location.href); } catch (_) { return; }
+      if (destination.origin !== window.location.origin) return;
+      if (destination.pathname === window.location.pathname && destination.search === window.location.search && destination.hash) return;
+      show(link);
+    });
+
+    window.addEventListener('pageshow', hide);
+    window.addEventListener('pagehide', () => { document.body.classList.remove('is-page-loading'); });
+    hide();
+  }
+
   function toast(msg, type) {
     type = type || 'info';
     let wrap = document.querySelector('.toast-wrap');
@@ -170,5 +206,8 @@
   }
 
   global.UI = { toast, fieldErrors, clearErrors, confirmDialog, confirm: confirmDialog, purgeDialog, qs, debounce, badge, pager, catchApi, signaturePad, initNotifications };
-  document.addEventListener('DOMContentLoaded', initNotifications);
+  document.addEventListener('DOMContentLoaded', () => {
+    initNavigationLoading();
+    initNotifications();
+  });
 })(window);

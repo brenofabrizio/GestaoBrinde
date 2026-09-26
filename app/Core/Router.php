@@ -11,6 +11,7 @@ namespace App\Core;
  *   perm     => 'x.y' | ['a.b','c.d']  any-of permission check
  *   csrf     => false  skip CSRF check (only for safe endpoints)
  *   idempotent => true require Idempotency-Key and replay duplicates
+ *   idempotent_optional => true replay when Idempotency-Key is provided
  *   password_change_ok => true reachable while the user must change the password
  */
 final class Router

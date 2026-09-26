@@ -179,6 +179,13 @@ Role slugs: `admin` Administrador · `approver` Gestor/Aprovador · `operations`
 | `POST /api/settings/logo` | settings.manage | multipart, field `logo` (PNG/JPG/WEBP ≤ 5 MB; stored as PNG ≤ 600px) |
 | `DELETE /api/settings/logo` | settings.manage | — |
 
+### 3.2.1 Lecom — abertura de chamado
+| Method & path | Permission | Body / returns |
+|---|---|---|
+| `POST /api/lecom/process/start` 🔑 | requests.create + `Idempotency-Key` | body `{}`; creates the configured Lecom process server-side and returns `{process_instance_id, activity_instance_id, cycle, url}` |
+
+The Lecom `apikey` is read from `LECOM_API_KEY` and is never sent to the browser. The server sends `apikey` and `X-Server` to `POST /v1/process-instances`, then builds the workspace URL returned to the user.
+
 ### 3.3 Users
 | Method & path | Permission | Notes |
 |---|---|---|

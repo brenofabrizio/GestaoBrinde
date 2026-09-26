@@ -108,7 +108,9 @@ final class App
         [$class, $method] = $match['route']['handler'];
         $call = static fn (): Response => (new $class())->{$method}($request);
 
-        return empty($options['idempotent']) ? $call() : Idempotency::run($request, $call);
+        $hasIdempotencyKey = is_string($request->header('Idempotency-Key')) && $request->header('Idempotency-Key') !== '';
+        $idempotent = !empty($options['idempotent']) || (!empty($options['idempotent_optional']) && $hasIdempotencyKey);
+        return $idempotent ? Idempotency::run($request, $call) : $call();
     }
 
     // -----------------------------------------------------------------

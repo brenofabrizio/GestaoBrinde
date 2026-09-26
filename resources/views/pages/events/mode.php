@@ -89,7 +89,7 @@ function modoEvento(id) {
       if (!this.pad || this.pad.isEmpty()) { UI.toast('Assine no campo.', 'err'); return; }
       this.saving = true;
       try {
-        const { data } = await Api.post('/api/events/' + id + '/withdrawals', {
+        const { data } = await Api.postIdem('/api/events/' + id + '/withdrawals', {
           industry_id: this.industry.id,
           received_by_name: this.recv,
           received_by_email: this.email,

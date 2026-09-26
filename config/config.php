@@ -41,6 +41,13 @@ return [
         'from_name' => Env::get('MAIL_FROM_NAME', 'Controle de Brindes'),
     ],
 
+    'lecom' => [
+        // Never expose this value to the browser or include it in repository files.
+        'api_key' => (string) Env::get('LECOM_API_KEY', ''),
+        'timeout' => (int) Env::get('LECOM_HTTP_TIMEOUT', 20),
+        'connect_timeout' => (int) Env::get('LECOM_CONNECT_TIMEOUT', 8),
+    ],
+
     'security' => [
         'login_max_attempts' => 5,       // per e-mail inside the window
         'login_max_attempts_ip' => 30,   // per IP inside the window

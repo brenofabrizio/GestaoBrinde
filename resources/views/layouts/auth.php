@@ -17,6 +17,8 @@ $company = e($settings['company_name'] ?? 'Controle de Brindes');
   <title><?= e($title . ' — ' . ($settings['company_name'] ?? '')) ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
+  <meta name="theme-color" content="#2563EB">
   <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/bootstrap.min.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap-icons/bootstrap-icons.min.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
@@ -41,6 +43,7 @@ $company = e($settings['company_name'] ?? 'Controle de Brindes');
   </div>
 </div>
 <script src="<?= e(asset('js/api.js')) ?>"></script>
+<script src="<?= e(asset('js/offline.js')) ?>"></script>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
 <?= $scripts ?? '' ?>
 <script src="<?= e(asset('vendor/alpinejs/alpine.min.js')) ?>"></script>

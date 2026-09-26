@@ -66,7 +66,7 @@ function reqForm() {
     async save() {
       this.saving = true;
       try {
-        const { data } = await Api.post('/api/requests', {
+        const { data } = await Api.postIdem('/api/requests', {
           ...this.f,
           department_id: this.f.department_id ? Number(this.f.department_id) : null,
           industry_id: this.f.industry_id ? Number(this.f.industry_id) : null,

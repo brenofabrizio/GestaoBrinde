@@ -134,6 +134,44 @@ a:hover { color: var(--brand-primary-dark); }
 /* ─── Main content ─────────────────────────────────────────────────── */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
+/* ─── Navigation loading state ────────────────────────────────────── */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  background: hsla(220, 20%, 97%, 0.78);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.page-loader[hidden] { display: none !important; }
+.page-loader-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+.page-loader-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--brand-primary-light);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+body.is-page-loading { cursor: progress; }
+@media (prefers-reduced-motion: reduce) {
+  .page-loader-spinner { animation: none; }
+}
+
 /* ─── Topbar ───────────────────────────────────────────────────────── */
 .topbar {
   background: var(--surface);
@@ -155,6 +193,23 @@ a:hover { color: var(--brand-primary-dark); }
   flex: 1;
   color: var(--text);
 }
+.connection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.connection-status.is-offline { color: hsl(0, 72%, 36%); background: hsl(0, 86%, 96%); border-color: hsl(0, 72%, 84%); }
+.connection-status.is-syncing { color: var(--brand-primary-dark); background: var(--brand-primary-light); border-color: hsl(var(--brand-hue), 83%, 84%); }
+.connection-status.has-pending { color: hsl(32, 86%, 28%); background: hsl(45, 96%, 94%); border-color: hsl(45, 86%, 78%); }
 
 /* ─── Page ─────────────────────────────────────────────────────────── */
 .page { padding: 22px 24px 48px; max-width: 1440px; width: 100%; }
@@ -432,6 +487,7 @@ a:hover { color: var(--brand-primary-dark); }
   .page { padding: 14px 12px 32px; }
   .table-desktop { display: none !important; }
   .topbar { padding: 8px 14px; }
+  .connection-status span { display: none; }
 }
 @media (min-width: 992px) {
   .table-mobile { display: none !important; }

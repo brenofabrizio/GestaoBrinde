@@ -155,30 +155,37 @@ function stockForm() {
       if (!this.item) { this.err = 'Selecione um brinde na lista.'; UI.toast(this.err, 'err'); return; }
       if (!this.f.quantity || Number(this.f.quantity) < 1) { this.err = 'Informe a quantidade.'; UI.toast(this.err, 'err'); return; }
       this.saving = true;
-      const fd = new FormData();
-      fd.append('item_id', String(this.item.id));
-      fd.append('quantity', String(this.f.quantity));
-      if (this.f.notes) fd.append('notes', this.f.notes);
+      const payload = {
+        item_id: Number(this.item.id),
+        quantity: Number(this.f.quantity),
+        notes: this.f.notes || null
+      };
       if (this.mode === 'entrada' || this.mode === 'saida') {
-        if (this.f.document_ref) fd.append('document_ref', this.f.document_ref);
-        if (this.f.industry_id) fd.append('industry_id', String(this.f.industry_id));
+        payload.document_ref = this.f.document_ref || null;
+        payload.industry_id = this.f.industry_id ? Number(this.f.industry_id) : null;
       }
       if (this.mode === 'entrada') {
-        if (this.f.unit_value) fd.append('unit_value', this.f.unit_value);
-        if (this.f.purchase_ticket_no) fd.append('purchase_ticket_no', this.f.purchase_ticket_no);
+        payload.unit_value = this.f.unit_value || null;
+        payload.purchase_ticket_no = this.f.purchase_ticket_no || null;
       }
       if (this.mode === 'saida') {
-        fd.append('purpose', this.f.purpose);
-        if (this.f.recipient) fd.append('recipient', this.f.recipient);
-        if (this.f.department_id) fd.append('department_id', String(this.f.department_id));
+        payload.purpose = this.f.purpose || '';
+        payload.recipient = this.f.recipient || null;
+        payload.department_id = this.f.department_id ? Number(this.f.department_id) : null;
       }
       if (this.mode === 'ajuste') {
-        fd.append('mode', this.f.mode);
-        fd.append('reason', this.f.reason);
+        payload.mode = this.f.mode;
+        payload.reason = this.f.reason || '';
       }
+      const fd = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') fd.append(key, String(value));
+      });
       if (this.invoice) fd.append('invoice', this.invoice);
       try {
-        const { data } = await Api.upload(this.endpoint, fd, { idempotencyKey: this.key });
+        const { data } = this.invoice
+          ? await Api.upload(this.endpoint, fd, { idempotencyKey: this.key })
+          : await Api.postIdem(this.endpoint, payload, { idempotencyKey: this.key });
         this.done = data;
         UI.toast('Movimentação registrada.', 'ok');
       } catch (e) {

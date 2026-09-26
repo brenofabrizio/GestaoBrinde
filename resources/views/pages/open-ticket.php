@@ -1,16 +1,7 @@
 <?php
-$code = (int) ($app['page']['query']['codigo'] ?? 26);
-$version = (int) ($app['page']['query']['versao'] ?? 10);
+$code = (int) setting('lecom_process_id', '26');
+$version = (int) setting('lecom_process_version', '10');
 $portal = trim((string) setting('lecom_portal_url', ''));
-$legacy = trim((string) setting('lecom_supply_form_url', ''));
-$target = $portal !== '' ? rtrim($portal, '/') . '/form-web/?' . http_build_query([
-    'processId' => $code,
-    'version' => $version,
-    'newWS' => 'true',
-], '', '&', PHP_QUERY_RFC3986) : '';
-if ($target === '' && $legacy !== '') {
-    $target = str_replace(['{codigo}', '{versao}'], [(string) $code, (string) $version], $legacy);
-}
 $apiBase = rtrim(trim((string) setting('lecom_api_base_url', 'https://api.lecom.com.br/service/bpm/api')), '/');
 $apiEndpoint = $apiBase . '/v1/process-instances';
 $portalHost = $portal !== '' ? parse_url($portal, PHP_URL_HOST) : null;
@@ -18,12 +9,16 @@ $workspaceEndpoint = $portal !== '' ? rtrim($portal, '/') . '/workspace/api/proc
     'processId' => $code,
     'version' => $version,
 ], '', '&', PHP_QUERY_RFC3986) : '';
+$startEndpoint = url('/api/lecom/process/start');
 ob_start(); ?>
 <div class="card card-body" style="max-width:760px">
   <h2 class="h5">Abrir chamado de suprimentos</h2>
   <p class="text-muted">Processo Lecom: código <?= e((string) $code) ?> · versão <?= e((string) $version) ?>.</p>
-  <?php if ($target !== ''): ?>
-    <a class="btn btn-primary align-self-start" href="<?= e($target) ?>" target="_blank" rel="noopener">Continuar para o Lecom</a>
+  <?php if ($portal !== ''): ?>
+    <button class="btn btn-primary align-self-start" type="button" id="lecomStartButton">
+      <i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>Abrir chamado no Lecom
+    </button>
+    <p class="small text-muted mt-2 mb-0">O sistema criará a instância e abrirá diretamente o formulário correto do chamado.</p>
   <?php else: ?>
     <div class="alert alert-warning mb-3">O endereço do portal Lecom ainda não foi configurado.</div>
     <p class="small text-muted mb-0">Peça ao Administrador para informar o endereço base do portal Lecom em Configurações. O sistema usará automaticamente o código 26 e a versão 10.</p>
@@ -43,4 +38,30 @@ ob_start(); ?>
 </div>
 <?php
 $content = ob_get_clean();
+$scripts = '<script>
+(function () {
+  const button = document.getElementById("lecomStartButton");
+  if (!button) return;
+  const endpoint = ' . json_script($startEndpoint) . ';
+  button.addEventListener("click", async function () {
+    const tab = window.open("about:blank", "_blank");
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    try {
+      const result = await Api.postIdem(endpoint, {});
+      const target = result && result.data && result.data.url;
+      if (!target) throw new Error("O Lecom não retornou o endereço do formulário.");
+      if (tab && !tab.closed) tab.location.href = target;
+      else window.location.href = target;
+    } catch (error) {
+      if (tab && !tab.closed) tab.close();
+      if (window.UI && typeof UI.toast === "function") UI.toast(error.message, "err");
+      else window.alert(error.message);
+    } finally {
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+    }
+  });
+})();
+</script>';
 include BASE_PATH . '/resources/views/layouts/app.php';

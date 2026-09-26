@@ -9,12 +9,14 @@
 /storage/pdf/**
 /storage/backups/**
 /storage/logs/**
+/storage/locks/**
 /storage/cache/**
 /storage/json/*.json
 !/storage/**/.gitkeep
 !/storage/json/fixtures/**
 /.idea/
 /.vscode/
+/database/demo.sqlite
 Thumbs.db
 .DS_Store
 .vercel

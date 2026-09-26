@@ -10,6 +10,7 @@ use App\Controllers\EventsController;
 use App\Controllers\HealthController;
 use App\Controllers\ImportController;
 use App\Controllers\ItemsController;
+use App\Controllers\LecomController;
 use App\Controllers\LookupController;
 use App\Controllers\NotificationsController;
 use App\Controllers\ReportsController;
@@ -52,6 +53,9 @@ return static function (Router $r): void {
     $r->delete('/api/settings/logo', [SettingsController::class, 'deleteLogo'], ['perm' => 'settings.manage']);
     $r->post('/api/settings/test-email', [SettingsController::class, 'testEmail'], ['perm' => 'settings.manage']);
     $r->get('/api/admin/backup', [SettingsController::class, 'backup'], ['perm' => 'settings.manage']);
+
+    // --- Lecom --------------------------------------------------------
+    $r->post('/api/lecom/process/start', [LecomController::class, 'start'], ['perm' => 'requests.create', 'idempotent' => true]);
 
     // --- Users --------------------------------------------------------
     $r->get('/api/users/options', [UsersController::class, 'options']);
@@ -121,7 +125,7 @@ return static function (Router $r): void {
     $r->post('/api/stock/reversals', [TradeController::class, 'reverse'], ['perm' => 'stock.adjust', 'idempotent' => true]);
 
     // --- TRADE (purchase → CD receive → withdraw) -----------------------
-    $r->post('/api/trade/requests', [TradeController::class, 'store'], ['perm' => 'requests.create']);
+    $r->post('/api/trade/requests', [TradeController::class, 'store'], ['perm' => 'requests.create', 'idempotent_optional' => true]);
     $r->post("/api/trade/requests/{$id}/approve", [TradeController::class, 'approve'], ['perm' => 'requests.approve']);
     $r->post("/api/trade/requests/{$id}/reject", [TradeController::class, 'reject'], ['perm' => 'requests.approve']);
     $r->post("/api/trade/requests/{$id}/purchase", [TradeController::class, 'purchase'], ['perm' => 'requests.approve']);
@@ -142,7 +146,7 @@ return static function (Router $r): void {
 
     // --- Requests -----------------------------------------------------
     $r->get('/api/requests', [RequestsController::class, 'index'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']]);
-    $r->post('/api/requests', [RequestsController::class, 'store'], ['perm' => 'requests.create']);
+    $r->post('/api/requests', [RequestsController::class, 'store'], ['perm' => 'requests.create', 'idempotent_optional' => true]);
     $r->post('/api/requests/check-availability', [RequestsController::class, 'checkAvailability'], ['perm' => 'requests.create']);
     $r->get("/api/requests/{$id}", [RequestsController::class, 'show'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']]);
     $r->put("/api/requests/{$id}", [RequestsController::class, 'update'], ['perm' => 'requests.create']);

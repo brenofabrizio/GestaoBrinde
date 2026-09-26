@@ -615,6 +615,10 @@ check('I3 [T5] reprovar sem justificativa 422; com justificativa libera', code($
 
 $rPick = $admin->post("/api/requests/{$autoId}/start-picking");
 $rReady = $admin->post("/api/requests/{$autoId}/ready");
+$readyEmail = Db::fetch(
+    "SELECT to_email, status FROM notifications WHERE channel = 'email' AND related_type = 'request' AND related_id = ? AND dedupe_key = ?",
+    [$autoId, 'request-ready-' . $autoId]
+);
 $sig = sigPng();
 $rDel = $admin->postIdem("/api/requests/{$autoId}/deliver", [
     'received_by_name' => 'Carlos Receptor', 'received_by_email' => 'carlos@teste.local', 'signature' => $sig,
@@ -631,6 +635,9 @@ $novaPage = $op->get('/solicitacoes-trade/nova');
 $opPage = $op->get('/operacao');
 check('I4 [T6] entrega gera protocolo e baixa; segunda entrega bloqueada', $rPick['status'] === 200 && $rReady['status'] === 200
     && $rDel['status'] === 201 && !empty($rDel['json']['data']['code']) && $rDel2['status'] === 409, [$rPick, $rReady, $rDel, $rDel2]);
+check('I4mail solicitante recebe e-mail quando os brindes ficam prontos', $readyEmail
+    && $readyEmail['to_email'] === 'sol@teste.local'
+    && in_array($readyEmail['status'], ['fila', 'enviado'], true), $readyEmail);
 check('I4cd CD/Estoque sem nova solicitação, cadastros e entregas', $blockedPick['status'] === 403 && $noTrade['status'] === 403
     && $cadPage['status'] === 403 && $novaPage['status'] === 403 && $opPage['status'] === 403,
     [$blockedPick['status'], $noTrade['status'], $cadPage['status'], $novaPage['status'], $opPage['status']]);

@@ -18,12 +18,20 @@ $mustChangePassword = !empty($user['must_change_password']);
   <title><?= e($title . ' — ' . ($settings['company_name'] ?? '')) ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
+  <meta name="theme-color" content="#2563EB">
   <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/bootstrap.min.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap-icons/bootstrap-icons.min.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
   <style>:root { --brand-primary: <?= $color ?>; }</style>
 </head>
 <body data-must-change-password="<?= $mustChangePassword ? '1' : '0' ?>">
+<div class="page-loader" id="pageLoader" role="status" aria-live="polite" aria-label="Carregando" hidden>
+  <div class="page-loader-card">
+    <span class="page-loader-spinner" aria-hidden="true"></span>
+    <span>Carregando…</span>
+  </div>
+</div>
 <div class="app-shell">
   <aside class="sidebar d-none d-lg-flex" role="complementary" aria-label="Menu lateral">
     <a class="sidebar-brand" href="<?= e(url('/dashboard')) ?>" aria-label="Ir para o painel">
@@ -59,6 +67,10 @@ $mustChangePassword = !empty($user['must_change_password']);
         <i class="bi bi-list" aria-hidden="true"></i>
       </button>
       <h1><?= e($title) ?></h1>
+      <div class="connection-status" id="connectionStatus" role="status" aria-live="polite" hidden>
+        <i class="bi bi-cloud-check" aria-hidden="true"></i>
+        <span data-connection-text>Online</span>
+      </div>
       <form class="d-none d-md-flex flex-grow-1" style="max-width:300px"
             action="<?= e(url('/brindes')) ?>" method="get" role="search" aria-label="Busca rápida">
         <input class="form-control form-control-sm" type="search" name="q"
@@ -125,11 +137,18 @@ $mustChangePassword = !empty($user['must_change_password']);
 </div>
 <script src="<?= e(asset('vendor/bootstrap/bootstrap.bundle.min.js')) ?>"></script>
 <script src="<?= e(asset('js/api.js')) ?>"></script>
+<script src="<?= e(asset('js/offline.js')) ?>"></script>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
 <script>
 document.getElementById('logoutBtn')?.addEventListener('click', async function () {
   this.disabled = true;
+  if (window.Offline && await window.Offline.hasPending()) {
+    UI.toast('Existem operações offline pendentes. Conecte-se à internet antes de sair.', 'err');
+    this.disabled = false;
+    return;
+  }
   try { await Api.post('/api/auth/logout', {}); } catch (e) {}
+  await window.Offline?.clearLocalData?.();
   location.href = <?= json_script(url('/login')) ?>;
 });
 <?php if (!$mustChangePassword): ?>

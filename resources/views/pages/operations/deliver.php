@@ -50,7 +50,7 @@ function deliverPage(id) {
       if (!this.pad || this.pad.isEmpty()) { UI.toast('Assine no campo indicado.', 'err'); return; }
       this.saving = true;
       try {
-        const { data } = await Api.post('/api/requests/' + id + '/deliver', {
+        const { data } = await Api.postIdem('/api/requests/' + id + '/deliver', {
           ...this.f, signature: this.pad.toDataURL('image/png')
         }, { idempotencyKey: this.key });
         this.done = data;

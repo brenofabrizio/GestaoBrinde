@@ -64,6 +64,8 @@ Nas solicitações internas: **Solicitações → Nova.**
 ### 4. Aprovar
 Se a regra exigir (valor, quantidade etc.), a solicitação vai para **Aguardando aprovação**. O gestor informa o **número do chamado** ao aprovar, ou reprova com justificativa.
 
+Quando os brindes ficam prontos para retirada/entrega, o solicitante recebe uma notificação interna e um e-mail no endereço cadastrado.
+
 ### 5. Comprovante de retirada
 Quem retira **assina na tela**. O sistema gera o **PDF** (com QR, quantidade, saldo e assinatura) e envia e-mail.  
 Em **Comprovantes**, filtre por texto e por **data (De / Até)**.

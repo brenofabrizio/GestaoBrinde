@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Core\Auth;
+use App\Core\Config;
 use App\Core\Db;
+use App\Core\Log;
 use App\Core\Paginator;
 use App\Core\Request;
 use Throwable;
 
 final class NotificationService
 {
+    private const OUTBOX_LOCK_NAME = 'controle_brindes_mail_outbox';
+
     public static function queueInApp(?int $userId, string $subject, string $body, ?string $link = null, ?string $dedupe = null, ?string $type = null, ?int $relatedId = null): void
     {
         self::insert([
@@ -92,6 +96,19 @@ final class NotificationService
         $body = "A solicitação {$code} está pronta para retirada/entrega.";
         $requesterId = (int) ($request['requester']['id'] ?? $request['requester_id'] ?? 0);
         self::queueInApp($requesterId ?: null, $subject, $body, '/solicitacoes/' . $request['id'], null, 'request', (int) $request['id']);
+        $email = $requesterId ? Db::value('SELECT email FROM users WHERE id = ?', [$requesterId]) : null;
+        if (is_string($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            self::queueEmail(
+                $requesterId,
+                $email,
+                $subject,
+                Mailer::layout($subject, '<p>' . e($body) . '</p>'),
+                null,
+                'request-ready-' . (int) $request['id'],
+                'request',
+                (int) $request['id']
+            );
+        }
     }
 
     public static function protocolEmail(array $delivery, array $items, ?string $industryEmail, ?int $remaining = null): array
@@ -137,10 +154,13 @@ final class NotificationService
             self::queueEmail(is_numeric($userId) ? (int) $userId : null, (string) $to, 'Protocolo ' . $delivery['code'] . ' — comprovante de retirada', $html, $attachment, 'protocol-' . $delivery['id'] . '-' . $i, 'delivery', (int) $delivery['id']);
         }
         if (Auth::id()) {
+            $deliveryMessage = Mailer::isSmtp()
+                ? 'Comprovante da retirada gerado e colocado na fila de envio.'
+                : 'Comprovante da retirada gerado. Configure SMTP para o comprovante sair por e-mail.';
             self::queueInApp(
                 Auth::id(),
                 'Protocolo ' . $delivery['code'],
-                'Comprovante da retirada gerado' . (Mailer::isSmtp() ? ' e e-mail enviado para ' . implode(', ', $tos) . '.' : '. Configure SMTP para o comprovante sair por e-mail.'),
+                $deliveryMessage,
                 '/protocolos/' . $delivery['id'],
                 null,
                 'delivery',
@@ -207,22 +227,32 @@ final class NotificationService
 
     public static function processOutbox(int $limit = 15): int
     {
-        $rows = Db::fetchAll("SELECT * FROM notifications WHERE channel = 'email' AND status = 'fila' ORDER BY id ASC LIMIT {$limit}");
+        $limit = max(1, min($limit, 200));
+        $lock = self::acquireOutboxLock();
+        if ($lock === null) {
+            return 0;
+        }
+
         $sent = 0;
-        foreach ($rows as $row) {
-            try {
-                $abs = $row['attachment_path'] ? ImageService::absolute($row['attachment_path']) : null;
-                Mailer::send((string) $row['to_email'], (string) $row['subject'], (string) $row['body'], ($abs && is_file($abs)) ? [$abs] : []);
-                Db::update('notifications', ['status' => 'enviado', 'sent_at' => now(), 'attempts' => (int) $row['attempts'] + 1], ['id' => (int) $row['id']]);
-                $sent++;
-            } catch (Throwable $e) {
-                $attempts = (int) $row['attempts'] + 1;
-                Db::update('notifications', [
-                    'status' => $attempts >= 5 ? 'falhou' : 'fila',
-                    'attempts' => $attempts,
-                    'last_error' => mb_substr($e->getMessage(), 0, 500),
-                ], ['id' => (int) $row['id']]);
+        try {
+            $rows = Db::fetchAll("SELECT * FROM notifications WHERE channel = 'email' AND status = 'fila' ORDER BY id ASC LIMIT {$limit}");
+            foreach ($rows as $row) {
+                try {
+                    $abs = $row['attachment_path'] ? ImageService::absolute($row['attachment_path']) : null;
+                    Mailer::send((string) $row['to_email'], (string) $row['subject'], (string) $row['body'], ($abs && is_file($abs)) ? [$abs] : []);
+                    Db::update('notifications', ['status' => 'enviado', 'sent_at' => now(), 'attempts' => (int) $row['attempts'] + 1], ['id' => (int) $row['id']]);
+                    $sent++;
+                } catch (Throwable $e) {
+                    $attempts = (int) $row['attempts'] + 1;
+                    Db::update('notifications', [
+                        'status' => $attempts >= 5 ? 'falhou' : 'fila',
+                        'attempts' => $attempts,
+                        'last_error' => mb_substr($e->getMessage(), 0, 500),
+                    ], ['id' => (int) $row['id']]);
+                }
             }
+        } finally {
+            self::releaseOutboxLock($lock);
         }
         return $sent;
     }
@@ -231,7 +261,51 @@ final class NotificationService
     {
         try {
             self::processOutbox(8);
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            Log::error('Notification outbox flush failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Prevents two cron/web requests from sending the same queued e-mail at once.
+     * MySQL/MariaDB use an advisory DB lock; SQLite uses a local lock file.
+     */
+    private static function acquireOutboxLock(): mixed
+    {
+        if (!Db::isSqlite()) {
+            return (int) (Db::value('SELECT GET_LOCK(?, 0)', [self::OUTBOX_LOCK_NAME]) ?? 0) === 1
+                ? 'mysql'
+                : null;
+        }
+
+        $path = Config::get('paths.storage') . '/locks/mail-outbox.lock';
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        $handle = @fopen($path, 'c');
+        if (!is_resource($handle) || !@flock($handle, LOCK_EX | LOCK_NB)) {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+            return null;
+        }
+        return $handle;
+    }
+
+    private static function releaseOutboxLock(mixed $lock): void
+    {
+        if ($lock === 'mysql') {
+            try {
+                Db::value('SELECT RELEASE_LOCK(?)', [self::OUTBOX_LOCK_NAME]);
+            } catch (Throwable $e) {
+                Log::error('Notification outbox lock release failed', ['error' => $e->getMessage()]);
+            }
+            return;
+        }
+        if (is_resource($lock)) {
+            @flock($lock, LOCK_UN);
+            @fclose($lock);
         }
     }
 
