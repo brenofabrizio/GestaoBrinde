@@ -141,7 +141,11 @@ final class DemoSqliteStore
             $out = curl_exec($ch);
             $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $err = is_string($out) ? '' : (string) curl_error($ch);
-            curl_close($ch);
+            // PHP 8.5 deprecates curl_close() because the handle is cleaned
+            // up automatically. Keep compatibility with older runtimes.
+            if (PHP_VERSION_ID < 80500) {
+                curl_close($ch);
+            }
             return ['code' => $code, 'body' => is_string($out) ? $out : $err];
         }
         $http = [

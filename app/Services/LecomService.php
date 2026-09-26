@@ -109,7 +109,12 @@ final class LecomService
         $raw = curl_exec($handle);
         $curlError = curl_error($handle);
         $httpStatus = (int) curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        curl_close($handle);
+        // curl_close() is a deprecated no-op in PHP 8.5. The application's
+        // error handler promotes deprecations to exceptions, so only call it
+        // on PHP versions where it still performs cleanup.
+        if (PHP_VERSION_ID < 80500) {
+            curl_close($handle);
+        }
 
         if ($raw === false) {
             Log::error('Lecom request failed', [
