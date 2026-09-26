@@ -42,7 +42,15 @@
         <div class="col-md-1"><button type="button" class="btn btn-sm btn-outline-danger" @click="items.splice(i,1)">×</button></div>
       </div>
     </template>
-    <button class="btn btn-primary mt-3" :disabled="saving">Enviar solicitação de compra</button>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <button class="btn btn-primary" :disabled="saving || lecomStarting">Enviar solicitação de compra</button>
+      <button class="btn btn-outline-primary" type="button" @click="openLecom"
+              :disabled="saving || lecomStarting" :aria-busy="lecomStarting ? 'true' : 'false'">
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" x-show="lecomStarting"></span>
+        <i class="bi bi-box-arrow-up-right me-1" aria-hidden="true" x-show="!lecomStarting"></i>
+        <span x-text="lecomStarting ? 'Abrindo chamado…' : 'Abrir chamado no Lecom'"></span>
+      </button>
+    </div>
   </form>
 </div>
 <?php
@@ -52,7 +60,7 @@ ob_start(); ?>
 function tradeForm() {
   return {
     f: { industry_id: '', purpose: '', recipient: '', action_type: 'campanha', delivery_place: 'CD Belford Roxo', notes: '' },
-    inds: [], q: '', opts: [], items: [], saving: false, formError: '', t: null,
+    inds: [], q: '', opts: [], items: [], saving: false, lecomStarting: false, formError: '', t: null,
     async init() {
       try {
         this.inds = (await Api.get('/api/industries', { all: 1 })).data || [];
@@ -76,6 +84,97 @@ function tradeForm() {
       if (this.items.find(i => i.item_id === o.id)) return;
       this.items.push({ item_id: o.id, name: o.code + ' — ' + o.name, qty_requested: 1, unit_value: o.unit_value ?? '' });
       this.opts = []; this.q = '';
+    },
+    readCookie(name) {
+      const target = String(name).toLowerCase();
+      const pair = document.cookie.split(';').map(part => part.trim()).find(part => {
+        const separator = part.indexOf('=');
+        return separator > 0 && part.slice(0, separator).toLowerCase() === target;
+      });
+      if (!pair) return '';
+      const index = pair.indexOf('=');
+      try { return decodeURIComponent(pair.slice(index + 1)); } catch (_) { return pair.slice(index + 1); }
+    },
+    findLecomValue(value, key) {
+      if (!value || typeof value !== 'object') return '';
+      if (value[key] !== undefined && value[key] !== null && String(value[key]) !== '') return String(value[key]);
+      for (const child of Object.values(value)) {
+        const found = this.findLecomValue(child, key);
+        if (found) return found;
+      }
+      return '';
+    },
+    async readLecomResponse(response) {
+      const raw = await response.text();
+      let data = null;
+      try { data = raw ? JSON.parse(raw) : null; } catch (_) {}
+      return { response, data };
+    },
+    async startLecomWithSso(portal, processId, processVersion, ticket) {
+      const base = String(portal || window.location.origin).replace(/\/+$/, '');
+      const endpoint = base + '/workspace/api/process/start?processId='
+        + encodeURIComponent(processId) + '&version=' + encodeURIComponent(processVersion);
+      const headers = {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Accept': 'application/json, text/plain, */*',
+        'language': 'pt_BR',
+        'ticket-sso': ticket
+      };
+      if (this.readCookie('testMode').toLowerCase() === 'true') {
+        headers['test-mode'] = 'true';
+        const testUser = this.readCookie('LecomEnvironmentMode');
+        if (testUser) headers['test-user'] = testUser;
+      }
+      let result;
+      try {
+        result = await this.readLecomResponse(await fetch(endpoint, {
+          method: 'PUT', headers, body: '{}', credentials: 'include', cache: 'no-store'
+        }));
+      } catch (error) {
+        const wrapped = new Error('Não foi possível chamar o Workspace do Lecom.');
+        wrapped.code = 'LECOM_SSO_NETWORK_ERROR';
+        wrapped.cause = error;
+        throw wrapped;
+      }
+      if (!result.response.ok) {
+        const message = result.response.status === 403
+          ? 'O Lecom recusou a abertura do processo. Verifique sua permissão no processo e o login de homologação.'
+          : 'O Workspace do Lecom recusou a criação da instância (HTTP ' + result.response.status + ').';
+        const error = new Error(message);
+        error.code = 'LECOM_SSO_START_FAILED';
+        throw error;
+      }
+      const processInstanceId = this.findLecomValue(result.data, 'processInstanceId');
+      if (!processInstanceId) throw new Error('O Lecom respondeu sem informar o identificador da nova instância.');
+      const activityInstanceId = this.findLecomValue(result.data, 'activityInstanceId') || '1';
+      const cycle = this.findLecomValue(result.data, 'cycle') || '1';
+      return base + '/workspace/form-app/' + encodeURIComponent(processInstanceId) + '/'
+        + encodeURIComponent(activityInstanceId) + '/' + encodeURIComponent(cycle) + '?isNewForm=true';
+    },
+    async openLecom() {
+      if (this.lecomStarting) return;
+      this.lecomStarting = true;
+      const tab = window.open('about:blank', '_blank');
+      const portal = <?= json_script(trim((string) setting('lecom_portal_url', ''))) ?>;
+      const processId = <?= json_script((int) setting('lecom_process_id', '26')) ?>;
+      const processVersion = <?= json_script((int) setting('lecom_process_version', '10')) ?>;
+      try {
+        let target = '';
+        const ticket = this.readCookie('LecomSSOTicket') || this.readCookie('lecomssoticket');
+        if (ticket) target = await this.startLecomWithSso(portal, processId, processVersion, ticket);
+        if (!target) {
+          const fallback = await Api.postIdem('/api/lecom/process/start', {});
+          target = fallback?.data?.url || '';
+        }
+        if (!target) throw new Error('O Lecom não retornou o endereço do formulário.');
+        if (tab && !tab.closed) tab.location.href = target;
+        else window.location.href = target;
+      } catch (error) {
+        if (tab && !tab.closed) tab.close();
+        UI.toast(error.message || 'Não foi possível abrir o chamado no Lecom.', 'err');
+      } finally {
+        this.lecomStarting = false;
+      }
     },
     async save() {
       this.formError = '';
