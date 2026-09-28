@@ -213,6 +213,9 @@ final class Installer
             self::upgrade($noop);
         }
 
+        if (!\App\Support\DemoSqliteStore::shouldSeedDemo()) {
+            self::resetVercelDemoToBlank();
+        }
         self::ensureDemoAccounts();
 
         $itemCount = 0;
@@ -221,13 +224,52 @@ final class Installer
         } catch (Throwable) {
             $itemCount = 0;
         }
-        if ($itemCount === 0) {
+        if ($itemCount === 0 && \App\Support\DemoSqliteStore::shouldSeedDemo()) {
             try {
                 DemoSeeder::run($noop);
             } catch (Throwable $e) {
                 Log::error('Demo seeder failed after schema install', ['error' => $e->getMessage()]);
             }
         }
+    }
+
+    /**
+     * Clears only the operational/demo domain while preserving system access.
+     * A sequence marker makes the reset idempotent across warm Vercel requests.
+     */
+    private static function resetVercelDemoToBlank(): void
+    {
+        $marker = \App\Support\DemoSqliteStore::datasetMarker();
+        if ((string) Db::value(
+            'SELECT last_value FROM sequences WHERE name = ? AND period = ?',
+            ['__demo_reset__', $marker]
+        ) === '1') {
+            return;
+        }
+
+        Db::transaction(function () use ($marker): void {
+            // User references must be cleared before their lookup rows go.
+            Db::query('UPDATE users SET department_id = NULL, industry_id = NULL');
+            $tables = [
+                'notifications', 'audit_log', 'login_attempts', 'password_resets',
+                'idempotency_keys', 'request_status_history', 'approvals', 'request_items',
+                'requests', 'delivery_items', 'deliveries', 'event_allocations', 'events',
+                'stock_exit_orders', 'stock_movements', 'stock_positions', 'stock', 'items',
+                'suppliers', 'industries', 'departments', 'categories', 'locations',
+                'approval_rules', 'sequences',
+            ];
+            $available = self::tables();
+            foreach ($tables as $table) {
+                if (in_array($table, $available, true)) {
+                    Db::query('DELETE FROM `' . $table . '`');
+                }
+            }
+            Db::insert('sequences', [
+                'name' => '__demo_reset__',
+                'period' => $marker,
+                'last_value' => 1,
+            ]);
+        });
     }
 
     /** Demo logins used on the public Vercel walkthrough (password Demo@123). */
@@ -286,13 +328,6 @@ final class Installer
         $industryEmail = 'industria@brindes.local';
         if (Db::fetch('SELECT id FROM users WHERE email = ? AND deleted_at IS NULL', [$industryEmail]) === null) {
             $industryId = (int) (Db::value('SELECT id FROM industries ORDER BY id LIMIT 1') ?? 0);
-            if ($industryId === 0 && in_array('industries', self::tables(), true)) {
-                $industryId = Db::insert('industries', [
-                    'name' => 'Indústria Alfa',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
             if ($industryId > 0) {
                 Db::insert('users', [
                     'name' => 'Portal Indústria Alfa',
