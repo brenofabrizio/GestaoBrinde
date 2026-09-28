@@ -49,7 +49,7 @@ if (getenv('VERCEL')) {
     $sqliteSrc = BASE_PATH . '/database/demo.sqlite';
     // Keep the local runtime path in sync with the demo namespace version so
     // a warm serverless process cannot reuse the previous homologation file.
-    $sqliteDst = $tmp . '/demo-v3.sqlite';
+    $sqliteDst = $tmp . '/demo-v4.sqlite';
     \App\Support\DemoSqliteStore::hydrate($sqliteDst, $sqliteSrc);
     if (getenv('DB_PATH') === false) {
         putenv('DB_PATH=' . $sqliteDst);
@@ -58,6 +58,10 @@ if (getenv('VERCEL')) {
 }
 
 Config::load(BASE_PATH . '/config/config.php');
+// The timezone must be active before any installer/seeder code runs. On
+// Vercel the demo database is initialized during bootstrap, so setting it at
+// the end would persist all first-run records in UTC.
+date_default_timezone_set((string) Config::get('app.timezone', 'America/Sao_Paulo'));
 
 if (getenv('VERCEL')) {
     Config::set('paths.storage', '/tmp/brindes/storage');
@@ -77,7 +81,6 @@ if (getenv('VERCEL')) {
     }
 }
 
-date_default_timezone_set((string) Config::get('app.timezone', 'America/Sao_Paulo'));
 mb_internal_encoding('UTF-8');
 
 error_reporting(E_ALL);

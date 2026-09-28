@@ -15,7 +15,7 @@ final class DemoSqliteStore
 {
     // Version bump intentionally starts a clean Vercel homologation dataset.
     // Production MySQL is not affected by this demo-only namespace.
-    private const PATHNAME = 'brindes-demo-v3.sqlite';
+    private const PATHNAME = 'brindes-demo-v4.sqlite';
 
     public static function hydrate(string $dst, string $bundled): void
     {
