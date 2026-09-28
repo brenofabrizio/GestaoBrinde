@@ -23,6 +23,104 @@ final class DemoSeeder
 {
     public const PASSWORD = 'Demo@123';
 
+    /** Seed only master data; operational records remain empty. */
+    public static function runCatalogs(callable $out): void
+    {
+        if (Db::value("SELECT last_value FROM sequences WHERE name = '__demo_catalogs__' AND period = 'v1'") !== null) {
+            return;
+        }
+
+        $admin = Auth::loadUser(1);
+        Auth::actingAs($admin);
+        Clock::set(date('Y-m-d 10:00:00'));
+        try {
+            $departments = self::names('departments', ['Comercial', 'Marketing', 'Trade Marketing', 'Eventos', 'Diretoria']);
+            $categories = self::names('categories', ['Eletrônicos', 'Eletrodomésticos', 'Vestuário', 'Papelaria', 'Utilidades', 'Kits']);
+
+            $locations = [];
+            foreach ([
+                ['CD Belford Roxo', 'Centro de distribuição principal', 'cd'],
+                ['CD - Centro de Distribuição', 'Área de armazenagem do CD', 'cd'],
+                ['Escritório - Almoxarifado', 'Almoxarifado administrativo', 'outro'],
+                ['Eventos e Ações', 'Local temporário para eventos', 'evento'],
+            ] as [$name, $description, $kind]) {
+                $locations[$name] = Db::insert('locations', [
+                    'name' => $name,
+                    'description' => $description,
+                    'kind' => $kind,
+                    'created_by' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            $suppliers = [];
+            foreach ([
+                ['Fornecedor Exemplo Ltda', 'compras@fornecedor.example'],
+                ['Brindes & Cia', 'vendas@brindesecia.example'],
+                ['Personaliza Brasil', 'comercial@personaliza.example'],
+            ] as [$name, $email]) {
+                $suppliers[$name] = Db::insert('suppliers', [
+                    'name' => $name,
+                    'contact_email' => $email,
+                    'created_by' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            $industries = [];
+            foreach (['Indústria Alfa', 'Indústria Beta', 'Indústria Gama', 'Indústria Delta'] as $name) {
+                $slug = strtolower(substr(strrchr($name, ' '), 1));
+                $industries[$name] = Db::insert('industries', [
+                    'name' => $name,
+                    'contact_name' => 'Contato ' . ucfirst($slug),
+                    'contact_email' => "contato@{$slug}.example",
+                    'contact_phone' => '(11) 90000-000' . count($industries),
+                    'created_by' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            foreach ([
+                ['Air Fryer 4L', 'Eletrodomésticos', 389.90, 5],
+                ['Smart TV 43"', 'Eletrônicos', 1899.00, 2],
+                ['Smartphone 128GB', 'Eletrônicos', 1299.00, 3],
+                ['Fone de Ouvido Bluetooth', 'Eletrônicos', 149.90, 10],
+                ['Caixa de Som Bluetooth', 'Eletrônicos', 219.90, 8],
+                ['Garrafa Térmica 500ml', 'Utilidades', 39.90, 30],
+                ['Camiseta Evento', 'Vestuário', 24.90, 50],
+                ['Boné Bordado', 'Vestuário', 29.90, 40],
+                ['Caderno Personalizado', 'Papelaria', 18.50, 50],
+                ['Kit Churrasco', 'Kits', 159.00, 5],
+                ['Mochila Executiva', 'Utilidades', 129.00, 10],
+                ['Squeeze 600ml', 'Utilidades', 14.90, 100],
+            ] as [$name, $category, $value, $minStock]) {
+                ItemService::create([
+                    'name' => $name,
+                    'category_id' => $categories[$category],
+                    'location_id' => $locations['CD - Centro de Distribuição'],
+                    'supplier_id' => $suppliers['Brindes & Cia'],
+                    'unit_value' => $value,
+                    'min_stock' => $minStock,
+                    'initial_quantity' => 0,
+                    'description' => "{$name} para ações e eventos.",
+                ]);
+            }
+
+            Db::insert('sequences', [
+                'name' => '__demo_catalogs__',
+                'period' => 'v1',
+                'last_value' => 1,
+            ]);
+            $out('Cadastros e 12 brindes fictícios criados com estoque inicial zerado.');
+        } finally {
+            Clock::set(null);
+            Auth::actingAs(null);
+        }
+    }
+
     public static function run(callable $out): void
     {
         // A previous interrupted seed must never leak its frozen clock into

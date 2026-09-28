@@ -51,6 +51,7 @@ expectContains('app/Support/Installer.php', "'stock.entry'", 'Perfil CD recebe p
 expectContains('app/Support/DemoSqliteStore.php', 'brindes-demo-v6.sqlite', 'Homologação inicia namespace novo');
 expectContains('app/Support/DemoSqliteStore.php', 'return false;', 'Homologação inicia sem dados fictícios');
 expectContains('app/Support/Installer.php', 'resetVercelDemoToBlank', 'Homologação limpa dados operacionais');
+expectContains('app/Support/DemoSeeder.php', 'runCatalogs', 'Homologação recria somente cadastros e brindes');
 expectContains('app/Support/DemoSeeder.php', 'CH-DEMO-HOJE', 'Base fictícia possui entrada do dia');
 expectContains('app/Support/DemoSeeder.php', "date('Y-m-d 10:00:00')", 'Dados fictícios usam horário estável');
 expectContains('app/bootstrap.php', 'date_default_timezone_set((string) Config::get', 'Fuso é aplicado antes da criação da base demo');
