@@ -394,6 +394,11 @@ $count = (int) Db::value("SELECT COUNT(*) FROM stock_movements WHERE item_id = ?
 check('E2 [T2] envio duplicado não duplica a entrada', $r1['status'] === 201 && $r2['status'] === 201
     && $r1['json']['data']['movement']['id'] === $r2['json']['data']['movement']['id']
     && ($r2['headers']['Idempotent-Replayed'] ?? '') === 'true' && $count === 1 && onHand($tvId) === 5, [$r1, $r2, $count]);
+$listedAfterEntry = $op->get('/api/items?q=TV-43');
+$listedItem = $listedAfterEntry['json']['data'][0] ?? [];
+check('E2b entrada atualiza imediatamente a aba Brindes', $listedAfterEntry['status'] === 200
+    && (int) ($listedItem['stock']['on_hand'] ?? -1) === 5
+    && (int) ($listedItem['stock']['available'] ?? -1) === 5, $listedAfterEntry);
 
 $r = $op->postIdem('/api/stock/entries', ['item_id' => $tvId, 'quantity' => 50], $key);
 check('E3 mesma chave com dados diferentes é recusada', $r['status'] === 422 && code($r) === 'IDEMPOTENCY_KEY_REUSED', $r);
