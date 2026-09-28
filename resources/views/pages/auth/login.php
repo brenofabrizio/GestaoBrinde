@@ -17,7 +17,7 @@ ob_start(); ?>
     <div class="input-group mt-1">
       <input class="form-control border-end-0" type="password" id="login-password" name="password"
              autocomplete="current-password" required placeholder="••••••••">
-      <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePwd" tabindex="-1" aria-label="Mostrar senha">
+      <button class="btn btn-outline-secondary border-start-0 rounded-end" type="button" id="togglePwd" tabindex="-1" aria-label="Mostrar senha">
         <i class="bi bi-eye" id="eyeIcon"></i>
       </button>
       <div class="invalid-feedback" id="err-password"></div>
