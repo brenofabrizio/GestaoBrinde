@@ -195,8 +195,11 @@ final class DemoSeeder
             'supplier_id' => $suppliers['Brindes & Cia'],
             'notes' => 'Entrada fictícia criada para validação do fluxo do CD.',
         ]);
-        Clock::set(null);
-        $out('1 entrada fictícia de hoje lançada para validação do CD.');
+        // The remaining records are fictitious fixtures. Freeze their clock
+        // to a stable local time so concurrent cold starts never create a
+        // different dataset merely because the page was refreshed.
+        Clock::set(date('Y-m-d 10:00:00'));
+        $out('1 entrada fictícia de hoje lançada para validação do fluxo do CD.');
 
         $sol = Auth::loadUser((int) Db::value("SELECT id FROM users WHERE email = 'solicitante@brindes.local'"));
         $gestor = Auth::loadUser((int) Db::value("SELECT id FROM users WHERE email = 'gestor@brindes.local'"));
@@ -287,6 +290,7 @@ final class DemoSeeder
         ]);
         $out('Evento Convenção 2026 aberto com 1 retirada de demonstração.');
         Auth::actingAs(null);
+        Clock::set(null);
     }
 
     private static function signature(): string

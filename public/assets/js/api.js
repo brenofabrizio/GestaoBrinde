@@ -73,7 +73,7 @@
 
     let res;
     try {
-      res = await fetch(buildUrl(path, opts.query), { method, headers, body, credentials: 'same-origin', signal: opts.signal });
+      res = await fetch(buildUrl(path, opts.query), { method, headers, body, credentials: 'same-origin', signal: opts.signal, cache: 'no-store' });
     } catch (e) {
       if (e && e.name === 'AbortError') throw e;
       const networkError = new ApiError(0, { code: 'NETWORK_ERROR', message: 'Sem conexão com o servidor. Verifique a internet e tente novamente.' });

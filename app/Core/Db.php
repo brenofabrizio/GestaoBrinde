@@ -251,6 +251,13 @@ final class Db
             if (!$hasUsers) {
                 return;
             }
+            try {
+                // Keep the organized JSON representation in sync with the
+                // transactional runtime database for migration and inspection.
+                \App\Support\JsonDatabase::mirrorFromPdo();
+            } catch (Throwable $mirrorError) {
+                Log::error('JSON mirror failed', ['error' => $mirrorError->getMessage()]);
+            }
             if (self::$pdo !== null) {
                 self::$pdo->exec('PRAGMA wal_checkpoint(TRUNCATE)');
             }

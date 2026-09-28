@@ -15,7 +15,7 @@ final class DemoSqliteStore
 {
     // Version bump intentionally starts a clean Vercel homologation dataset.
     // Production MySQL is not affected by this demo-only namespace.
-    private const PATHNAME = 'brindes-demo-v4.sqlite';
+    private const PATHNAME = 'brindes-demo-v5.sqlite';
 
     public static function hydrate(string $dst, string $bundled): void
     {
@@ -58,7 +58,8 @@ final class DemoSqliteStore
             $fallback = self::request('PUT', 'https://blob.vercel-storage.com/?' . $qs, $token, $body, [
                 'x-api-version: 7',
                 'x-vercel-blob-access: private',
-                'x-add-random-suffix: 1',
+                'x-add-random-suffix: 0',
+                'x-allow-overwrite: 1',
                 'x-content-type: application/octet-stream',
             ], 25);
             if (($fallback['code'] ?? 0) < 200 || ($fallback['code'] ?? 0) >= 300) {
@@ -91,7 +92,9 @@ final class DemoSqliteStore
         $bestTime = '';
         foreach ($json['blobs'] ?? [] as $blob) {
             $name = (string) ($blob['pathname'] ?? '');
-            if ($name === '' || !str_starts_with($name, self::PATHNAME)) {
+            // Only one deterministic object is valid. Older fallback uploads
+            // with random suffixes must never become alternate databases.
+            if ($name !== self::PATHNAME) {
                 continue;
             }
             $when = (string) ($blob['uploadedAt'] ?? $blob['uploaded_at'] ?? '');

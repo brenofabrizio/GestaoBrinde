@@ -29,7 +29,10 @@ final class JsonDatabase
     public static function directory(): string
     {
         $configured = (string) (getenv('JSON_DB_PATH') ?: '');
-        return rtrim($configured !== '' ? $configured : BASE_PATH . '/storage/json', '/\\');
+        $default = Env::get('VERCEL')
+            ? sys_get_temp_dir() . '/brindes/storage/json'
+            : BASE_PATH . '/storage/json';
+        return rtrim($configured !== '' ? $configured : $default, '/\\');
     }
 
     /** Export all known relational tables into separate UTF-8 JSON files. */

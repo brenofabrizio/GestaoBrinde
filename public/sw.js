@@ -1,4 +1,4 @@
-const VERSION = 'gestao-brindes-v1';
+const VERSION = 'gestao-brindes-v2';
 const STATIC_CACHE = VERSION + '-static';
 const PAGE_CACHE = VERSION + '-pages';
 const API_CACHE = VERSION + '-api';
@@ -34,39 +34,19 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-function isCacheableApi(url) {
-  return url.pathname.startsWith('/api/')
-    && !url.pathname.startsWith('/api/auth/')
-    && !url.pathname.endsWith('/pdf')
-    && !url.pathname.endsWith('/signature');
-}
-
-async function networkFirst(request, cacheName, fallbackUrl) {
-  try {
-    const response = await fetch(request, { cache: 'no-store' });
-    if (response.ok) {
-      const cache = await caches.open(cacheName);
-      await cache.put(request, response.clone());
-    }
-    return response;
-  } catch (_) {
-    const cached = await caches.match(request);
-    return cached || (fallbackUrl ? caches.match(fallbackUrl) : Response.error());
-  }
-}
-
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, PAGE_CACHE, OFFLINE_URL));
+    event.respondWith(fetch(request, { cache: 'no-store' }).catch(() => caches.match(OFFLINE_URL)));
     return;
   }
 
-  if (isCacheableApi(url)) {
-    event.respondWith(networkFirst(request, API_CACHE));
+  if (url.pathname.startsWith('/api/')) {
+    // Dynamic authenticated data must never fall back to a stale snapshot.
+    event.respondWith(fetch(request, { cache: 'no-store' }));
     return;
   }
 
