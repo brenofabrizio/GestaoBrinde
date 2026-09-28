@@ -336,6 +336,11 @@ final class Installer
             'Confirmar saídas autorizadas no CD',
             'Estoque'
         );
+        $allowed = [
+            'dashboard.view', 'items.view', 'stock.view', 'stock.entry', 'stock.receive',
+            'stock.exit_confirm', 'stock.transfer', 'events.view', 'events.withdraw',
+            'deliveries.view', 'reports.view', 'reports.export', 'alerts.stock',
+        ];
         foreach ($roleIds as $roleId) {
             foreach (['requests.create', 'requests.process', 'stock.exit', 'requests.view_own', 'requests.view_department', 'requests.view_all', 'items.manage', 'lookups.view', 'lookups.manage', 'lookups.delete', 'lookups.purge'] as $slug) {
                 $pid = Db::value('SELECT id FROM permissions WHERE slug = ?', [$slug]);
@@ -347,15 +352,23 @@ final class Installer
                     [(int) $roleId, (int) $pid]
                 );
             }
-            $has = Db::fetch(
-                'SELECT role_id FROM role_permissions WHERE role_id = ? AND permission_id = ?',
-                [(int) $roleId, $confirmId]
-            );
-            if ($has === null) {
-                Db::insert('role_permissions', [
-                    'role_id' => (int) $roleId,
-                    'permission_id' => $confirmId,
-                ]);
+            foreach ($allowed as $slug) {
+                $pid = $slug === 'stock.exit_confirm'
+                    ? $confirmId
+                    : Db::value('SELECT id FROM permissions WHERE slug = ?', [$slug]);
+                if (!$pid) {
+                    continue;
+                }
+                $has = Db::fetch(
+                    'SELECT role_id FROM role_permissions WHERE role_id = ? AND permission_id = ?',
+                    [(int) $roleId, (int) $pid]
+                );
+                if ($has === null) {
+                    Db::insert('role_permissions', [
+                        'role_id' => (int) $roleId,
+                        'permission_id' => (int) $pid,
+                    ]);
+                }
             }
         }
     }

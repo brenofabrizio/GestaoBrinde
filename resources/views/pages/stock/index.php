@@ -54,7 +54,17 @@
 
   <!-- Movements Table -->
   <div class="table-responsive bg-white rounded border shadow-sm mb-3">
-    <table class="table table-hover align-middle mb-0">
+    <table class="table table-hover align-middle mb-0 stock-journal-table">
+      <colgroup>
+        <col class="journal-date">
+        <col class="journal-type">
+        <col class="journal-item">
+        <col class="journal-qty">
+        <col class="journal-balance">
+        <col class="journal-user">
+        <col class="journal-details">
+        <col class="journal-note">
+      </colgroup>
       <thead class="table-light">
         <tr>
           <th>Data / Hora</th>

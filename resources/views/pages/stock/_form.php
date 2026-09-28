@@ -15,7 +15,7 @@ ob_start(); ?>
 <?php if ($mode === 'saida'): ?>
 <p class="text-muted mb-3">Registre a saída aqui: escolha o brinde, a quantidade e a finalidade. Depois clique em <b>Registrar saída</b>. O CD só confirma no depósito (menu <b>Confirmar saída</b>, com QR).</p>
 <?php endif; ?>
-<div class="card card-body" style="max-width:640px" x-data="stockForm()" x-init="init()" data-mode="<?= e($mode) ?>" data-endpoint="<?= e($endpoint) ?>">
+<div class="card card-body stock-form" x-data="stockForm()" x-init="init()" data-mode="<?= e($mode) ?>" data-endpoint="<?= e($endpoint) ?>" data-can-lookups="<?= can('lookups.view') ? '1' : '0' ?>">
   <template x-if="done">
     <div>
       <div class="alert alert-success" x-show="done.order">
@@ -58,12 +58,16 @@ ob_start(); ?>
       <label class="form-label">Quantidade *</label>
       <input class="form-control qty-lg" type="number" min="1" x-model.number="f.quantity" required>
     </div>
-    <?php if ($mode === 'entrada'): ?>
+    <?php if ($mode === 'entrada' && can('lookups.view')): ?>
     <div class="mb-3"><label class="form-label">Indústria</label>
       <select class="form-select" x-model="f.industry_id"><option value="">—</option>
         <template x-for="i in industries" :key="i.id"><option :value="i.id" x-text="i.name"></option></template>
       </select>
     </div>
+    <?php elseif ($mode === 'entrada'): ?>
+    <div class="form-text mb-3">A indústria é opcional e fica disponível somente para perfis com acesso aos cadastros.</div>
+    <?php endif; ?>
+    <?php if ($mode === 'entrada'): ?>
     <div class="mb-3"><label class="form-label">Valor unitário</label><input class="form-control" x-model="f.unit_value"></div>
     <div class="mb-3"><label class="form-label">Nº chamado de compra</label><input class="form-control" x-model="f.purchase_ticket_no"></div>
     <div class="mb-3"><label class="form-label">NF / documento (número)</label><input class="form-control" x-model="f.document_ref" placeholder="Nº da nota"></div>
@@ -108,17 +112,18 @@ ob_start(); ?>
 function stockForm() {
   const pre = new URLSearchParams(location.search).get('item_id');
   return {
-    mode: '', endpoint: '', q: '', opts: [], item: null, industries: [], departments: [],
+    mode: '', endpoint: '', canLookups: false, q: '', opts: [], item: null, industries: [], departments: [],
     saving: false, done: null, err: '', key: Api.newKey(), invoice: null,
     f: { quantity: 1, mode: 'set', purpose: '', recipient: '', industry_id: '', department_id: '', reason: '', notes: '', unit_value: '', purchase_ticket_no: '', document_ref: '' },
     async init() {
       this.mode = (this.$el && this.$el.dataset && this.$el.dataset.mode) || 'entrada';
       this.endpoint = (this.$el && this.$el.dataset && this.$el.dataset.endpoint) || '/api/stock/entries';
+      this.canLookups = this.$el?.dataset?.canLookups === '1';
       try {
-        if (this.mode === 'saida' || this.mode === 'entrada') {
+        if (this.canLookups && (this.mode === 'saida' || this.mode === 'entrada')) {
           this.industries = (await Api.get('/api/industries', { all: 1 })).data || [];
         }
-        if (this.mode === 'saida') {
+        if (this.canLookups && this.mode === 'saida') {
           this.departments = (await Api.get('/api/departments', { all: 1 })).data || [];
         }
         if (pre) {

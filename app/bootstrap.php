@@ -47,7 +47,9 @@ if (getenv('VERCEL')) {
     $tmp = '/tmp/brindes';
     @mkdir($tmp, 0775, true);
     $sqliteSrc = BASE_PATH . '/database/demo.sqlite';
-    $sqliteDst = $tmp . '/demo.sqlite';
+    // Keep the local runtime path in sync with the demo namespace version so
+    // a warm serverless process cannot reuse the previous homologation file.
+    $sqliteDst = $tmp . '/demo-v3.sqlite';
     \App\Support\DemoSqliteStore::hydrate($sqliteDst, $sqliteSrc);
     if (getenv('DB_PATH') === false) {
         putenv('DB_PATH=' . $sqliteDst);

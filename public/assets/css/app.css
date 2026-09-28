@@ -261,6 +261,21 @@ body.is-page-loading { cursor: progress; }
 .table-wrap { overflow-x: auto; }
 .table > :not(caption) > * > * { vertical-align: middle; }
 .table-hover > tbody > tr { transition: background var(--transition-fast); }
+.stock-journal-table { min-width: 980px; table-layout: fixed; }
+.stock-journal-table th { white-space: nowrap; font-size: 12px; }
+.stock-journal-table td { overflow-wrap: anywhere; }
+.stock-journal-table td:nth-child(1),
+.stock-journal-table td:nth-child(2),
+.stock-journal-table td:nth-child(4),
+.stock-journal-table td:nth-child(5),
+.stock-journal-table td:nth-child(8) { white-space: nowrap; }
+.stock-journal-table .journal-date { width: 138px; }
+.stock-journal-table .journal-type { width: 84px; }
+.stock-journal-table .journal-item { width: 190px; }
+.stock-journal-table .journal-qty { width: 74px; }
+.stock-journal-table .journal-balance { width: 88px; }
+.stock-journal-table .journal-user { width: 150px; }
+.stock-journal-table .journal-note { width: 80px; }
 
 /* ─── Thumbnails ───────────────────────────────────────────────────── */
 .thumb {
@@ -295,8 +310,15 @@ body.is-page-loading { cursor: progress; }
   border-radius: var(--radius-sm);
   border-color: var(--line);
   font-size: 14px;
+  min-height: 40px;
+  line-height: 1.35;
+  padding: .55rem .75rem;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
+.form-select { padding-right: 2.25rem; }
+.form-control::placeholder { color: hsl(215, 16%, 60%); opacity: 1; }
+.form-control[type="number"] { text-align: right; }
+textarea.form-control { min-height: 96px; resize: vertical; }
 .form-control:focus, .form-select:focus {
   border-color: var(--brand-primary);
   box-shadow: 0 0 0 3px hsl(var(--brand-hue), 83%, 53%, 0.15);
@@ -365,6 +387,8 @@ body.is-page-loading { cursor: progress; }
 
 /* ─── Stock form qty ───────────────────────────────────────────────── */
 .qty-lg { font-size: 24px; font-weight: 700; }
+.stock-form { max-width: 680px; }
+.stock-form .qty-lg { max-width: 180px; }
 
 /* ─── Event Kiosk ──────────────────────────────────────────────────── */
 .event-kiosk { background: hsl(222, 47%, 8%); color: #fff; min-height: 100vh; }

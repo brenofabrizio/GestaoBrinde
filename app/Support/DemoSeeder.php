@@ -186,6 +186,18 @@ final class DemoSeeder
         Clock::set(null);
         $out("{$exits} saídas, 1 entrada de reposição e 1 ajuste lançados.");
 
+        // Keep one clear, fictitious movement on the current day so the
+        // homologation dataset proves that dates and entries are live.
+        Clock::set(date('Y-m-d 09:30:00'));
+        StockService::entry($items['Squeeze 600ml'], 14, [
+            'purchase_ticket_no' => 'CH-DEMO-HOJE',
+            'document_ref' => 'NF DEMO HOJE',
+            'supplier_id' => $suppliers['Brindes & Cia'],
+            'notes' => 'Entrada fictícia criada para validação do fluxo do CD.',
+        ]);
+        Clock::set(null);
+        $out('1 entrada fictícia de hoje lançada para validação do CD.');
+
         $sol = Auth::loadUser((int) Db::value("SELECT id FROM users WHERE email = 'solicitante@brindes.local'"));
         $gestor = Auth::loadUser((int) Db::value("SELECT id FROM users WHERE email = 'gestor@brindes.local'"));
         $opUser = Auth::loadUser((int) Db::value("SELECT id FROM users WHERE email = 'operacao@brindes.local'"));
