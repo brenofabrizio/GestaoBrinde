@@ -138,7 +138,7 @@ final class DemoSqliteStore
     /** @param list<string> $headers */
     private static function request(string $method, string $url, string $token, ?string $body, array $headers, int $timeout): array
     {
-        $headers[] = 'Authorization: Bearer ' . $token;
+        $headers[] = 'Authorization: ' . 'Bearer ' . $token;
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
             $opts = [
