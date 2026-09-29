@@ -49,6 +49,8 @@ expectContains('resources/views/pages/items/show.php', 'Abrir formulário Lecom'
 expectContains('resources/views/pages/stock/_form.php', 'data-can-lookups', 'Entrada não consulta cadastros sem permissão');
 expectContains('app/Support/Installer.php', "'stock.entry'", 'Perfil CD recebe permissão de entrada na atualização');
 expectContains('app/Support/DemoSqliteStore.php', 'brindes-demo-v6.sqlite', 'Homologação inicia namespace novo');
+expectContains('app/Support/DemoSqliteStore.php', "Authorization: Bearer ' . \$token", 'Persistência Vercel autentica o Blob com Bearer token');
+expectNotContains('app/Support/DemoSqliteStore.php', 'Authorization: ***', 'Persistência Vercel não usa header mascarado');
 expectContains('app/Support/DemoSqliteStore.php', 'return false;', 'Homologação inicia sem dados fictícios');
 expectContains('app/Support/Installer.php', 'resetVercelDemoToBlank', 'Homologação limpa dados operacionais');
 expectContains('app/Support/DemoSeeder.php', 'runCatalogs', 'Homologação recria somente cadastros e brindes');
