@@ -1,6 +1,6 @@
 # Documentação do projeto — índice
 
-Versão **1.1.3** · entrega **21/09/2026**
+Versão **1.1.4** · documentação atualizada em **29/09/2026**
 
 ## Para quem usa o sistema
 - [Manual do Usuário](Manual-do-Usuario.md)
@@ -21,6 +21,7 @@ Versão **1.1.3** · entrega **21/09/2026**
 - [Contrato da API legada](api-contract.md)
 - [Contratos incrementais da API Laravel](backend-api-contract.md)
 - [Deploy produtivo na Vercel](Deploy-Vercel-Producao.md)
+- [Requisitos de VM](Requisitos-VM.md)
 - [Plano de sprints da reestruturação Laravel](Plano-Sprints-Reestruturacao-Laravel.md)
 
 ## Planejamento do produto

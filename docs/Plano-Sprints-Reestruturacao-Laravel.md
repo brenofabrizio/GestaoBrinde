@@ -1,130 +1,209 @@
 # Plano de sprints — Reestruturação Laravel
 
+## Legenda
+
+- **Concluída:** implementação e validação local realizadas.
+- **Parcial:** parte implementada; depende de infraestrutura, integração ou homologação.
+- **Pendente:** ainda não implementada.
+- **Fora do escopo:** decisão explícita para esta entrega.
+
 ## Sprint 0 — Diagnóstico e arquitetura
 
-**Status:** Concluída
+**Status: Concluída**
 
 - diagnóstico do backend PHP próprio;
-- identificação do problema de SQLite/snapshot na Vercel;
-- definição de Laravel, API versionada e banco relacional futuro;
-- decisão de manter o legado até a validação.
+- identificação da perda de persistência do SQLite/snapshot na Vercel;
+- definição do backend Laravel e API versionada;
+- separação entre legado, homologação e produção;
+- definição de banco relacional como fonte de verdade.
 
 ## Sprint 1 — Núcleo Laravel e estoque
 
-**Status:** Implementada; execução local pendente
+**Status: Concluída e validada localmente**
 
 - estrutura Laravel em `backend/`;
 - migrations de cadastros, brindes e estoque;
 - `InventoryService` transacional;
-- livro imutável;
+- entradas, saídas e ajustes;
+- livro de movimentações;
+- validações de saldo;
 - idempotência;
-- endpoints de entrada, saída e consulta.
+- testes de persistência e duplicidade.
 
 ## Sprint 2 — Identidade e permissões
 
-**Status:** Implementada; execução local pendente
+**Status: Concluída e validada localmente**
 
 - Sanctum;
-- login/logout/me;
-- cinco perfis;
-- permissões granulares;
+- login, logout e usuário atual;
+- cinco perfis e permissões granulares;
 - middleware de autorização;
-- importador inicial de cadastros e brindes;
-- `--dry-run` para importação.
+- troca obrigatória de senha;
+- recuperação e redefinição de senha;
+- rate limit;
+- expiração e revogação de tokens;
+- auditoria de autenticação;
+- escopo por indústria.
 
 ## Sprint 3 — Solicitações TRADE
 
-**Status:** Implementada; execução local pendente
+**Status: Concluída e validada localmente**
 
-- solicitação e itens;
+- criação de solicitação e itens;
 - cálculo de valor e necessidade de compra;
 - envio para aprovação;
 - aprovação/reprovação;
 - histórico de status;
-- escopo por solicitante e indústria.
+- validação de escopo por indústria;
+- proteção de acesso a solicitações de terceiros.
 
 ## Sprint 4 — Eventos, entregas e QR
 
-**Status:** Implementada parcialmente
+**Status: Concluída e validada localmente**
 
-- eventos e cotas;
 - protocolo de entrega;
-- baixa transacional;
+- baixa transacional de estoque;
 - idempotência da retirada;
-- QR assinado e verificação mínima.
+- QR Code visual;
+- verificação do QR;
+- assinatura PNG validada e armazenada em filesystem privado;
+- PDF do protocolo com QR e assinatura;
+- proteção de acesso por indústria.
 
-Pendente dentro desta sprint: geração visual do QR, PDF, assinatura persistida e armazenamento de arquivos.
+**Pendente para produção:** storage persistente externo e validação com usuários reais.
 
 ## Sprint 5 — Migração completa de dados
 
-**Status:** Pendente
+**Status: Concluída localmente; migração real pendente**
 
-- importar solicitações;
-- importar itens de solicitações;
-- importar movimentações;
-- importar auditoria;
-- gerar relatório de registros inválidos;
-- não importar usuários sem senha válida;
-- validar contagem e saldos antes/depois.
+- importação de cadastros e brindes;
+- importação de solicitações e itens;
+- importação de movimentações;
+- importação de auditoria com snapshots seguros;
+- `--dry-run`;
+- relatório `import_invalid.json`;
+- validação de referências;
+- idempotência;
+- reconciliação de saldos;
+- exclusão de senhas, hashes e tokens dos dados importados.
+
+**Falta:** executar contra o banco legado real e conferir contagens/saldos com o responsável do negócio.
 
 ## Sprint 6 — Segurança e experiência de acesso
 
-**Status:** Pendente
+**Status: Concluída e validada localmente**
 
 - troca obrigatória de senha;
-- recuperação de senha;
-- convite de usuário;
-- escopo completo por indústria;
-- auditoria de login e alterações;
+- recuperação e reset;
 - expiração/revogação de tokens;
-- rate limit e proteção contra tentativas excessivas.
+- rate limit;
+- auditoria de login;
+- escopo por indústria;
+- bloqueio de acesso cruzado a entregas e solicitações.
+
+**Falta:** validar política de senha e perfis com usuários reais.
 
 ## Sprint 7 — Lecom, notificações e relatórios
 
-**Status:** Pendente
+**Status: Parcial**
 
-- integração de abertura de instância Lecom;
-- configuração do portal em Configurações;
-- notificações internas;
-- SMTP/Graph;
+### Concluído
+
+- dashboard operacional Laravel;
 - relatórios de estoque, solicitações e entregas;
-- dashboard operacional.
+- JSON e CSV;
+- filtros e paginação limitada;
+- proteção contra CSV formula injection;
+- configuração e código de integração Lecom;
+- notificações internas existentes no legado.
 
-## Sprint 8 — Frontend e Vercel
+### Pendente
 
-**Status:** Pendente
+- validar Lecom com tenant, processo, versão e API key reais;
+- decidir e implementar SMTP/Graph;
+- configurar mailbox e política do Microsoft 365;
+- worker/cron de notificações.
 
-- trocar chamadas do frontend legado para `/api/v1`;
-- corrigir contratos de erro e loading;
-- validar perfis no menu e no backend;
-- configurar CORS e domínio;
-- apontar homologação Vercel para `backend`;
-- executar migrations e seed no ambiente;
-- teste completo dos cinco perfis.
+**E-mail está fora do escopo desta entrega por decisão do usuário.**
 
-## Sprint 9 — Operação corporativa e `.exe`
+## Sprint 8 — Frontend, API e Vercel
 
-**Status:** Pendente
+**Status: Parcial**
 
-- PostgreSQL gerenciado;
-- backups e restauração;
-- observabilidade;
-- fila de tarefas;
+### Concluído
+
+- ponte opcional `laravel-api-bridge.js`;
+- normalização de respostas e erros Laravel;
+- Bearer token, upload e idempotência;
+- CORS parametrizado;
+- documentação do contrato e deploy;
+- correção da persistência do snapshot Blob na homologação Vercel;
+- readiness com verificações de banco, APP_KEY, CORS e storage.
+
+### Pendente
+
+- apontar o frontend principal definitivamente para `/api/v1`;
+- configurar PostgreSQL/Supabase ou outro banco persistente;
+- executar migrations e seed no ambiente final;
+- configurar S3/Supabase Storage;
+- configurar variáveis de produção;
+- testar os cinco perfis em homologação remota;
+- executar smoke de login, estoque, solicitação, entrega, QR e PDF.
+
+## Sprint 9 — Operação corporativa e desktop
+
+**Status: Parcial**
+
+### Concluído
+
+- readiness;
+- backup/restore SQLite para uso local;
+- documentação operacional;
+- timezone parametrizado;
+- critérios de deploy produtivo seguro.
+
+### Pendente
+
+- banco persistente de produção;
+- backup automatizado do banco real;
+- storage externo e política de retenção;
+- monitoramento externo;
+- worker/scheduler persistente;
+- teste periódico de restauração;
 - build desktop com Tauri;
-- modo remoto e eventual modo local/offline;
-- manual de implantação e suporte.
+- modo remoto e eventual modo local/offline avançado.
+
+**Tauri está fora do escopo desta entrega.**
+
+## Sprint 10 — Implantação em VM
+
+**Status: Planejada**
+
+- provisionar Ubuntu Server;
+- instalar Nginx, PHP-FPM, extensões, banco e Supervisor;
+- configurar domínio e HTTPS;
+- criar banco e usuário de menor privilégio;
+- importar schema e dados;
+- configurar storage e permissões;
+- configurar cron/worker;
+- configurar backups externos;
+- executar checklist de aceite da VM.
+
+Os requisitos estão em `docs/Requisitos-VM.md`.
 
 ## Critérios para trocar o backend legado
 
 1. migrations executadas sem erro;
 2. testes automatizados aprovados;
-3. entradas e saídas persistem após reinício/requisição;
+3. entradas e saídas persistem após reinício;
 4. estoque, livro e histórico batem;
 5. retirada duplicada bloqueada;
-6. perfis validados;
+6. cinco perfis validados;
 7. importação conferida;
 8. frontend conectado;
 9. deploy de homologação aprovado;
-10. backup e restauração testados.
+10. backup e restauração testados;
+11. storage de arquivos persistente;
+12. logs e monitoramento configurados.
 
-Até todos os critérios serem atendidos, o backend legado deve permanecer disponível apenas como referência e fallback controlado.
+Até todos os critérios serem atendidos, o backend legado deve permanecer disponível como referência e fallback controlado.
