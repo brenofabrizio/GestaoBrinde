@@ -6,7 +6,7 @@ Este documento registra os endpoints implementados em `backend/`. O contrato leg
 
 | Método e rota | Acesso | Comportamento |
 |---|---|---|
-| `POST /api/v1/trade-requests/{id}/deliver` | Sanctum; `stock.exit_confirm` ou `requests.process` | Recebe `received_by_name`, `signature` como data URI PNG, `idempotency_key` e campos opcionais do recebedor/observações. Persiste a assinatura no disco privado `local`; gera protocolo e baixa de estoque transacionalmente. |
+| `POST /api/v1/trade-requests/{id}/deliver` | Sanctum; `stock.exit_confirm` ou `requests.process` | Recebe `received_by_name`, `signature` como data URI PNG, `idempotency_key` e campos opcionais do recebedor/observações. Persiste a assinatura no disco configurado em `FILESYSTEM_DISK`; em produção, use S3/Supabase Storage. Gera protocolo e baixa de estoque transacionalmente. |
 | `GET /api/v1/deliveries` | Sanctum + `deliveries.view` | Lista paginada; usuário vinculado a uma indústria recebe somente os protocolos dessa indústria. |
 | `GET /api/v1/deliveries/{id}` | Sanctum + `deliveries.view` | Detalhe; respeita o escopo da indústria. |
 | `GET /api/v1/deliveries/{id}/qr` | Sanctum + `deliveries.view` | Retorna `code`, URL assinada, QR SVG em `data_uri`, formato e validade de sete dias. Respeita escopo da indústria. |

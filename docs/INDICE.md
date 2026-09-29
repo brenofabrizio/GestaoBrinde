@@ -22,6 +22,7 @@ Versão **1.1.4** · documentação atualizada em **29/09/2026**
 - [Contratos incrementais da API Laravel](backend-api-contract.md)
 - [Deploy produtivo na Vercel](Deploy-Vercel-Producao.md)
 - [Supabase + Vercel](Supabase-Vercel.md)
+- [Setup temporário do Supabase](Setup-Supabase-Temporario.md)
 - [Requisitos de VM](Requisitos-VM.md)
 - [Plano de sprints da reestruturação Laravel](Plano-Sprints-Reestruturacao-Laravel.md)
 

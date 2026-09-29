@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O backend Laravel foi criado em `backend/` para permitir uma migração segura. O backend legado em `app/` continua sendo o destino do deploy raiz até a validação dos fluxos.
+O backend Laravel agora exige PHP 8.4+ porque o `composer.lock` usa Laravel 13, Symfony 8.1 e `endroid/qr-code` 6.1. O backend legado em `app/` continua sendo o destino do deploy raiz até a validação dos fluxos.
 
 ## Por que os registros zeravam na Vercel
 

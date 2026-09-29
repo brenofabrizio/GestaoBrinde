@@ -94,8 +94,9 @@ O readiness precisa retornar `ready: true`, com banco, chave da aplicação, COR
 - Assinaturas, PDFs e anexos não devem depender do disco temporário da Vercel. O Supabase Storage é compatível com S3 e poderá ser conectado em uma etapa separada.
 - O plano Free é adequado para testes e homologação, mas pode pausar projetos com baixa atividade; não tratar isso como garantia de produção.
 
-Referências oficiais:
+O passo a passo para homologação temporária sem alterar o deploy legado está em [Setup temporário do Supabase](Setup-Supabase-Temporario.md).
 
+Referências oficiais:
 - <https://supabase.com/docs/guides/database/connecting-to-postgres>
 - <https://supabase.com/docs/guides/storage/s3/compatibility>
 - <https://supabase.com/docs/guides/platform/free-project-pausing>

@@ -29,7 +29,7 @@ O backend legado continua na raiz até a troca ser validada. O novo backend fica
 
 ## 2. Stack
 
-- PHP 8.3+;
+- PHP 8.4+;
 - Laravel 13;
 - Laravel Sanctum;
 - Eloquent ORM e migrations;

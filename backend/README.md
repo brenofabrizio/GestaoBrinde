@@ -13,7 +13,7 @@ Esta pasta é a nova implementação do backend. O backend PHP antigo continua n
 
 ## Execução local
 
-Requisitos: PHP 8.3+, Composer e PostgreSQL. Laravel 13 requer PHP 8.3 ou superior.
+Requisitos: PHP 8.4+, Composer e PostgreSQL. O lock atual usa Laravel 13 e dependências Symfony/QR que exigem PHP 8.4 ou superior.
 
 ```powershell
 Copy-Item .env.example .env
@@ -25,7 +25,7 @@ php artisan serve
 
 Os endpoints públicos de verificação são `GET /up`, `GET /api/v1/health` e `GET /api/v1/readiness`. O runbook de backup, restauração, filas e scheduler está em `docs/operations-sprint-9.md`.
 
-Para testar na Vercel, configure o Root Directory do projeto Vercel como `backend` e forneça as variáveis PostgreSQL no ambiente da Vercel. Não use SQLite, JSON gravável ou o filesystem da função como banco.
+O projeto possui o template `backend/.env.supabase.example`; para o procedimento temporário, consulte `../docs/Setup-Supabase-Temporario.md`.
 
 Para usar o PostgreSQL gratuito do Supabase na Vercel, copie no `DB_URL` a conexão **Transaction Pooler** do menu **Connect**, normalmente na porta `6543`, mantenha `DB_SSLMODE=require` e `DB_PGSQL_DISABLE_PREPARES=true`. O passo a passo está em [`docs/Supabase-Vercel.md`](../docs/Supabase-Vercel.md).
 

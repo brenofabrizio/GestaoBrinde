@@ -95,7 +95,7 @@ final class DeliveryService
 
             $locked->update(['status' => 'finalizada']);
 
-            if (! Storage::disk('local')->put($signaturePath, $signatureBytes)) {
+            if (! Storage::disk((string) config('filesystems.default'))->put($signaturePath, $signatureBytes)) {
                 abort(500, 'Não foi possível armazenar a assinatura do protocolo.');
             }
 

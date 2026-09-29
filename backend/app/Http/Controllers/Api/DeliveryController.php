@@ -51,7 +51,7 @@ final class DeliveryController extends Controller
         $this->assertIndustryScope($request, $delivery);
         $delivery->load(['request.requester:id,name', 'items.item:id,code,name']);
         $signature = $delivery->signature_path
-            ? Storage::disk('local')->get($delivery->signature_path)
+            ? Storage::disk((string) config('filesystems.default'))->get($delivery->signature_path)
             : null;
         $signatureImage = is_string($signature) && extension_loaded('gd')
             ? 'data:image/png;base64,'.base64_encode($signature)

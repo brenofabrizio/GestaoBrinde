@@ -6,6 +6,8 @@ O backend está preparado para homologação e para o deploy produtivo depois qu
 
 ## Configuração da Vercel
 
+O projeto Vercel atual da aplicação raiz continua apontando para o backend legado. Para homologar o Laravel com Supabase sem interromper o legado, crie um projeto Vercel separado.
+
 - Root Directory: `backend`
 - Framework preset: Other
 - Build command: `composer install --no-dev --optimize-autoloader`
@@ -40,7 +42,7 @@ SESSION_DRIVER=database
 
 Para Supabase, `DB_URL` deve ser a conexão **Transaction Pooler** copiada em **Connect**, normalmente na porta `6543`. A conexão direta na porta `5432` não é a opção indicada para funções serverless.
 
-O passo a passo específico está em [Supabase + Vercel](Supabase-Vercel.md).
+O passo a passo para uma homologação temporária com projeto separado na Vercel está em [Setup temporário do Supabase](Setup-Supabase-Temporario.md).
 
 ## Banco e migrations
 
