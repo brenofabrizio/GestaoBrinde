@@ -63,7 +63,9 @@ FILESYSTEM_DISK=local
 
 ## Executar migrations e dados iniciais
 
-As migrations devem ser executadas uma vez contra o Supabase, usando um ambiente PHP/Composer confiável e as mesmas variáveis do ambiente de produção:
+As migrations devem ser executadas uma vez contra o Supabase, usando um ambiente PHP/Composer confiável. Para essa tarefa, prefira a conexão **direta** ou o **Session Pooler** do Supabase; deixe o Transaction Pooler `6543` para as requisições da Vercel.
+
+No `.env` local, preencha temporariamente `DB_URL` com a conexão escolhida para migrations e depois use a URL de Transaction Pooler nas variáveis da Vercel:
 
 ```powershell
 Set-Location backend
