@@ -23,11 +23,9 @@ APP_KEY=<gerado com php artisan key:generate --show>
 APP_URL=https://api.<dominio>
 CORS_ALLOWED_ORIGINS=https://<frontend>
 DB_CONNECTION=pgsql
-DB_HOST=<host>
-DB_PORT=5432
-DB_DATABASE=<database>
-DB_USERNAME=<username>
-DB_PASSWORD=<password>
+DB_URL=postgresql://postgres.<PROJECT_REF>:<PASSWORD>@<POOLER_HOST>:6543/postgres
+DB_SSLMODE=require
+DB_PGSQL_DISABLE_PREPARES=true
 FILESYSTEM_DISK=s3
 AWS_ACCESS_KEY_ID=<access-key>
 AWS_SECRET_ACCESS_KEY=<secret-key>
@@ -39,6 +37,10 @@ SESSION_DRIVER=database
 ```
 
 `QUEUE_CONNECTION=sync` é adequado apenas enquanto não houver jobs assíncronos do produto. Quando houver jobs, usar um worker persistente externo; funções Vercel não substituem worker contínuo.
+
+Para Supabase, `DB_URL` deve ser a conexão **Transaction Pooler** copiada em **Connect**, normalmente na porta `6543`. A conexão direta na porta `5432` não é a opção indicada para funções serverless.
+
+O passo a passo específico está em [Supabase + Vercel](Supabase-Vercel.md).
 
 ## Banco e migrations
 

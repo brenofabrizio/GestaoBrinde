@@ -27,6 +27,8 @@ Os endpoints públicos de verificação são `GET /up`, `GET /api/v1/health` e `
 
 Para testar na Vercel, configure o Root Directory do projeto Vercel como `backend` e forneça as variáveis PostgreSQL no ambiente da Vercel. Não use SQLite, JSON gravável ou o filesystem da função como banco.
 
+Para usar o PostgreSQL gratuito do Supabase na Vercel, copie no `DB_URL` a conexão **Transaction Pooler** do menu **Connect**, normalmente na porta `6543`, mantenha `DB_SSLMODE=require` e `DB_PGSQL_DISABLE_PREPARES=true`. O passo a passo está em [`docs/Supabase-Vercel.md`](../docs/Supabase-Vercel.md).
+
 ## Persistência
 
 JSON do projeto antigo não é usado como banco operacional. Ele pode ser importado pelo comando controlado abaixo. Todas as alterações de estoque deste backend passam pelo PostgreSQL e por `InventoryService`.

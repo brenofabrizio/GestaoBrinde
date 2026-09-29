@@ -97,6 +97,26 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Supabase Transaction Pooler (port 6543) does not support
+            // named server-side prepared statements. Use the driver-specific
+            // option when the PHP runtime exposes it. The fallback keeps the
+            // connection compatible with older PHP/PDO-PGSQL runtimes.
+            'options' => (static function (): array {
+                if (! filter_var(env('DB_PGSQL_DISABLE_PREPARES', false), FILTER_VALIDATE_BOOL)) {
+                    return [];
+                }
+
+                foreach ([
+                    'Pdo\\Pgsql::ATTR_DISABLE_PREPARES',
+                    'PDO::PGSQL_ATTR_DISABLE_PREPARES',
+                ] as $constant) {
+                    if (defined($constant)) {
+                        return [constant($constant) => true];
+                    }
+                }
+
+                return [];
+            })(),
         ],
 
         'sqlsrv' => [
