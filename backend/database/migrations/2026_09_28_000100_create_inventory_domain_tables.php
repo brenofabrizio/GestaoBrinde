@@ -92,9 +92,6 @@ return new class extends Migration
             $table->integer('qty_on_hand')->default(0);
             $table->integer('qty_reserved')->default(0);
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
-            $table->check('qty_on_hand >= 0');
-            $table->check('qty_reserved >= 0');
-            $table->check('qty_reserved <= qty_on_hand');
         });
 
         Schema::create('stock_movements', function (Blueprint $table): void {

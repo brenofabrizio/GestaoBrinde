@@ -18,7 +18,10 @@ Versão **1.1.3** · entrega **21/09/2026**
 - [Perfis e permissões](Perfis-e-Permissoes.md)
 - [Modelo e diagrama do banco](database.md) · [diagrama visual](diagrama-banco.html)
 - [Dependências e versões](Dependencias.md)
-- [Contrato da API](api-contract.md)
+- [Contrato da API legada](api-contract.md)
+- [Contratos incrementais da API Laravel](backend-api-contract.md)
+- [Deploy produtivo na Vercel](Deploy-Vercel-Producao.md)
+- [Plano de sprints da reestruturação Laravel](Plano-Sprints-Reestruturacao-Laravel.md)
 
 ## Planejamento do produto
 - [PRD — requisitos do produto](PRD.md)

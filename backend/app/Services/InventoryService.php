@@ -27,6 +27,24 @@ final class InventoryService
 
         return DB::transaction(function () use ($item, $delta, $type, $userId, $meta): StockMovement {
             $lockedItem = Item::query()->whereKey($item->getKey())->lockForUpdate()->firstOrFail();
+            $idempotencyKey = $meta['idempotency_key'] ?? null;
+
+            if ($idempotencyKey !== null && $idempotencyKey !== '') {
+                $existing = StockMovement::query()->where('idempotency_key', $idempotencyKey)->first();
+
+                if ($existing !== null) {
+                    abort_unless(
+                        (int) $existing->item_id === (int) $lockedItem->getKey()
+                            && $existing->type === $type
+                            && (int) $existing->qty === $delta,
+                        409,
+                        'A chave de idempotência já foi usada com dados diferentes.'
+                    );
+
+                    return $existing;
+                }
+            }
+
             DB::table('stock')->insertOrIgnore([
                 'item_id' => $lockedItem->getKey(),
                 'qty_on_hand' => 0,
@@ -40,15 +58,6 @@ final class InventoryService
                 throw ValidationException::withMessages([
                     'quantity' => "Estoque insuficiente. Disponível: {$available}.",
                 ]);
-            }
-
-            if (!empty($meta['idempotency_key'])) {
-                $existing = StockMovement::query()
-                    ->where('idempotency_key', $meta['idempotency_key'])
-                    ->first();
-                if ($existing !== null) {
-                    return $existing;
-                }
             }
 
             $newBalance = (int) $stock->qty_on_hand + $delta;
@@ -67,7 +76,7 @@ final class InventoryService
                 'delivery_id' => $meta['delivery_id'] ?? null,
                 'event_id' => $meta['event_id'] ?? null,
                 'industry_id' => $meta['industry_id'] ?? null,
-                'idempotency_key' => $meta['idempotency_key'] ?? null,
+                'idempotency_key' => $idempotencyKey,
             ]);
         });
     }

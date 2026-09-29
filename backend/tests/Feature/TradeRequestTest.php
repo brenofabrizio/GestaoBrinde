@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Industry;
 use App\Models\Item;
 use App\Models\Role;
 use App\Models\Stock;
-use App\Models\TradeRequest;
 use App\Models\User;
 use Database\Seeders\AccessSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,12 +37,36 @@ class TradeRequestTest extends TestCase
         ])->assertCreated()->assertJsonPath('status', 'aguardando_aprovacao');
 
         Sanctum::actingAs($approver);
-        $this->postJson('/api/v1/trade-requests/' . $created->json('id') . '/approve', [
+        $this->postJson('/api/v1/trade-requests/'.$created->json('id').'/approve', [
             'approved' => true,
         ])->assertOk()->assertJsonPath('status', 'aprovada');
 
         $this->assertDatabaseHas('requests', ['id' => $created->json('id'), 'status' => 'aprovada']);
         $this->assertDatabaseCount('request_status_history', 3);
+    }
+
+    public function test_industry_user_cannot_create_request_for_another_industry(): void
+    {
+        $this->seed(AccessSeeder::class);
+        $homeIndustry = Industry::query()->create(['name' => 'Indústria da conta']);
+        $otherIndustry = Industry::query()->create(['name' => 'Outra indústria']);
+        $requester = User::factory()->create([
+            'role_id' => Role::query()->where('slug', 'requester')->value('id'),
+            'industry_id' => $homeIndustry->id,
+        ]);
+        $item = Item::query()->create([
+            'code' => 'BRD-INDUSTRY-SCOPE',
+            'name' => 'Brinde escopo',
+            'category_id' => Category::query()->create(['name' => 'Escopo'])->id,
+        ]);
+        Sanctum::actingAs($requester);
+
+        $this->postJson('/api/v1/trade-requests', [
+            'purpose' => 'Solicitação fora do escopo',
+            'industry_id' => $otherIndustry->id,
+            'items' => [['item_id' => $item->id, 'qty_requested' => 1]],
+        ])->assertForbidden();
+        $this->assertDatabaseCount('requests', 0);
     }
 
     public function test_operations_profile_cannot_create_trade_request(): void

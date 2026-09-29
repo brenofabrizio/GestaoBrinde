@@ -114,4 +114,6 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'token_expiration_minutes' => max(1, (int) env('AUTH_TOKEN_EXPIRATION_MINUTES', 480)),
+
 ];

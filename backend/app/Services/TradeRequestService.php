@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Item;
 use App\Models\RequestApproval;
 use App\Models\TradeRequest;
 use App\Models\User;
@@ -12,16 +13,26 @@ final class TradeRequestService
 {
     public function create(User $user, array $data, bool $submit = false): TradeRequest
     {
-        if (! $user->hasPermission('requests.create')) abort(403, 'Você não tem permissão para criar solicitações TRADE.');
+        if (! $user->hasPermission('requests.create')) {
+            abort(403, 'Você não tem permissão para criar solicitações TRADE.');
+        }
+        if ($user->industry_id !== null
+            && isset($data['industry_id'])
+            && (int) $data['industry_id'] !== (int) $user->industry_id) {
+            abort(403, 'Você não pode criar solicitações para outra indústria.');
+        }
+
         $lines = $data['items'] ?? [];
-        if (count($lines) === 0) abort(422, 'Inclua pelo menos um brinde na solicitação.');
+        if (count($lines) === 0) {
+            abort(422, 'Inclua pelo menos um brinde na solicitação.');
+        }
 
         return DB::transaction(function () use ($user, $data, $lines, $submit): TradeRequest {
             $total = 0;
             $needsPurchase = false;
             $prepared = [];
             foreach ($lines as $line) {
-                $item = \App\Models\Item::query()->with('stock')->findOrFail($line['item_id']);
+                $item = Item::query()->with('stock')->findOrFail($line['item_id']);
                 $qty = (int) $line['qty_requested'];
                 $unit = (float) ($item->unit_value ?? 0);
                 $available = (int) ($item->stock?->qty_on_hand ?? 0) - (int) ($item->stock?->qty_reserved ?? 0);
@@ -31,7 +42,7 @@ final class TradeRequestService
             }
 
             $request = TradeRequest::query()->create([
-                'code' => 'TMP-' . Str::upper(Str::random(20)),
+                'code' => 'TMP-'.Str::upper(Str::random(20)),
                 'requester_id' => $user->id,
                 'department_id' => $data['department_id'] ?? $user->department_id,
                 'industry_id' => $data['industry_id'] ?? $user->industry_id,
@@ -45,10 +56,13 @@ final class TradeRequestService
                 'total_value' => round($total, 2),
                 'notes' => $data['notes'] ?? null,
             ]);
-            $request->update(['code' => 'SOL-' . now()->format('Y') . '-' . str_pad((string) $request->id, 6, '0', STR_PAD_LEFT)]);
+            $request->update(['code' => 'SOL-'.now()->format('Y').'-'.str_pad((string) $request->id, 6, '0', STR_PAD_LEFT)]);
             $request->items()->createMany($prepared);
             $this->history($request, null, 'rascunho', $user->id, 'Solicitação criada.');
-            if ($submit) $this->submitLocked($request, $user);
+            if ($submit) {
+                $this->submitLocked($request, $user);
+            }
+
             return $request->load(['items.item', 'history']);
         });
     }
@@ -59,16 +73,22 @@ final class TradeRequestService
             $locked = TradeRequest::query()->lockForUpdate()->findOrFail($request->id);
             $this->assertOwnerOrProcess($locked, $user);
             $this->submitLocked($locked, $user);
+
             return $locked->load(['items.item', 'history']);
         });
     }
 
     public function approve(TradeRequest $request, User $user, bool $approved, ?string $justification = null): TradeRequest
     {
-        if (! $user->hasPermission('requests.approve')) abort(403, 'Você não tem permissão para aprovar solicitações.');
+        if (! $user->hasPermission('requests.approve')) {
+            abort(403, 'Você não tem permissão para aprovar solicitações.');
+        }
+
         return DB::transaction(function () use ($request, $user, $approved, $justification): TradeRequest {
             $locked = TradeRequest::query()->lockForUpdate()->findOrFail($request->id);
-            if ($locked->status !== 'aguardando_aprovacao') abort(422, 'Esta solicitação não está aguardando aprovação.');
+            if ($locked->status !== 'aguardando_aprovacao') {
+                abort(422, 'Esta solicitação não está aguardando aprovação.');
+            }
             $from = $locked->status;
             $changes = ['status' => $approved ? 'aprovada' : 'reprovada'];
             $changes[$approved ? 'approved_at' : 'rejected_at'] = now();
@@ -81,6 +101,7 @@ final class TradeRequestService
                 'decided_at' => now(),
             ]);
             $this->history($locked, $from, $locked->status, $user->id, $justification);
+
             return $locked->load(['items.item', 'history', 'approvals.approver']);
         });
     }
@@ -94,7 +115,9 @@ final class TradeRequestService
 
     private function submitLocked(TradeRequest $request, User $user): void
     {
-        if ($request->status !== 'rascunho') abort(422, 'Somente rascunhos podem ser enviados.');
+        if ($request->status !== 'rascunho') {
+            abort(422, 'Somente rascunhos podem ser enviados.');
+        }
         $from = $request->status;
         $request->update(['status' => 'aguardando_aprovacao', 'submitted_at' => now()]);
         $this->history($request, $from, $request->status, $user->id, 'Solicitação enviada para aprovação.');

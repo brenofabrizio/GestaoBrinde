@@ -38,7 +38,7 @@ class AccessSeeder extends Seeder
                 'events.withdraw', 'deliveries.view', 'reports.view', 'reports.export',
             ]],
             'operations' => ['CD / Estoque', [
-                'dashboard.view', 'stock.view', 'stock.entry', 'stock.exit_confirm', 'stock.transfer',
+                'dashboard.view', 'items.view', 'stock.view', 'stock.entry', 'stock.exit_confirm', 'stock.transfer',
                 'stock.receive', 'deliveries.view', 'reports.view',
             ]],
             'requester' => ['TRADE', [

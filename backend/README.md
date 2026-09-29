@@ -23,7 +23,7 @@ php artisan migrate
 php artisan serve
 ```
 
-O endpoint público de verificação é `GET /up` e `GET /api/v1/health`.
+Os endpoints públicos de verificação são `GET /up`, `GET /api/v1/health` e `GET /api/v1/readiness`. O runbook de backup, restauração, filas e scheduler está em `docs/operations-sprint-9.md`.
 
 Para testar na Vercel, configure o Root Directory do projeto Vercel como `backend` e forneça as variáveis PostgreSQL no ambiente da Vercel. Não use SQLite, JSON gravável ou o filesystem da função como banco.
 
@@ -36,6 +36,10 @@ Para simular a importação sem gravar:
 ```powershell
 php artisan brindes:import-json --dry-run
 ```
+
+O comando aceita `--path=<diretório>` para fixtures ou uma origem exportada. Ele importa `solicitacoes.json`, `solicitacao_itens.json`, `movimentacoes.json` e `auditoria.json` além de cadastros e brindes; `usuarios.json` é sempre ignorado. Os aliases legados aceitos por fixture são `id`/`solicitacao_id`, `codigo`, `usuario_id`, `finalidade`, `brinde_id`, `quantidade`, `tipo`, `saldo_apos` e `acao`. Registros sem referências ou dados obrigatórios são ignorados e listados, em ordem determinística, em `import_invalid.json` no diretório de entrada. O resumo informa totais importados e saldos por código. Senhas, hashes, tokens e conteúdo arbitrário de auditoria não são copiados.
+
+Os JSON versionados no repositório estão vazios; os aliases acima descrevem os campos cobertos pelos testes de fixture, não garantem a estrutura de arquivos legados ainda não fornecidos.
 
 Para importar depois de revisar o relatório:
 
