@@ -1,31 +1,38 @@
 <?php
 ob_start(); ?>
-<form id="loginForm" novalidate>
-  <h2 class="h6 fw-semibold text-muted mb-4 text-center" style="letter-spacing:.02em;text-transform:uppercase;font-size:11px">Faça login para continuar</h2>
-  <div class="mb-3">
+<form id="loginForm" class="auth-form" novalidate>
+  <div class="auth-form-intro">
+    <h3>Entrar na sua conta</h3>
+    <p>Use suas credenciais corporativas para continuar.</p>
+  </div>
+  <div class="auth-field mb-3">
     <label class="form-label" for="login-email">E-mail</label>
-    <input class="form-control" type="email" id="login-email" name="email"
-           autocomplete="username" required autofocus
-           placeholder="seu@email.com">
+    <div class="auth-input-wrap">
+      <i class="bi bi-envelope" aria-hidden="true"></i>
+      <input class="form-control" type="email" id="login-email" name="email"
+             autocomplete="username" required autofocus
+             placeholder="seu@email.com">
+    </div>
     <div class="invalid-feedback" id="err-email"></div>
   </div>
-  <div class="mb-4">
+  <div class="auth-field mb-4">
     <div class="d-flex justify-content-between align-items-center">
       <label class="form-label mb-0" for="login-password">Senha</label>
-      <a href="<?= e(url('/esqueci-senha')) ?>" class="small text-muted">Esqueci minha senha</a>
+      <a href="<?= e(url('/esqueci-senha')) ?>" class="auth-forgot">Esqueci minha senha</a>
     </div>
-    <div class="input-group mt-1">
-      <input class="form-control border-end-0" type="password" id="login-password" name="password"
-             autocomplete="current-password" required placeholder="••••••••">
-      <button class="btn btn-outline-secondary border-start-0 rounded-end" type="button" id="togglePwd" tabindex="-1" aria-label="Mostrar senha">
+    <div class="auth-input-wrap mt-1">
+      <i class="bi bi-lock" aria-hidden="true"></i>
+      <input class="form-control" type="password" id="login-password" name="password"
+             autocomplete="current-password" required placeholder="Digite sua senha">
+      <button class="auth-password-toggle" type="button" id="togglePwd" aria-label="Mostrar senha">
         <i class="bi bi-eye" id="eyeIcon"></i>
       </button>
-      <div class="invalid-feedback" id="err-password"></div>
     </div>
+    <div class="invalid-feedback" id="err-password"></div>
   </div>
-  <p class="small text-danger d-none mb-2" id="loginGlobalErr"></p>
-  <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit" id="loginBtn" style="font-size:15px">
-    Entrar
+  <p class="auth-error d-none" id="loginGlobalErr" role="alert"></p>
+  <button class="btn btn-primary auth-submit w-100" type="submit" id="loginBtn">
+    <span>Entrar</span><i class="bi bi-arrow-right" aria-hidden="true"></i>
   </button>
 </form>
 <?php
@@ -63,7 +70,7 @@ ob_start(); ?>
     ev.preventDefault();
     clearErrors();
     btn.disabled = true;
-    btn.innerHTML = '<span class="spin d-inline-block me-2" style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%"></span>Entrando…';
+    btn.innerHTML = '<span class="spin d-inline-block me-2" style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%"></span><span>Entrando…</span>';
     try {
       await Api.post('/api/auth/login', Object.fromEntries(new FormData(this)));
       const next = new URLSearchParams(location.search).get('next');

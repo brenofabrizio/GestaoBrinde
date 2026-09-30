@@ -33,6 +33,9 @@ expectContains('resources/views/pages/trade/show.php', 'catch (e)', 'Detalhe TRA
 expectContains('resources/views/pages/trade/form.php', 'items.length === 0', 'Formulário TRADE valida inclusão de brindes');
 expectContains('resources/views/pages/trade/form.php', 'UI.fieldErrors', 'Formulário TRADE exibe erros de campos');
 expectContains('resources/views/layouts/app.php', 'notificationPopover', 'Layout possui modal flutuante de notificações');
+expectContains('resources/views/layouts/auth.php', 'auth-layout', 'Login possui layout visual responsivo');
+expectContains('resources/views/layouts/auth.php', 'auth-brand-panel', 'Login preserva painel de marca e identidade');
+expectContains('resources/views/pages/auth/login.php', 'auth-submit', 'Login possui ação visual principal');
 expectContains('resources/views/layouts/app.php', 'Marcar todas como lidas', 'Modal de notificações possui marcar todas como lidas');
 expectContains('app/Services/SettingsService.php', 'lecom_supply_form_url', 'URL Lecom é configurável');
 expectContains('app/Services/SettingsService.php', 'lecom_portal_url', 'Portal Lecom é configurável');

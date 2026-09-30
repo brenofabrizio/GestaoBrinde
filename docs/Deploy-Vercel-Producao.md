@@ -25,9 +25,11 @@ APP_KEY=<gerado com php artisan key:generate --show>
 APP_URL=https://api.<dominio>
 CORS_ALLOWED_ORIGINS=https://<frontend>
 DB_CONNECTION=pgsql
-DB_URL=postgresql://postgres.<PROJECT_REF>:<PASSWORD>@<POOLER_HOST>:6543/postgres
+# Supabase Transaction Pooler copied from Dashboard > Connect (normally port 6543).
+DB_URL=postgresql://postgres.<PROJECT_REF>:<SUPABASE_PASSWORD>@<POOLER_HOST>:6543/postgres
 DB_SSLMODE=require
 DB_PGSQL_DISABLE_PREPARES=true
+# Alternatively, configure DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME and DB_PASSWORD separately.
 FILESYSTEM_DISK=s3
 AWS_ACCESS_KEY_ID=<access-key>
 AWS_SECRET_ACCESS_KEY=<secret-key>
