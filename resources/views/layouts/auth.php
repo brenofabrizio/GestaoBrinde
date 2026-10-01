@@ -29,41 +29,28 @@ $company = e($settings['company_name'] ?? 'Controle de Brindes');
   <div class="auth-bg-watermark" aria-hidden="true">
     <img src="<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>" alt="">
   </div>
-  <div class="auth-layout fade-in">
-    <aside class="auth-brand-panel" aria-label="Identidade do sistema">
-      <div class="auth-brand-mark">
-        <?php if (!empty($settings['logo_url'])): ?>
-          <img src="<?= e($settings['logo_url']) ?>" alt="<?= $company ?>">
-        <?php else: ?>
-          <img src="<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>" alt="<?= $company ?>">
-        <?php endif; ?>
-      </div>
-      <span class="auth-eyebrow">Gestão simples, controle completo</span>
-      <h1><?= $company ?></h1>
-      <p>Controle seus brindes com mais clareza, segurança e rastreabilidade em cada etapa.</p>
-      <div class="auth-highlights" aria-label="Recursos do sistema">
-        <span><i class="bi bi-box-seam" aria-hidden="true"></i> Estoque atualizado</span>
-        <span><i class="bi bi-check2-circle" aria-hidden="true"></i> Solicitações e aprovações</span>
-        <span><i class="bi bi-shield-check" aria-hidden="true"></i> Histórico e auditoria</span>
-      </div>
-    </aside>
-    <main class="auth-card" aria-labelledby="login-title">
-      <div class="auth-card-header">
-        <div class="auth-mobile-logo">
+  <main class="auth-login-shell fade-in" aria-labelledby="login-title">
+    <div class="auth-login-card">
+      <div class="auth-login-brand">
+        <span class="auth-login-logo">
           <?php if (!empty($settings['logo_url'])): ?>
-            <img src="<?= e($settings['logo_url']) ?>" alt="<?= $company ?>">
+            <img src="<?= e($settings['logo_url']) ?>" alt="Logo <?= $company ?>" onerror="this.onerror=null;this.src='<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>'">
           <?php else: ?>
-            <img src="<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>" alt="<?= $company ?>">
+            <img src="<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>" alt="Logo <?= $company ?>">
           <?php endif; ?>
-        </div>
-        <span class="auth-kicker">Acesso seguro</span>
-        <h2 id="login-title">Bem-vindo de volta</h2>
-        <p>Entre para acessar o Controle de Brindes.</p>
+        </span>
+        <span class="auth-login-company"><?= $company ?></span>
+      </div>
+      <div class="auth-card-header">
+        <span class="auth-kicker">CONTROLE DE BRINDES</span>
+        <h1 id="login-title">Acesse sua conta</h1>
+        <p>Entre com seus dados corporativos para continuar.</p>
       </div>
       <?= $content ?? '' ?>
-      <p class="auth-security-note"><i class="bi bi-lock-fill" aria-hidden="true"></i> Seus dados são protegidos por uma conexão segura.</p>
-    </main>
-  </div>
+      <p class="auth-security-note"><i class="bi bi-shield-lock" aria-hidden="true"></i> Acesso protegido e exclusivo para usuários autorizados</p>
+    </div>
+    <p class="auth-login-footer">© <?= date('Y') ?> <?= $company ?> <span aria-hidden="true">·</span> Gestão de brindes</p>
+  </main>
 </div>
 <script src="<?= e(asset('js/api.js')) ?>"></script>
 <script src="<?= e(asset('js/offline.js')) ?>"></script>
