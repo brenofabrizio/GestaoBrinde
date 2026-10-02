@@ -25,6 +25,7 @@ Versão **1.1.4** · documentação atualizada em **29/09/2026**
 - [Setup temporário do Supabase](Setup-Supabase-Temporario.md)
 - [Requisitos de VM](Requisitos-VM.md)
 - [Plano de sprints da reestruturação Laravel](Plano-Sprints-Reestruturacao-Laravel.md)
+- [Sprints pendentes do frontend](Sprints-Pendentes-Frontend.md)
 
 ## Planejamento do produto
 - [PRD — requisitos do produto](PRD.md)
