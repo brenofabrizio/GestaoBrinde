@@ -101,6 +101,18 @@
       const err = new ApiError(res.status, json && json.error);
       if (res.status === 401 && !opts.noRedirect) handlers.unauthenticated(err);
       if (err.code === 'PASSWORD_CHANGE_REQUIRED') handlers.passwordChangeRequired(err);
+      // A page can remain open across a serverless redeploy or a rotated
+      // session cookie. Refresh the token once and replay the mutation before
+      // showing an error; an invalid CSRF token means the first request was
+      // rejected before any business data was changed.
+      if (method !== 'GET' && (err.code === 'CSRF_INVALID' || res.status === 419) && !opts._csrfRetried) {
+        try {
+          await refreshCsrf();
+          return request(method, path, Object.assign({}, opts, { _csrfRetried: true }));
+        } catch (_) {
+          /* Fall through with the original, actionable error. */
+        }
+      }
       throw err;
     }
     // Mutations invalidate every open page/tab. The event carries no business

@@ -4,7 +4,7 @@ ob_start(); ?>
 <div x-data="tradeShow(<?= $id ?>)" x-init="load()">
   <div x-show="loading && !r" class="alert alert-info">Carregando solicitação TRADE…</div>
   <div x-show="loadError && !r" class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
-    <span x-text="loadError"></span>
+    <span x-text="loadError || 'Não foi possível carregar a solicitação TRADE.'"></span>
     <button type="button" class="btn btn-sm btn-outline-danger" @click="load()">Tentar novamente</button>
   </div>
   <template x-if="r">
@@ -118,9 +118,13 @@ function tradeShow(id) {
     async approve() {
       if (!this.ticket.trim()) { UI.toast('Informe o número do chamado para aprovar.', 'err'); return; }
       this.saving = true;
-      try { await Api.post('/api/trade/requests/' + id + '/approve', { purchase_ticket_no: this.ticket.trim() }); this.load(); }
-      catch (e) { UI.toast(e.message, 'err'); }
-      this.saving = false;
+      try {
+        await Api.post('/api/trade/requests/' + id + '/approve', { purchase_ticket_no: this.ticket.trim() });
+        await this.load();
+        UI.toast('Solicitação aprovada e encaminhada para recebimento no CD.', 'ok');
+      } catch (e) {
+        UI.toast(e.message || 'Não foi possível aprovar a solicitação.', 'err');
+      } finally { this.saving = false; }
     },
     async reject() {
       const reason = prompt('Motivo da reprovação:');

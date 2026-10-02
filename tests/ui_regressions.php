@@ -67,6 +67,8 @@ expectContains('public/sw.js', "const VERSION = 'gestao-brindes-v3'", 'Cache ant
 expectContains('public/sw.js', "fetch(request, { cache: 'no-store' })", 'APIs não usam snapshots antigos');
 expectContains('public/sw.js', "'/assets/js/state-sync.js'", 'Cache inclui sincronização entre abas');
 expectContains('public/assets/js/api.js', 'BrindesSync?.touch(path)', 'Mutações invalidam os dados das telas abertas');
+expectContains('public/assets/js/api.js', 'CSRF_INVALID', 'Mutações renovam CSRF expirado antes de falhar');
+expectContains('resources/views/pages/trade/show.php', 'Solicitação aprovada e encaminhada', 'Aprovação TRADE confirma a transição concluída');
 expectContains('public/assets/js/state-sync.js', "localStorage.setItem(KEY", 'localStorage guarda somente a revisão dos dados');
 expectContains('public/assets/js/state-sync.js', 'server database remains the source of truth', 'Sincronização não cria uma segunda base de negócio no navegador');
 expectContains('resources/views/pages/requests/index.php', 'Solicitações internas', 'Tela interna explica seu fluxo');
