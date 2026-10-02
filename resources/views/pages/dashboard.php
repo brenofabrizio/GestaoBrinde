@@ -1,7 +1,7 @@
 <?php
 $canItems = can('items.manage');
 ob_start(); ?>
-<div x-data="dashboardPage()" x-init="load()">
+<div x-data="dashboardPage()" x-init="init()">
   <header class="page-header">
     <div><h2>Painel de controle</h2><p>Resumo operacional do estoque, solicitações e movimentações.</p></div>
   </header>
@@ -121,6 +121,12 @@ function dashboardPage() {
     from: iso(new Date(today.getFullYear(), today.getMonth(), 1)),
     to: iso(today),
     charts: {},
+    offSync: null, stopPolling: null,
+    init() {
+      this.load();
+      this.offSync = window.BrindesSync?.listen(() => this.load());
+      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
+    },
     applyPreset() {
       const t = new Date();
       if (this.preset === 'month') this.from = iso(new Date(t.getFullYear(), t.getMonth(), 1));

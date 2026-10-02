@@ -124,8 +124,10 @@ ob_start(); ?>
 <script>
 function stockIndex() {
   return {
-    type: '', q: '', from: '', to: '', page: 1, rows: [], meta: null, summary: null, t: null, loading: false, reconciling: false,
+    type: '', q: '', from: '', to: '', page: 1, rows: [], meta: null, summary: null, t: null, loading: false, reconciling: false, offSync: null, stopPolling: null,
     async init() {
+      this.offSync = window.BrindesSync?.listen(() => Promise.all([this.loadSummary(), this.load()]));
+      this.stopPolling = window.BrindesSync?.poll(() => Promise.all([this.loadSummary(), this.load()]), 15000);
       await Promise.all([this.loadSummary(), this.load()]);
     },
     debounced() { clearTimeout(this.t); this.t = setTimeout(() => { this.page = 1; this.load(); }, 300); },

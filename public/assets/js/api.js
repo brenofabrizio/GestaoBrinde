@@ -103,6 +103,9 @@
       if (err.code === 'PASSWORD_CHANGE_REQUIRED') handlers.passwordChangeRequired(err);
       throw err;
     }
+    // Mutations invalidate every open page/tab. The event carries no business
+    // data; listeners re-read the canonical server state with a no-store GET.
+    if (method !== 'GET') global.BrindesSync?.touch(path);
     return json; // { ok: true, data, meta? }
   }
 

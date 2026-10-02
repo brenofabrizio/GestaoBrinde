@@ -1,8 +1,11 @@
 <?php ob_start(); ?>
-<div x-data="reqIndex()" x-init="load()">
+<div x-data="reqIndex()" x-init="init()">
   <header class="page-header">
     <div><h2>Solicitações</h2><p>Acompanhe o andamento das solicitações e as próximas ações.</p></div>
   </header>
+  <div class="alert alert-info small mb-3">
+    <strong>Solicitações internas</strong> são pedidos para consumo interno da empresa, com aprovação, separação e entrega pelo estoque. Elas não representam uma compra externa de brindes.
+  </div>
   <div class="d-flex flex-wrap gap-2 mb-3">
     <select class="form-select" style="width:auto" x-model="status" @change="load()">
       <option value="">Todos</option>
@@ -37,9 +40,23 @@ ob_start(); ?>
 function reqIndex() {
   return {
     status: new URLSearchParams(location.search).get('status') || '',
-    rows: [],
+    rows: [], loading: false, offSync: null, stopPolling: null,
     statuses: Object.keys(Api.labels.requestStatus),
-    async load() { this.rows = (await Api.get('/api/requests', { status: this.status })).data; }
+    init() {
+      this.load();
+      this.offSync = window.BrindesSync?.listen(() => this.load());
+      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
+    },
+    async load() {
+      if (this.loading) return;
+      this.loading = true;
+      try {
+        const { data } = await Api.get('/api/requests', { status: this.status });
+        this.rows = Array.isArray(data) ? data : [];
+      } catch (e) {
+        UI.toast(e.message || 'Não foi possível carregar as solicitações.', 'err');
+      } finally { this.loading = false; }
+    }
   };
 }
 </script>

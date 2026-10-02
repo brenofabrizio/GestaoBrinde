@@ -137,6 +137,7 @@ $mustChangePassword = !empty($user['must_change_password']);
   </div>
 </div>
 <script src="<?= e(asset('vendor/bootstrap/bootstrap.bundle.min.js')) ?>"></script>
+<script src="<?= e(asset('js/state-sync.js')) ?>"></script>
 <script src="<?= e(asset('js/api.js')) ?>"></script>
 <script src="<?= e(asset('js/offline.js')) ?>"></script>
 <script src="<?= e(asset('js/app.js')) ?>"></script>

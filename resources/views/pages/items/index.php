@@ -125,9 +125,13 @@ function itemsIndex() {
   const params = new URLSearchParams(location.search);
   return {
     q: params.get('q') || '', status: params.get('status') || '', stock_level: params.get('stock_level') || '',
-    trashed: params.get('trashed') === '1', page: 1, rows: [], meta: null, loading: true,
+    trashed: params.get('trashed') === '1', page: 1, rows: [], meta: null, loading: true, offSync: null, stopPolling: null,
     debounce: null,
-    init() { this.load(); },
+    init() {
+      this.load();
+      this.offSync = window.BrindesSync?.listen(() => this.load());
+      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
+    },
     debounced() { clearTimeout(this.debounce); this.debounce = setTimeout(() => { this.page = 1; this.load(); }, 300); },
     async load() {
       this.loading = true;

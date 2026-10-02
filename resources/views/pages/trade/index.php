@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
-<div x-data="tradeIndex()" x-init="load()">
+<div x-data="tradeIndex()" x-init="init()">
+  <div class="alert alert-info small">
+    <strong>Solicitações TRADE</strong> são pedidos de compra para campanhas, ações e eventos. Após a aprovação, o chamado de compra é informado; quando o fornecedor entrega, o CD registra a NF e a entrada no estoque.
+  </div>
   <div class="alert alert-danger" x-show="error" x-text="error"></div>
   <div class="text-muted py-3" x-show="loading">Carregando solicitações TRADE…</div>
   <div class="d-flex flex-wrap gap-2 mb-3">
@@ -26,7 +29,7 @@
       <thead><tr><th>Nº</th><th>Indústria</th><th>Ação</th><th>Status</th><th>Valor</th><th>Data</th></tr></thead>
       <tbody>
         <template x-for="r in rows" :key="r.id">
-          <tr role="button" tabindex="0" @click="location.href = Api.url('/solicitacoes-trade/' + r.id)" @keydown.enter="location.href = Api.url('/solicitacoes-trade/' + r.id)">
+          <tr role="button" tabindex="0" x-show="Number.isInteger(Number(r.id)) && Number(r.id) > 0" @click="open(r.id)" @keydown.enter="open(r.id)">
             <td class="fw-semibold" x-text="r.public_code || r.code"></td>
             <td x-text="r.industry?.name || '—'"></td>
             <td x-text="r.action_type_label || r.purpose"></td>
@@ -47,7 +50,17 @@ ob_start(); ?>
 function tradeIndex() {
   const qs = new URLSearchParams(location.search);
   return {
-    rows: [], q: qs.get('q') || '', status: qs.get('status') || '', t: null, loading: false, error: '',
+    rows: [], q: qs.get('q') || '', status: qs.get('status') || '', t: null, loading: false, error: '', offSync: null, stopPolling: null,
+    init() {
+      this.load();
+      this.offSync = window.BrindesSync?.listen(() => this.load());
+      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
+    },
+    open(id) {
+      const numericId = Number(id);
+      if (!Number.isInteger(numericId) || numericId <= 0) return;
+      location.href = Api.url('/solicitacoes-trade/' + numericId);
+    },
     async load() {
       clearTimeout(this.t);
       this.t = setTimeout(async () => {

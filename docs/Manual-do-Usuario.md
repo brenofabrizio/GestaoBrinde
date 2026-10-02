@@ -42,7 +42,7 @@ Movimentações de estoque, protocolos e auditoria **não podem ser apagados**. 
 ### 2. Entrada / saída / ajuste
 **Registrar entrada:** quantidade, indústria, nº do chamado, **número da NF** e **anexo da nota** (PDF, JPG ou PNG).
 
-**Registrar saída (somente o gestor):** no menu aparece **Registrar saída** (também no grupo TRADE, no dashboard e em Solicitações TRADE).  
+**Registrar saída (somente o gestor):** no menu aparece **Registrar saída** dentro do grupo **Estoque**. O dashboard e a tela de Solicitações TRADE também podem oferecer atalhos contextuais para a mesma operação.
 1. Digite o código ou o nome do brinde e toque nele na lista.  
 2. Informe **quantidade** e **finalidade** (obrigatórios). Destinatário e NF são opcionais.  
 3. Clique em **Registrar saída**. O sistema gera o QR (`SAI-2026-0001`) e reserva o estoque.  

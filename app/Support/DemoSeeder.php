@@ -339,6 +339,17 @@ final class DemoSeeder
         ]);
         $out('Solicitação TRADE pronta para recebimento no CD: ' . ($readyCd['public_code'] ?? $readyCd['code']) . ' (chamado CH-DEMO-001)');
 
+        // Complete one real TRADE path with the CD receiving the purchased
+        // quantity and registering a fictional invoice. A second TRADE below
+        // remains pending so the approval queue is visible in the demo.
+        Auth::actingAs($opUser);
+        $received = TradeService::receive((int) $trade['id'], [
+            'invoice_no' => 'NF-DEMO-001',
+            'items' => [['item_id' => $items['Air Fryer 4L'], 'qty' => 10]],
+            'notes' => 'Recebimento fictício concluído no CD para validação do fluxo.',
+        ]);
+        $out('Recebimento TRADE concluído no CD: ' . ($received['public_code'] ?? $received['code']) . ' (NF-DEMO-001)');
+
         Auth::actingAs($sol);
         $pending = TradeService::create([
             'industry_id' => $industries['Indústria Beta'],

@@ -14,7 +14,7 @@ Este arquivo diz **qual pacote é o sistema desta entrega**, para não misturar 
 
 A demo e este zip são a **mesma linha de código** da versão 1.1.3.
 
-**Registrar saída de brindes** aparece **somente no painel do gestor** (menu TRADE, menu Estoque, dashboard e Solicitações TRADE). O CD **não** registra: só confirma no menu **Confirmar saída** (QR).
+**Registrar saída de brindes** aparece **somente no painel do gestor**. No menu lateral existe apenas em **Estoque**; dashboard e Solicitações TRADE podem oferecer atalhos contextuais. O CD **não** registra: só confirma no menu **Confirmar saída** (QR).
 
 Não instalem zips anteriores (`v1.0`, `v1.1.0`, `v1.1.1`, `v1.1.2`). Usem **só o v1.1.3**.
 

@@ -4,6 +4,8 @@ Esta pasta é o formato legível de fixture/exportação do Controle de Brindes.
 
 - O banco operacional continua sendo SQLite/MySQL/MariaDB.
 - Os arquivos JSON não substituem transações, locks de estoque ou auditoria.
+- O navegador usa apenas `localStorage` para guardar a revisão da última alteração e avisar outras abas; ele não guarda registros de estoque ou solicitações como fonte de verdade.
+- Depois de cada mutação, as telas consultam novamente a base operacional com `cache: no-store`, evitando divergência entre JSON, abas e indicadores.
 - Snapshots reais são ignorados pelo Git para não publicar dados pessoais.
 - Use `php bin/export-json.php` para exportar cada tabela em um arquivo separado.
 - Para começar do zero em homologação, use `php bin/install.php --fresh` com `APP_ENV=local` ou `APP_ENV=testing`.

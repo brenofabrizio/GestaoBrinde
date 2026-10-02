@@ -17,7 +17,6 @@ final class Menu
         ]],
         ['group' => 'TRADE', 'items' => [
             ['label' => 'Solicitações TRADE', 'icon' => 'clipboard-check', 'url' => '/solicitacoes-trade', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all'], 'hide_cd' => true],
-            ['label' => 'Registrar saída', 'icon' => 'box-arrow-up', 'url' => '/estoque/saida', 'perm' => 'stock.exit', 'hide_cd' => true],
             ['label' => 'Recebimento no CD', 'icon' => 'box-arrow-in-down', 'url' => '/recebimento', 'perm' => ['stock.receive', 'stock.entry']],
             ['label' => 'Estoque por indústria', 'icon' => 'building', 'url' => '/estoque/por-industria', 'perm' => 'stock.view'],
             ['label' => 'Transferência', 'icon' => 'arrow-left-right', 'url' => '/estoque/transferencia', 'perm' => ['stock.transfer', 'stock.exit']],

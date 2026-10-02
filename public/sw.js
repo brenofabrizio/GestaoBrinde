@@ -1,4 +1,4 @@
-const VERSION = 'gestao-brindes-v2';
+const VERSION = 'gestao-brindes-v3';
 const STATIC_CACHE = VERSION + '-static';
 const PAGE_CACHE = VERSION + '-pages';
 const API_CACHE = VERSION + '-api';
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   '/offline.html',
   '/assets/css/app.css',
   '/assets/js/api.js',
+  '/assets/js/state-sync.js',
   '/assets/js/app.js',
   '/assets/js/offline.js',
   '/assets/vendor/bootstrap/bootstrap.min.css',

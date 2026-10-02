@@ -3,11 +3,11 @@ $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="tradeShow(<?= $id ?>)" x-init="load()">
   <div x-show="loading && !r" class="alert alert-info">Carregando solicitação TRADE…</div>
-  <div x-show="loadError" class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+  <div x-show="loadError && !r" class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
     <span x-text="loadError"></span>
     <button type="button" class="btn btn-sm btn-outline-danger" @click="load()">Tentar novamente</button>
   </div>
-  <template x-if="r && !loadError">
+  <template x-if="r">
     <div>
       <div class="d-flex flex-wrap gap-2 mb-3">
         <div>
@@ -105,11 +105,12 @@ function tradeShow(id) {
       try {
         const { data } = await Api.get('/api/requests/' + id);
         this.r = data;
+        this.loadError = '';
         this.ticket = this.r.purchase_ticket_no || '';
       } catch (e) {
-        this.r = null;
         this.loadError = e.message || 'Não foi possível carregar a solicitação TRADE.';
-        UI.toast(this.loadError, 'err');
+        if (!this.r) UI.toast('Solicitação TRADE não encontrada ou sem permissão para visualização.', 'err');
+        else UI.toast('Não foi possível atualizar os dados. Mantendo a última versão carregada.', 'err');
       } finally {
         this.loading = false;
       }
