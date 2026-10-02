@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="rulesPage()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Regras de aprovação</h2><p>Configure quando uma solicitação precisa de aprovação adicional.</p></div>
+  </header>
   <form class="card card-body mb-3" @submit.prevent="create">
     <div class="row g-2">
       <div class="col-md-3"><input class="form-control" placeholder="Nome" x-model="n.name" required></div>

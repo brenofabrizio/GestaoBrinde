@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div class="card card-body" x-data="reqForm()" x-init="init()">
+  <header class="section-header">
+    <div><h2>Nova solicitação</h2><p>Informe a finalidade, o destinatário e os brindes necessários.</p></div>
+  </header>
   <form @submit.prevent="save">
     <div class="row g-3">
       <div class="col-md-6"><label class="form-label">Finalidade *</label><input class="form-control" x-model="f.purpose" required></div>

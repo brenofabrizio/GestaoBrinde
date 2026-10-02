@@ -2,6 +2,9 @@
 $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="protShow(<?= $id ?>)" x-init="load()">
+  <header class="page-header">
+    <div><h2>Detalhes da entrega</h2><p>Confira o protocolo, os itens entregues e os documentos associados.</p></div>
+  </header>
   <template x-if="d">
     <div class="card card-body">
       <h2 class="h4" x-text="d.code"></h2>

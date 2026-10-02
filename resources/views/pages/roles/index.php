@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="rolesPage()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Perfis e permissões</h2><p>Defina quais operações cada perfil pode realizar.</p></div>
+  </header>
   <p class="text-muted">O perfil Administrador sempre tem acesso total.</p>
   <template x-for="role in roles" :key="role.id">
     <div class="card card-body mb-3">

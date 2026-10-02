@@ -2,6 +2,9 @@
 $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="eventShow(<?= $id ?>)" x-init="load()">
+  <header class="page-header">
+    <div><h2>Detalhes do evento</h2><p>Gerencie alocações, retiradas e devoluções do evento.</p></div>
+  </header>
   <template x-if="e">
     <div>
       <div class="d-flex flex-wrap gap-2 mb-3">

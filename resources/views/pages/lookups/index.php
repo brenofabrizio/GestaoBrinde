@@ -2,6 +2,9 @@
 $page = (string) ($app['page']['params']['type'] ?? 'categorias');
 ob_start(); ?>
 <div class="card card-body" x-data="lookupsPage()" x-init="init()" data-lookup-page="<?= e($page) ?>">
+  <header class="section-header">
+    <div><h2>Cadastros auxiliares</h2><p>Gerencie as informações de apoio usadas nos fluxos operacionais.</p></div>
+  </header>
   <p class="text-muted" x-show="hint" x-text="hint"></p>
   <div class="alert alert-danger" x-show="error" x-text="error"></div>
   <div class="d-flex gap-2 mb-3">

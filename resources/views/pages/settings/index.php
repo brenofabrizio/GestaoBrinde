@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div class="card card-body" style="max-width:760px" x-data="settingsPage()" x-init="load()">
+  <header class="section-header">
+    <div><h2>Configurações</h2><p>Personalize a marca e os parâmetros operacionais do sistema.</p></div>
+  </header>
   <div class="mb-3">
     <label class="form-label">Nome da empresa</label>
     <input class="form-control" x-model="f.company_name">

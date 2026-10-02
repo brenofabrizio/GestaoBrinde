@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div class="row g-4" x-data="profilePage()">
+  <header class="page-header col-12">
+    <div><h2>Meu perfil</h2><p>Atualize seus dados e mantenha sua senha segura.</p></div>
+  </header>
   <div class="col-lg-6">
     <div class="card card-body">
       <h2 class="h6">Meus dados</h2>

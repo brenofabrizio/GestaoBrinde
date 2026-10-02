@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="auditPage()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Auditoria</h2><p>Consulte as alterações e movimentações registradas no sistema.</p></div>
+  </header>
   <div class="d-flex flex-wrap gap-2 mb-3">
     <input class="form-control" style="max-width:220px" placeholder="Buscar" x-model="q" @change="load()">
     <input type="date" class="form-control" style="width:auto" x-model="from" @change="load()">

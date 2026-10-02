@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div class="card card-body" style="max-width:640px" x-data="importPage()">
+  <header class="section-header">
+    <div><h2>Importar dados</h2><p>Faça uma pré-visualização antes de confirmar a importação.</p></div>
+  </header>
   <div class="mb-3">
     <label class="form-label">Tipo</label>
     <select class="form-select" x-model="type">

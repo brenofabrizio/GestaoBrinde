@@ -2,6 +2,9 @@
 $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="reqShow(<?= $id ?>)" x-init="load()">
+  <header class="page-header">
+    <div><h2>Detalhes da solicitação</h2><p>Acompanhe o histórico, os itens e as ações permitidas para este processo.</p></div>
+  </header>
   <template x-if="r">
     <div>
       <div class="d-flex flex-wrap gap-2 mb-3">
