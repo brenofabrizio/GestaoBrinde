@@ -26,6 +26,7 @@ $mustChangePassword = !empty($user['must_change_password']);
   <style>:root { --brand-primary: <?= $color ?>; }</style>
 </head>
 <body data-must-change-password="<?= $mustChangePassword ? '1' : '0' ?>">
+<a class="skip-link" href="#main-content">Ir para o conteúdo principal</a>
 <div class="page-loader" id="pageLoader" role="status" aria-live="polite" aria-label="Carregando" hidden>
   <div class="page-loader-card">
     <span class="page-loader-spinner" aria-hidden="true"></span>
@@ -130,9 +131,9 @@ $mustChangePassword = !empty($user['must_change_password']);
         <?php endforeach; ?>
       </div>
     </div>
-    <div class="page" role="main">
+    <main class="page" id="main-content" tabindex="-1">
       <?= $content ?? '' ?>
-    </div>
+    </main>
   </div>
 </div>
 <script src="<?= e(asset('vendor/bootstrap/bootstrap.bundle.min.js')) ?>"></script>

@@ -25,6 +25,7 @@ $company = e($settings['company_name'] ?? 'Controle de Brindes');
   <style>:root { --brand-primary: <?= $color ?>; }</style>
 </head>
 <body>
+<a class="skip-link" href="#login-title">Ir para o formulário de acesso</a>
 <div class="auth-wrap">
   <div class="auth-bg-watermark" aria-hidden="true">
     <img src="<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>" alt="">
