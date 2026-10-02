@@ -15,3 +15,11 @@ Route::get('/__debug-routes', function (\Illuminate\Http\Request $request) {
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::fallback(function (\Illuminate\Http\Request $request) {
+    return response()->json([
+        'fallback' => true,
+        'path' => $request->path(),
+        'uri' => $request->getRequestUri(),
+    ], 404);
+});
