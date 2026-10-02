@@ -38,6 +38,8 @@ expectContains('resources/views/layouts/auth.php', 'auth-login-card', 'Login man
 expectContains('public/assets/css/app.css', '.auth-login-shell', 'Estilo do novo layout de autenticação está definido');
 expectContains('resources/views/pages/auth/login.php', 'auth-submit', 'Login possui ação visual principal');
 expectContains('resources/views/layouts/app.php', 'Marcar todas como lidas', 'Modal de notificações possui marcar todas como lidas');
+expectContains('resources/views/layouts/app.php', 'refreshDataBtn', 'Cabeçalho possui botão para atualizar os dados');
+expectContains('public/assets/js/app.js', "searchParams.set('_refresh'", 'Botão atualizar força nova leitura da página');
 expectContains('app/Services/SettingsService.php', 'lecom_supply_form_url', 'URL Lecom é configurável');
 expectContains('app/Services/SettingsService.php', 'lecom_portal_url', 'Portal Lecom é configurável');
 expectContains('app/Services/SettingsService.php', 'lecomApiStartUrl', 'Endpoint de abertura Lecom é gerado');

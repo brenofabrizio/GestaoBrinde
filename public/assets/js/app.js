@@ -37,6 +37,20 @@
     hide();
   }
 
+  function initRefreshButton() {
+    const button = document.getElementById('refreshDataBtn');
+    if (!button) return;
+    button.addEventListener('click', () => {
+      if (button.disabled) return;
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.querySelector('i')?.classList.add('spin');
+      const url = new URL(window.location.href);
+      url.searchParams.set('_refresh', Date.now().toString());
+      window.location.assign(url.toString());
+    });
+  }
+
   function toast(msg, type) {
     type = type || 'info';
     let wrap = document.querySelector('.toast-wrap');
@@ -208,6 +222,7 @@
   global.UI = { toast, fieldErrors, clearErrors, confirmDialog, confirm: confirmDialog, purgeDialog, qs, debounce, badge, pager, catchApi, signaturePad, initNotifications };
   document.addEventListener('DOMContentLoaded', () => {
     initNavigationLoading();
+    initRefreshButton();
     initNotifications();
   });
 })(window);

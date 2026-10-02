@@ -77,6 +77,11 @@ $mustChangePassword = !empty($user['must_change_password']);
         <input class="form-control form-control-sm" type="search" name="q"
                placeholder="Buscar brinde, código…" aria-label="Buscar brinde">
       </form>
+      <button class="btn btn-light btn-sm d-inline-flex align-items-center gap-1" type="button"
+              id="refreshDataBtn" aria-label="Atualizar dados" title="Atualizar dados">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+        <span class="d-none d-sm-inline">Atualizar</span>
+      </button>
       <?php if (!$mustChangePassword): ?>
       <div class="position-relative">
         <button class="btn btn-light" type="button" id="bellBtn"
