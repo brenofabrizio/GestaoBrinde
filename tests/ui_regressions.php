@@ -72,6 +72,8 @@ expectContains('public/assets/js/api.js', 'BrindesSync?.touch(path)', 'Mutaçõe
 expectContains('public/assets/js/api.js', 'CSRF_INVALID', 'Mutações renovam CSRF expirado antes de falhar');
 expectContains('resources/views/pages/trade/show.php', 'Solicitação aprovada e encaminhada', 'Aprovação TRADE confirma a transição concluída');
 expectContains('resources/views/pages/trade/show.php', "this.loadError = ''", 'Falha de atualização não bloqueia detalhe TRADE já carregado');
+expectContains('resources/views/pages/requests/show.php', 'Não foi possível carregar a solicitação', 'Detalhe interno exibe erro em vez de ficar em branco');
+expectContains('resources/views/pages/requests/show.php', 'BrindesSync?.listen', 'Detalhe interno atualiza após alterações');
 expectContains('public/assets/js/state-sync.js', "localStorage.setItem(KEY", 'localStorage guarda somente a revisão dos dados');
 expectContains('public/assets/js/state-sync.js', 'server database remains the source of truth', 'Sincronização não cria uma segunda base de negócio no navegador');
 expectContains('resources/views/pages/requests/index.php', 'Solicitações internas', 'Tela interna explica seu fluxo');

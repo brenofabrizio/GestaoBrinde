@@ -1,10 +1,15 @@
 <?php
 $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
-<div x-data="reqShow(<?= $id ?>)" x-init="load()">
+<div x-data="reqShow(<?= $id ?>)" x-init="init()">
   <header class="page-header">
     <div><h2>Detalhes da solicitação</h2><p>Acompanhe o histórico, os itens e as ações permitidas para este processo.</p></div>
   </header>
+  <div x-show="loading && !r" class="alert alert-info">Carregando solicitação…</div>
+  <div x-show="error && !r" class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+    <span x-text="error || 'Não foi possível carregar a solicitação.'"></span>
+    <button type="button" class="btn btn-sm btn-outline-danger" @click="load()">Tentar novamente</button>
+  </div>
   <template x-if="r">
     <div>
       <div class="d-flex flex-wrap gap-2 mb-3">
@@ -69,8 +74,33 @@ ob_start(); ?>
 <script>
 function reqShow(id) {
   return {
-    r: null, showApprove: false, just: '',
-    async load() { this.r = (await Api.get('/api/requests/' + id)).data; this.r.items.forEach(i => { if (i.qty_approved == null) i.qty_approved = i.qty_requested; }); },
+    r: null, showApprove: false, just: '', loading: false, error: '', offSync: null, stopPolling: null,
+    init() {
+      this.load();
+      this.offSync = window.BrindesSync?.listen(() => this.load());
+      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
+    },
+    async load() {
+      if (this.loading) return;
+      this.loading = true;
+      this.error = '';
+      try {
+        const { data } = await Api.get('/api/requests/' + id);
+        if (!data || typeof data !== 'object') throw new Error('A API não retornou os dados da solicitação.');
+        this.r = data;
+        if (!Array.isArray(this.r.items)) this.r.items = [];
+        if (!Array.isArray(this.r.history)) this.r.history = [];
+        this.r.items.forEach(i => { if (i.qty_approved == null) i.qty_approved = i.qty_requested; });
+      } catch (e) {
+        if (this.r) {
+          this.error = '';
+          UI.toast('Não foi possível atualizar agora. Os dados carregados continuam disponíveis.', 'err');
+        } else {
+          this.error = e.message || 'Não foi possível carregar a solicitação.';
+          UI.toast(this.error, 'err');
+        }
+      } finally { this.loading = false; }
+    },
     async act(path) {
       try { this.r = (await Api.post('/api/requests/' + id + path)).data; UI.toast('Atualizado.', 'ok'); }
       catch (e) { UI.toast(e.message, 'err'); }
