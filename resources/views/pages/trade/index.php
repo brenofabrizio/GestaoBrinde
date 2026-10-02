@@ -50,11 +50,10 @@ ob_start(); ?>
 function tradeIndex() {
   const qs = new URLSearchParams(location.search);
   return {
-    rows: [], q: qs.get('q') || '', status: qs.get('status') || '', t: null, loading: false, error: '', offSync: null, stopPolling: null,
+    rows: [], q: qs.get('q') || '', status: qs.get('status') || '', t: null, loading: false, error: '', offSync: null,
     init() {
       this.load();
       this.offSync = window.BrindesSync?.listen(() => this.load());
-      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
     },
     open(id) {
       const numericId = Number(id);

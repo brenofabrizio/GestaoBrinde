@@ -121,11 +121,10 @@ function dashboardPage() {
     from: iso(new Date(today.getFullYear(), today.getMonth(), 1)),
     to: iso(today),
     charts: {},
-    offSync: null, stopPolling: null,
+    offSync: null,
     init() {
       this.load();
       this.offSync = window.BrindesSync?.listen(() => this.load());
-      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
     },
     applyPreset() {
       const t = new Date();

@@ -40,12 +40,11 @@ ob_start(); ?>
 function reqIndex() {
   return {
     status: new URLSearchParams(location.search).get('status') || '',
-    rows: [], loading: false, offSync: null, stopPolling: null,
+    rows: [], loading: false, offSync: null,
     statuses: Object.keys(Api.labels.requestStatus),
     init() {
       this.load();
       this.offSync = window.BrindesSync?.listen(() => this.load());
-      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
     },
     async load() {
       if (this.loading) return;

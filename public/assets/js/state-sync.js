@@ -10,6 +10,17 @@
 
   const KEY = 'brindes:data-revision:v1';
   const CHANNEL_NAME = 'brindes-data-change:v1';
+  const TAB_ID = (() => {
+    try {
+      const current = global.sessionStorage.getItem('brindes:tab-id');
+      if (current) return current;
+      const next = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+      global.sessionStorage.setItem('brindes:tab-id', next);
+      return next;
+    } catch (_) {
+      return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    }
+  })();
   let channel = null;
   let lastRevision = '';
 
@@ -40,6 +51,7 @@
       revision: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2),
       changed_at: new Date().toISOString(),
       source: String(source || 'mutation'),
+      origin: TAB_ID,
     };
     try { global.localStorage.setItem(KEY, JSON.stringify(data)); } catch (_) {}
     dispatch(data);
@@ -49,12 +61,12 @@
   function listen(callback) {
     const handler = (event) => {
       const data = event?.detail || event;
-      if (data && data.revision) callback(data);
+      if (data && data.revision && data.origin !== TAB_ID) callback(data);
     };
     const storageHandler = (event) => {
       if (event.key === KEY) {
         const data = parse(event.newValue);
-        if (data) dispatch(data);
+        if (data && data.origin !== TAB_ID) dispatch(data);
       }
     };
     global.addEventListener('brindes:data-changed', handler);
@@ -67,12 +79,5 @@
     };
   }
 
-  function poll(callback, interval) {
-    const timer = global.setInterval(() => {
-      if (!document.hidden) callback();
-    }, Number(interval) || 15000);
-    return () => global.clearInterval(timer);
-  }
-
-  global.BrindesSync = { touch, listen, poll, key: KEY };
+  global.BrindesSync = { touch, listen, key: KEY };
 })(window);

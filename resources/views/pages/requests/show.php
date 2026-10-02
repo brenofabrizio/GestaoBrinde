@@ -74,11 +74,10 @@ ob_start(); ?>
 <script>
 function reqShow(id) {
   return {
-    r: null, showApprove: false, just: '', loading: false, error: '', offSync: null, stopPolling: null,
+    r: null, showApprove: false, just: '', loading: false, error: '', offSync: null,
     init() {
       this.load();
       this.offSync = window.BrindesSync?.listen(() => this.load());
-      this.stopPolling = window.BrindesSync?.poll(() => this.load(), 15000);
     },
     async load() {
       if (this.loading) return;

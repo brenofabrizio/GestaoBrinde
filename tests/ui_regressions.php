@@ -76,6 +76,8 @@ expectContains('resources/views/pages/requests/show.php', 'Não foi possível ca
 expectContains('resources/views/pages/requests/show.php', 'BrindesSync?.listen', 'Detalhe interno atualiza após alterações');
 expectContains('public/assets/js/state-sync.js', "localStorage.setItem(KEY", 'localStorage guarda somente a revisão dos dados');
 expectContains('public/assets/js/state-sync.js', 'server database remains the source of truth', 'Sincronização não cria uma segunda base de negócio no navegador');
+expectNotContains('public/assets/js/state-sync.js', 'setInterval', 'Sincronização não faz polling que sobrescreve dados atuais');
+expectContains('public/assets/js/state-sync.js', 'origin !== TAB_ID', 'A aba que gravou não recarrega snapshot antigo da própria alteração');
 expectContains('resources/views/pages/requests/index.php', 'Solicitações internas', 'Tela interna explica seu fluxo');
 expectContains('resources/views/pages/trade/index.php', 'Solicitações TRADE', 'Tela TRADE explica seu fluxo de compra');
 expectContains('resources/views/pages/trade/index.php', 'Number.isInteger(Number(r.id))', 'Lista TRADE bloqueia links com identificador inválido');
