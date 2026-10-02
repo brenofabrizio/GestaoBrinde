@@ -108,9 +108,15 @@ function tradeShow(id) {
         this.loadError = '';
         this.ticket = this.r.purchase_ticket_no || '';
       } catch (e) {
-        this.loadError = e.message || 'Não foi possível carregar a solicitação TRADE.';
-        if (!this.r) UI.toast('Solicitação TRADE não encontrada ou sem permissão para visualização.', 'err');
-        else UI.toast('Não foi possível atualizar os dados. Mantendo a última versão carregada.', 'err');
+        if (this.r) {
+          // A última resposta válida continua utilizável. Do not turn a
+          // background refresh hiccup into a full-page blocking error.
+          this.loadError = '';
+          UI.toast('Não foi possível atualizar agora. Os dados carregados continuam disponíveis.', 'err');
+        } else {
+          this.loadError = e.message || 'Não foi possível carregar a solicitação TRADE.';
+          UI.toast('Solicitação TRADE não encontrada ou sem permissão para visualização.', 'err');
+        }
       } finally {
         this.loading = false;
       }
