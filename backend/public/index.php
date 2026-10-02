@@ -26,6 +26,8 @@ if (isset($_SERVER['REQUEST_URI'])) {
 
     if (is_string($requestPath) && $requestPath !== '') {
         $_SERVER['PATH_INFO'] = $requestPath;
+        $_SERVER['SCRIPT_NAME'] = '/';
+        $_SERVER['PHP_SELF'] = '/';
     }
 }
 
