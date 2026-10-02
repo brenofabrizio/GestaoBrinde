@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="usersPage()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Usuários</h2><p>Gerencie acessos, perfis e responsabilidades do sistema.</p></div>
+  </header>
   <div class="d-flex mb-3"><button class="btn btn-primary ms-auto" @click="open()">Novo usuário</button></div>
   <div class="table-responsive">
     <table class="table">

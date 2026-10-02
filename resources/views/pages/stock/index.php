@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="stockIndex()" x-init="init()">
+  <header class="page-header">
+    <div><h2>Livro de movimentações</h2><p>Acompanhe entradas, saídas, ajustes e saldos do estoque.</p></div>
+  </header>
   <!-- Header & Summary Cards -->
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">

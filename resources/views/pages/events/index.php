@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="eventsIndex()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Eventos</h2><p>Organize eventos, responsáveis e a alocação de brindes.</p></div>
+  </header>
   <?php if (can('events.manage')): ?>
   <div class="card card-body mb-3">
     <form class="row g-2" @submit.prevent="create">

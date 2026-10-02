@@ -2,6 +2,9 @@
 $canItems = can('items.manage');
 ob_start(); ?>
 <div x-data="dashboardPage()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Painel de controle</h2><p>Resumo operacional do estoque, solicitações e movimentações.</p></div>
+  </header>
   <div class="d-flex flex-wrap gap-2 mb-3">
     <select class="form-select form-select-sm" style="width:auto" x-model="preset" @change="applyPreset()">
       <option value="month">Este mês</option>

@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="reqIndex()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Solicitações</h2><p>Acompanhe o andamento das solicitações e as próximas ações.</p></div>
+  </header>
   <div class="d-flex flex-wrap gap-2 mb-3">
     <select class="form-select" style="width:auto" x-model="status" @change="load()">
       <option value="">Todos</option>

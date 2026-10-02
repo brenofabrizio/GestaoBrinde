@@ -2,6 +2,9 @@
 $q = $app['page']['query'] ?? [];
 ob_start(); ?>
 <div x-data="itemsIndex()" x-init="init()">
+  <header class="page-header">
+    <div><h2>Brindes</h2><p>Consulte o catálogo, disponibilidade e nível de estoque de cada item.</p></div>
+  </header>
   <!-- Toolbar -->
   <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
     <div class="d-flex flex-wrap gap-2 flex-grow-1">

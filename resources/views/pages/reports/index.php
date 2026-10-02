@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="reportsPage()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Relatórios</h2><p>Filtre os dados operacionais e exporte as informações necessárias.</p></div>
+  </header>
   <div class="row g-2 mb-3">
     <div class="col-md-4">
       <select class="form-select" x-model="type" @change="run()">

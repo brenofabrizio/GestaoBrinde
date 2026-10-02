@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div x-data="protIndex()" x-init="load()">
+  <header class="page-header">
+    <div><h2>Entregas e comprovantes</h2><p>Consulte protocolos, destinatários e documentos de entrega.</p></div>
+  </header>
   <div class="d-flex flex-wrap align-items-end gap-2 mb-3">
     <div>
       <label class="form-label small mb-1">Buscar</label>
