@@ -19,4 +19,14 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $app->register(\Illuminate\View\ViewServiceProvider::class);
 
+// The Vercel PHP runtime strips `/api` from PATH_INFO when routing to the
+// function. Laravel must receive the original public request path.
+if (isset($_SERVER['REQUEST_URI'])) {
+    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+    if (is_string($requestPath) && $requestPath !== '') {
+        $_SERVER['PATH_INFO'] = $requestPath;
+    }
+}
+
 $app->handleRequest(Request::capture());
