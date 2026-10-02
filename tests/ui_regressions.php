@@ -63,6 +63,7 @@ expectContains('app/Support/DemoSeeder.php', "date('Y-m-d 10:00:00')", 'Dados fi
 expectContains('app/bootstrap.php', 'date_default_timezone_set((string) Config::get', 'Fuso é aplicado antes da criação da base demo');
 expectContains('public/sw.js', "const VERSION = 'gestao-brindes-v2'", 'Cache antigo do navegador é invalidado');
 expectContains('public/sw.js', "fetch(request, { cache: 'no-store' })", 'APIs não usam snapshots antigos');
+expectContains('app/Support/JsonDatabase.php', "use App\\Core\\Env;", 'Espelho JSON resolve Env no namespace correto');
 expectContains('app/Support/JsonDatabase.php', "sys_get_temp_dir() . '/brindes/storage/json'", 'Espelho JSON funciona no runtime Vercel');
 expectContains('app/Controllers/LookupController.php', 'LOWER(name)', 'Cadastros rejeitam duplicidade sem diferenciar maiúsculas');
 expectContains('app/Support/Installer.php', 'lookups.view', 'Restrição do CD remove acesso a Cadastros');

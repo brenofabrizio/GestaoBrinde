@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Core\Db;
+use App\Core\Env;
 use RuntimeException;
 
 /**
