@@ -10,8 +10,9 @@ O projeto Vercel atual da aplicação raiz continua apontando para o backend leg
 
 - Root Directory: `backend`
 - Framework preset: Other
-- Build command: `composer install --no-dev --optimize-autoloader`
-- Install command: `composer install --no-dev --optimize-autoloader`
+- Build command: deixar vazio
+- Install command: deixar vazio; o `vercel-php@0.9.0` detecta `composer.json` e executa o Composer no build
+- Output Directory: deixar vazio
 - Não usar SQLite, JSON gravável ou filesystem local como persistência.
 
 ## Variáveis obrigatórias
