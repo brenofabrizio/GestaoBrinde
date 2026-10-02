@@ -2,6 +2,9 @@
 $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="itemShow(<?= $id ?>)" x-init="load()">
+  <header class="page-header">
+    <div><h2>Detalhes do brinde</h2><p>Consulte informações, disponibilidade e histórico de movimentações.</p></div>
+  </header>
   <template x-if="it">
     <div>
       <div class="d-flex flex-wrap gap-3 mb-3">

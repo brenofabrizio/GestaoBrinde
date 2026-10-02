@@ -15,6 +15,9 @@ ob_start(); ?>
 <?php if ($mode === 'saida'): ?>
 <p class="text-muted mb-3">Registre a saída aqui: escolha o brinde, a quantidade e a finalidade. Depois clique em <b>Registrar saída</b>. O CD só confirma no depósito (menu <b>Confirmar saída</b>, com QR).</p>
 <?php endif; ?>
+<header class="section-header">
+  <div><h2><?= $mode === 'entrada' ? 'Registrar entrada' : ($mode === 'ajuste' ? 'Ajustar estoque' : 'Registrar saída') ?></h2><p>Informe os dados com atenção para manter o saldo operacional correto.</p></div>
+</header>
 <div class="card card-body stock-form" x-data="stockForm()" x-init="init()" data-mode="<?= e($mode) ?>" data-endpoint="<?= e($endpoint) ?>" data-can-lookups="<?= can('lookups.view') ? '1' : '0' ?>">
   <template x-if="done">
     <div>

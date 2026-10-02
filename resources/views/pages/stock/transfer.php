@@ -1,5 +1,8 @@
 <?php ob_start(); ?>
 <div class="card card-body" x-data="transferPage()" x-init="init()">
+  <header class="section-header">
+    <div><h2>Transferir estoque</h2><p>Altere o local do estoque sem registrar uma retirada.</p></div>
+  </header>
   <p class="text-muted">A transferência <b>não é retirada</b>. O saldo total permanece; só muda o local (CD → evento, escritório ou outro depósito).</p>
   <form @submit.prevent="save">
     <div class="row g-3">

@@ -3,6 +3,9 @@ $id = (int) ($app['page']['params']['id'] ?? 0);
 $isEdit = $id > 0;
 ob_start(); ?>
 <div class="card card-body" x-data="itemForm(<?= $id ?>)" x-init="init()">
+  <header class="section-header">
+    <div><h2><?= $isEdit ? 'Editar brinde' : 'Novo brinde' ?></h2><p>Preencha os dados do item e mantenha o estoque atualizado.</p></div>
+  </header>
   <form @submit.prevent="save">
     <div class="row g-3">
       <div class="col-md-4">
