@@ -218,6 +218,13 @@ final class JsonDatabase
                         Db::query('INSERT INTO `' . $table . '` (' . $quoted . ') VALUES (' . $values . ')', array_values($row));
                     }
                 }
+                $foreignKeyViolations = Db::fetchAll('PRAGMA foreign_key_check');
+                if ($foreignKeyViolations !== []) {
+                    $violation = $foreignKeyViolations[0];
+                    throw new RuntimeException(
+                        'Snapshot JSON viola uma chave estrangeira na tabela ' . (string) ($violation['table'] ?? 'desconhecida') . '.'
+                    );
+                }
             });
         } finally {
             $pdo->exec('PRAGMA foreign_keys = ON');

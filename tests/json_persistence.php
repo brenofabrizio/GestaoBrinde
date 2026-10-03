@@ -202,6 +202,32 @@ try {
     $expect((int) ($current['last_value'] ?? 0) === 41, 'snapshot inválido não apaga o último estado restaurado');
 }
 
+$invalidForeignKeySnapshot = $restoreDocuments;
+$invalidForeignKeySnapshot['requests.json']['tables']['request_items'] = [[
+    'id' => 1,
+    'request_id' => 987654,
+    'item_id' => 987654,
+    'qty_requested' => 1,
+    'qty_approved' => null,
+    'qty_reserved' => 0,
+    'qty_delivered' => 0,
+    'qty_received' => 0,
+    'unit_value' => null,
+    'notes' => null,
+    'created_at' => date('Y-m-d H:i:s'),
+    'updated_at' => date('Y-m-d H:i:s'),
+]];
+$invalidForeignKeyRejected = false;
+try {
+    JsonDatabase::restoreSnapshot($invalidForeignKeySnapshot, 'invalid-foreign-key');
+} catch (RuntimeException) {
+    $invalidForeignKeyRejected = true;
+}
+$orphanItemCount = (int) \App\Core\Db::value('SELECT COUNT(*) FROM request_items');
+$currentSequence = \App\Core\Db::fetch('SELECT last_value FROM sequences WHERE name = ? AND period = ?', ['json-test', '2030']);
+$expect($invalidForeignKeyRejected, 'snapshot com referências estrangeiras órfãs é rejeitado');
+$expect($orphanItemCount === 0 && (int) ($currentSequence['last_value'] ?? 0) === 41, 'rejeitar FK órfã reverte a restauração inteira');
+
 $store = new VercelJsonStore('unit', $transport, 'store_unit');
 try {
     new VercelJsonStore('unit', $transport);
