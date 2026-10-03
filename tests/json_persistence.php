@@ -120,7 +120,30 @@ $expect(count(JsonDatabase::documentsForTables(null)) === 7, 'snapshot inicial c
 $expect(\App\Core\Db::mutatedTables() === ['sequences'], 'SQL identifica a tabela alterada para atualizar apenas seu domínio');
 JsonDatabase::mirrorFromPdo(['sequences']);
 $localSequences = JsonDatabase::read('sequences');
+App\Core\Db::clearMutationState();
+App\Core\Db::query(" UPDATE sequences SET last_value = last_value WHERE name = ? AND period = ?", ['local-json', '2030']);
+$expect(App\Core\Db::mutatedTables() === ['sequences'], 'SQL com espaços iniciais identifica tabela para sync incremental');
 $expect(count(array_filter($localSequences, static fn (array $row): bool => ($row['name'] ?? null) === 'local-json')) === 1, 'espelho local JSON reflete uma gravação SQL');
+
+$domainTables = [
+    'access.json' => ['roles', 'permissions', 'role_permissions', 'users', 'departments', 'industries'],
+    'catalog.json' => ['categories', 'locations', 'suppliers', 'items'],
+    'inventory.json' => ['stock', 'stock_positions', 'stock_movements', 'stock_exit_orders'],
+    'requests.json' => ['requests', 'request_items', 'request_status_history', 'approval_rules', 'approvals'],
+    'deliveries.json' => ['deliveries', 'delivery_items'],
+    'events.json' => ['events', 'event_allocations'],
+    'system.json' => ['notifications', 'audit_log', 'settings', 'login_attempts', 'password_resets', 'idempotency_keys', 'sequences'],
+];
+$populatedSnapshot = [];
+foreach ($domainTables as $file => $tables) {
+    $populatedSnapshot[$file] = ['schema_version' => 1, 'generated_at' => date(DATE_ATOM), 'tables' => []];
+    foreach ($tables as $table) {
+        $populatedSnapshot[$file]['tables'][$table] = App\Core\Db::fetchAll('SELECT * FROM `' . $table . '`');
+    }
+}
+JsonDatabase::restoreSnapshot($populatedSnapshot, 'populated-fixture');
+$foreignKeyViolations = App\Core\Db::fetchAll('PRAGMA foreign_key_check');
+$expect($foreignKeyViolations === [], 'restaurar snapshot povoado preserva todas as referências estrangeiras');
 
 $restoreDocuments = [];
 foreach (\App\Support\Installer::tables() as $table) {
@@ -139,7 +162,8 @@ try {
     $expect((int) ($restored['last_value'] ?? 0) === 41, 'restaura os dados JSON no SQLite de execução');
     $expect($stale === null, 'substitui o estado antigo pelo snapshot JSON completo');
     $expect(JsonDatabase::localSnapshotRevision($testDatabase) === 'revision-test-1', 'cache aceita banco cujo hash corresponde ao marcador remoto');
-    \App\Core\Db::insert('sequences', ['name' => 'crash-test', 'period' => '2030', 'last_value' => 99]);
+    $expect(JsonDatabase::localSnapshotRevision($testDatabase . '.missing') === null, 'marcador sobrevivente não valida cache SQLite ausente');
+    App\Core\Db::insert('sequences', ['name' => 'crash-test', 'period' => '2030', 'last_value' => 99]);
     $expect(JsonDatabase::localSnapshotRevision($testDatabase) === null, 'cache modificado sem commit JSON força restauração');
     JsonDatabase::restoreSnapshot($restoreDocuments, 'revision-test-2');
     $crash = \App\Core\Db::fetch('SELECT last_value FROM sequences WHERE name = ? AND period = ?', ['crash-test', '2030']);
