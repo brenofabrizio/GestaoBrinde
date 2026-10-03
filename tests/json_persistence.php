@@ -23,9 +23,10 @@ $failPath = null;
 $authorizationHeaders = [];
 $conditionalHeaders = [];
 $privateAccessHeaders = [];
+$apiVersionHeaders = [];
 $injectCasConflict = false;
 
-$transport = static function (string $method, string $url, string $token, ?string $body, array $headers, int $timeout) use (&$blobs, &$failPath, &$authorizationHeaders, &$conditionalHeaders, &$privateAccessHeaders, &$injectCasConflict): array {
+$transport = static function (string $method, string $url, string $token, ?string $body, array $headers, int $timeout) use (&$blobs, &$failPath, &$authorizationHeaders, &$conditionalHeaders, &$privateAccessHeaders, &$apiVersionHeaders, &$injectCasConflict): array {
     foreach ($headers as $header) {
         if (str_starts_with($header, 'Authorization:')) {
             $authorizationHeaders[] = $header;
@@ -35,6 +36,9 @@ $transport = static function (string $method, string $url, string $token, ?strin
         }
         if (str_starts_with(strtolower($header), 'x-vercel-blob-access:')) {
             $privateAccessHeaders[] = $header;
+        }
+        if (str_starts_with(strtolower($header), 'x-api-version:')) {
+            $apiVersionHeaders[] = strtolower($header);
         }
     }
     if ($method === 'PUT') {
@@ -212,6 +216,7 @@ $store->save([
 ]);
 $first = $store->load();
 $expect(in_array('Authorization: Bearer unit', $authorizationHeaders, true), 'requisições privadas usam Authorization Bearer');
+$expect($apiVersionHeaders !== [] && array_values(array_unique($apiVersionHeaders)) === ['x-api-version: 12'], 'requisições Blob usam a versão da API que oferece ETag e CAS');
 $expect(in_array('x-vercel-blob-access: private', $privateAccessHeaders, true), 'JSONs são armazenados sem acesso público');
 $expect($store->hasSnapshot() === true, 'storage detecta o manifesto publicado');
 $expect(($first['inventory.json']['items'][0]['id'] ?? null) === 11, 'restaura o JSON de estoque da versão publicada');

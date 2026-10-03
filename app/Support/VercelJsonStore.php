@@ -171,7 +171,7 @@ final class VercelJsonStore
             'GET',
             self::API . '?' . http_build_query(['url' => $url]),
             null,
-            ['x-api-version: 10'],
+            ['x-api-version: 12'],
             10,
         );
         $metadata = json_decode($response['body'], true);
@@ -181,7 +181,7 @@ final class VercelJsonStore
 
     private function headEtagFallback(string $url): string
     {
-        $headers = ['x-api-version: 10', 'Authorization: Bearer ' . $this->token];
+        $headers = ['x-api-version: 12', 'Authorization: Bearer ' . $this->token];
         if ($this->transport !== null) {
             $response = ($this->transport)('HEAD', $url, $this->token, null, $headers, 10);
             $status = (int) ($response['code'] ?? 0);
@@ -253,7 +253,7 @@ final class VercelJsonStore
     private function put(string $pathname, string $body, bool $overwrite, ?string $ifMatch = null): array
     {
         $headers = [
-            'x-api-version: 10',
+            'x-api-version: 12',
             'x-vercel-blob-access: private',
             'x-add-random-suffix: 0',
             'x-allow-overwrite: ' . ($overwrite ? '1' : '0'),
@@ -275,7 +275,7 @@ final class VercelJsonStore
     private function findExact(string $pathname): ?array
     {
         $url = self::API . '?' . http_build_query(['prefix' => $pathname]);
-        $response = $this->request('GET', $url, null, ['x-api-version: 10'], 12);
+        $response = $this->request('GET', $url, null, ['x-api-version: 12'], 12);
         $result = json_decode($response['body'], true);
         if (!is_array($result) || !is_array($result['blobs'] ?? null)) {
             throw new RuntimeException('O storage retornou uma listagem inválida.');
