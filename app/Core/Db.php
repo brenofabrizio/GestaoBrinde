@@ -98,7 +98,11 @@ final class Db
             }
         }
         $readOnly = preg_match('/^\s*(SELECT|SHOW|DESCRIBE|PRAGMA|EXPLAIN)\b/i', $sql) === 1;
-        if (!$readOnly) {
+        $command = strtoupper(strtok(trim($sql), chr(32) . chr(9) . chr(10) . chr(13)));
+        $dml = in_array($command, ['INSERT', 'REPLACE', 'UPDATE', 'DELETE'], true);
+        // No-op DML (especially DELETEs during idempotent bootstrap) changes no persisted state;
+        // treating it as a mutation makes every read request race to rewrite the Blob snapshot.
+        if (!$readOnly && (!$dml || $stmt->rowCount() > 0)) {
             self::$mutated = true;
             self::trackMutatedTable($sql);
         }

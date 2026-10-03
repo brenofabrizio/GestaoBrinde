@@ -116,6 +116,12 @@ $expect = static function (bool $condition, string $label) use (&$checks, &$fail
     }
 };
 
+App\Support\Installer::ensureVercelDemo();
+App\Core\Db::clearMutationState();
+App\Support\Installer::ensureVercelDemo();
+$expect(App\Core\Db::mutatedTables() === [], 'bootstrap idempotente sem mudanças não marca snapshot sujo');
+App\Core\Db::clearMutationState();
+
 $expect(JsonDatabase::documentsForTables(['stock_movements']) === ['inventory.json'], 'movimentação atualiza apenas o JSON de estoque');
 $expect(JsonDatabase::documentsForTables(['request_items', 'approvals']) === ['requests.json'], 'TRADE atualiza apenas o JSON de solicitações');
 $expect(count(JsonDatabase::documentsForTables(null)) === 7, 'snapshot inicial contém os sete domínios JSON');
