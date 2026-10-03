@@ -18,7 +18,7 @@ O estado é dividido por domínio para evitar um arquivo monolítico:
 - `events.json`: eventos e alocações;
 - `system.json`: notificações, auditoria, configurações (exceto `app.key`), tentativas e sequências.
 
-Cada gravação gera arquivos versionados. O manifesto `brindes-json/v1/current.json` só é publicado depois que os documentos da versão foram enviados; instâncias novas leem o manifesto e reconstroem o cache SQLite na ordem de dependências. Tabelas que contêm hash de senha são guardadas somente no Blob privado. A chave `app.key` não é exportada para os documentos.
+Cada gravação gera arquivos versionados. O manifesto `brindes-json/v1/current.json` só é publicado depois que os documentos da versão foram enviados; os nomes e caminhos dos arquivos são validados antes do download e a restauração exige exatamente os sete domínios previstos. No primeiro boot sem manifesto, a aplicação publica explicitamente um baseline completo, mesmo se o instalador não produzir SQL rastreado. Linhas restauradas são verificadas contra as colunas reais do esquema SQLite antes de qualquer limpeza ou gravação. Instâncias novas reconstroem o cache SQLite na ordem validada por referências estrangeiras. Tabelas que contêm hash de senha são guardadas somente no Blob privado. A chave `app.key` não é exportada para os documentos.
 
 ## Concorrência e falhas
 
@@ -32,7 +32,7 @@ Blob armazena arquivos; esta solução não fornece transações relacionais ent
 
 ## Verificação
 
-- `php tests/json_persistence.php`: cobre round-trip de múltiplos domínios, publicação atômica do manifesto, ETag, conflito concorrente, privacidade dos uploads e restauração isolada em SQLite.
-- `php tests/ui_regressions.php`: cobre integração, restauração e erro explícito de concorrência.
+- `php tests/json_persistence.php`: cobre round-trip de múltiplos domínios, ETag, conflito concorrente, rejeição de colunas fora do esquema, restauração povoada com verificação de chaves estrangeiras, cache ausente/alterado e gravação do baseline;
+- `php tests/ui_regressions.php`: cobre integração, restauração, snapshot inicial completo e erro explícito de concorrência.
 - `php tests/scenarios.php`: a execução normal é bloqueada porque o MySQL local em `127.0.0.1` recusa conexões. Com um SQLite temporário isolado, os cenários passaram até `D7` (autenticação, permissões, cadastros e CRUD de brindes) e pararam pela ausência do GD (`imagecreatetruecolor`); a suíte completa não foi validada.
 - A validação de produção ainda deve confirmar escrita JSON, abertura em novo request/instância e manutenção de quantidades antes de apagar dados ou iniciar o fluxo TRADE.

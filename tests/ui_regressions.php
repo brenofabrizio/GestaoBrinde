@@ -92,6 +92,8 @@ expectContains('app/Support/VercelJsonStore.php', 'x-if-match: ', 'Manifesto JSO
 expectContains('app/Support/VercelJsonStore.php', 'headEtag', 'CAS lê ETag atual do manifesto privado');
 expectContains('app/Support/JsonDatabase.php', 'restoreSnapshot', 'Instância fria restaura tabelas a partir dos JSONs');
 expectContains('app/Support/JsonDatabase.php', 'sqlite_fingerprint', 'Cache local não é confiável após interrupção de gravação');
+expectContains('app/bootstrap.php', 'if (!$restored)', 'Primeira inicialização detecta que ainda não há snapshot remoto');
+expectContains('app/bootstrap.php', 'JsonDatabase::mirrorFromPdo();', 'Primeira inicialização publica baseline completo independente de SQL rastreado');
 expectContains('public/index.php', 'CONCURRENT_UPDATE', 'Conflito concorrente retorna 409 explícito');
 expectContains('app/Controllers/LookupController.php', 'LOWER(name)', 'Cadastros rejeitam duplicidade sem diferenciar maiúsculas');
 expectContains('app/Support/Installer.php', 'lookups.view', 'Restrição do CD remove acesso a Cadastros');

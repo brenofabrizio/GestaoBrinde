@@ -156,6 +156,13 @@ final class JsonDatabase
 
     public static function restoreSnapshot(array $documents, string $revision): void
     {
+        $expectedFiles = array_keys(self::GROUPS);
+        $actualFiles = array_keys($documents);
+        sort($expectedFiles);
+        sort($actualFiles);
+        if ($actualFiles !== $expectedFiles) {
+            throw new RuntimeException('Snapshot JSON deve conter exatamente os sete domínios esperados.');
+        }
         $tableRows = [];
         foreach (self::GROUPS as $file => $tables) {
             $document = $documents[$file] ?? null;
@@ -168,6 +175,20 @@ final class JsonDatabase
                     throw new RuntimeException('Tabela ausente no snapshot JSON: ' . $table);
                 }
                 $tableRows[$table] = $rows;
+                $schemaRows = Db::fetchAll('PRAGMA table_info(' . $table . ')');
+                $schemaColumns = array_fill_keys(array_map(static fn (array $column): string => (string) ($column['name'] ?? ''), $schemaRows), true);
+                if ($schemaColumns === []) {
+                    throw new RuntimeException('Tabela indisponível no cache SQLite: ' . $table);
+                }
+                foreach ($rows as $row) {
+                    if (!is_array($row)) {
+                        throw new RuntimeException('Linha inválida no snapshot JSON: ' . $table);
+                    }
+                    $unknownColumns = array_diff(array_keys($row), array_keys($schemaColumns));
+                    if ($unknownColumns !== []) {
+                        throw new RuntimeException('Coluna não permitida no snapshot JSON: ' . $table . '.' . (string) reset($unknownColumns));
+                    }
+                }
             }
         }
 

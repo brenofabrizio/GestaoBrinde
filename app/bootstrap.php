@@ -71,8 +71,14 @@ if (getenv('VERCEL')) {
         }
     };
     $run(static fn () => \App\Support\Installer::ensureVercelDemo());
-    \App\Support\JsonDatabase::restoreFromBlob();
-    \App\Core\Db::persistDemo();
+    $restored = \App\Support\JsonDatabase::restoreFromBlob();
+    if (!$restored) {
+        // First request: publish the complete baseline even when installer emitted no tracked SQL writes.
+        \App\Support\JsonDatabase::mirrorFromPdo();
+        \App\Core\Db::clearMutationState();
+    } else {
+        \App\Core\Db::persistDemo();
+    }
 }
 
 mb_internal_encoding('UTF-8');

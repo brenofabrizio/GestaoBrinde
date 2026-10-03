@@ -47,7 +47,7 @@ $transport = static function (string $method, string $url, string $token, ?strin
             $injectCasConflict = false;
             $external = json_decode($blobs[$pathname], true);
             if (is_array($external)) {
-                $external['revision'] = 'external-writer';
+                $external['revision'] = '20261003T141500Z-0123456789abcdef';
                 $blobs[$pathname] = json_encode($external, JSON_UNESCAPED_SLASHES);
             }
         }
@@ -161,6 +161,24 @@ try {
     $stale = \App\Core\Db::fetch('SELECT last_value FROM sequences WHERE name = ? AND period = ?', ['stale-test', '2030']);
     $expect((int) ($restored['last_value'] ?? 0) === 41, 'restaura os dados JSON no SQLite de execução');
     $expect($stale === null, 'substitui o estado antigo pelo snapshot JSON completo');
+    $extraDocumentSnapshot = $restoreDocuments;
+    $extraDocumentSnapshot['unexpected.json'] = ['schema_version' => 1, 'tables' => []];
+    try {
+        JsonDatabase::restoreSnapshot($extraDocumentSnapshot, 'unexpected-document');
+        $expect(false, 'snapshot rejeita documento fora dos sete domínios previstos');
+    } catch (RuntimeException) {
+        $current = App\Core\Db::fetch('SELECT last_value FROM sequences WHERE name = ? AND period = ?', ['json-test', '2030']);
+        $expect((int) ($current['last_value'] ?? 0) === 41, 'manifesto com documento extra não altera o SQLite');
+    }
+    $untrustedSnapshot = $restoreDocuments;
+    $untrustedSnapshot['system.json']['tables']['sequences'][0]['rowid'] = 999;
+    try {
+        JsonDatabase::restoreSnapshot($untrustedSnapshot, 'untrusted-rowid');
+        $expect(false, 'colunas fora do esquema são recusadas antes da restauração');
+    } catch (RuntimeException) {
+        $current = App\Core\Db::fetch('SELECT last_value FROM sequences WHERE name = ? AND period = ?', ['json-test', '2030']);
+        $expect((int) ($current['last_value'] ?? 0) === 41, 'snapshot com coluna fora do esquema não altera dados restaurados');
+    }
     $expect(JsonDatabase::localSnapshotRevision($testDatabase) === 'revision-test-1', 'cache aceita banco cujo hash corresponde ao marcador remoto');
     $expect(JsonDatabase::localSnapshotRevision($testDatabase . '.missing') === null, 'marcador sobrevivente não valida cache SQLite ausente');
     App\Core\Db::insert('sequences', ['name' => 'crash-test', 'period' => '2030', 'last_value' => 99]);
@@ -209,6 +227,16 @@ try {
     $expect(true, 'manifesto não pode redirecionar token para outro Blob host');
 }
 $blobs[$manifestPath] = $validManifestBody;
+$mismatchedManifest = json_decode($validManifestBody, true);
+$mismatchedManifest['files']['trade.json'] = $mismatchedManifest['files']['inventory.json'];
+$blobs[$manifestPath] = json_encode($mismatchedManifest, JSON_UNESCAPED_SLASHES);
+try {
+    $store->loadSnapshot();
+    $expect(false, 'manifesto vincula nome do JSON ao próprio caminho versionado');
+} catch (RuntimeException) {
+    $expect(true, 'manifesto vincula nome do JSON ao próprio caminho versionado');
+}
+$blobs[$manifestPath] = $validManifestBody;
 $snapshot = $store->loadSnapshot();
 $expect(is_string($snapshot['revision'] ?? null) && $snapshot['revision'] !== '', 'retorna a revisão do manifesto carregado');
 $expect(($snapshot['documents']['trade.json']['requests'][0]['status'] ?? null) === 'pendente', 'revisão identifica exatamente os documentos restaurados');
@@ -247,7 +275,7 @@ try {
     $expect(true, 'gravação concorrente não pode sobrescrever snapshot alheio');
 }
 $afterConflict = $store->loadSnapshot();
-$expect(($afterConflict['revision'] ?? null) === 'external-writer', 'conflito conserva a revisão publicada pelo outro escritor');
+$expect(($afterConflict['revision'] ?? null) === '20261003T141500Z-0123456789abcdef', 'conflito conserva a revisão publicada pelo outro escritor');
 $expect(($afterConflict['documents']['inventory.json']['items'][0]['id'] ?? null) === 12, 'conflito não perde o último estoque confirmado');
 $expect($conditionalHeaders !== [], 'manifesto é publicado com compare-and-swap por ETag');
 

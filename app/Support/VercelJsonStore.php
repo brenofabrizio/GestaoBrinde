@@ -142,11 +142,23 @@ final class VercelJsonStore
         if (!is_array($manifest) || (int) ($manifest['schema_version'] ?? 0) !== 1 || !is_array($manifest['files'] ?? null)) {
             throw new RuntimeException('Manifesto JSON persistido inválido.');
         }
+        $revision = (string) ($manifest['revision'] ?? '');
+        if (!preg_match('/^\\d{8}T\\d{6}Z-[a-f0-9]{16}$/D', $revision)) {
+            throw new RuntimeException('Revisão inválida no manifesto JSON.');
+        }
         foreach ($manifest['files'] as $name => $url) {
             if (!is_string($name) || !preg_match('/^[a-z0-9_-]+\\.json$/', $name) || !is_string($url)) {
                 throw new RuntimeException('Manifesto JSON contém referência inválida.');
             }
-            $manifest['files'][$name] = $this->safeBlobUrl($url);
+            $safeUrl = $this->safeBlobUrl($url);
+            $path = rawurldecode((string) (parse_url($safeUrl, PHP_URL_PATH) ?? ''));
+            $prefix = '/' . self::PREFIX . 'snapshots/';
+            $relative = str_starts_with($path, $prefix) ? substr($path, strlen($prefix)) : '';
+            $segments = explode('/', $relative);
+            if (count($segments) !== 2 || !preg_match('/^\\d{8}T\\d{6}Z-[a-f0-9]{16}$/D', $segments[0]) || $segments[1] !== $name) {
+                throw new RuntimeException('Documento JSON fora do caminho versionado esperado.');
+            }
+            $manifest['files'][$name] = $safeUrl;
         }
         $manifestEtag = (string) ($manifestBlob['etag'] ?? $manifestBlob['eTag'] ?? '');
         $manifest['_etag'] = $manifestEtag !== '' ? $manifestEtag : $this->headEtag($manifestUrl);
