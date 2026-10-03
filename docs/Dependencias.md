@@ -66,4 +66,4 @@ JS próprio do sistema: `public/assets/js/app.js` e `api.js`.
 
 ## Demo na Vercel (só teste, não é produção)
 
-A demo pública usa `vercel-php@0.6.2` e SQLite em `/tmp`. Isso **não** entra no servidor da empresa. Produção = PHP + MySQL no painel da empresa (Hostinger ou equivalente).
+A aplicação raiz na Vercel usa `vercel-php@0.9.0`, SQLite em `/tmp` apenas como cache e snapshots JSON privados no Vercel Blob para persistência. É um caminho limitado de demonstração/homologação, com conflitos concorrentes explicitados; não equivale a banco transacional de produção. A arquitetura corporativa recomendada continua PHP + MySQL/MariaDB no host da empresa.

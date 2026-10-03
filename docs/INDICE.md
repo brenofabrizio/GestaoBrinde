@@ -21,6 +21,7 @@ Versão **1.1.4** · documentação atualizada em **29/09/2026**
 - [Contrato da API legada](api-contract.md)
 - [Contratos incrementais da API Laravel](backend-api-contract.md)
 - [Deploy produtivo na Vercel](Deploy-Vercel-Producao.md)
+- [Persistência JSON privada no Vercel Blob](Persistencia-JSON-Vercel.md)
 - [Supabase + Vercel](Supabase-Vercel.md)
 - [Setup temporário do Supabase](Setup-Supabase-Temporario.md)
 - [Requisitos de VM](Requisitos-VM.md)

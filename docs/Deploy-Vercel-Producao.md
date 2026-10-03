@@ -15,6 +15,10 @@ O projeto Vercel atual da aplicação raiz continua apontando para o backend leg
 - Output Directory: `public`
 - Não usar SQLite, JSON gravável ou filesystem local como persistência.
 
+### Exceção temporária do app raiz
+
+Para o fluxo atual no projeto raiz `gestao-brinde`, foi configurado armazenamento JSON privado no Vercel Blob por solicitação. O SQLite em `/tmp` é somente cache e a persistência ainda não é prova de prontidão transacional de produção. Essa exceção não torna a API Laravel separada saudável nem substitui os critérios de `readiness`; ver [Persistência JSON no Vercel](Persistencia-JSON-Vercel.md).
+
 ## Variáveis obrigatórias
 
 Configurar no ambiente Production da Vercel, sem versionar valores:

@@ -46,11 +46,8 @@ if (getenv('VERCEL')) {
     }
     $tmp = '/tmp/brindes';
     @mkdir($tmp, 0775, true);
-    $sqliteSrc = BASE_PATH . '/database/demo.sqlite';
-    // Keep the local runtime path in sync with the demo namespace version so
-    // a warm serverless process cannot reuse the previous homologation file.
-    $sqliteDst = $tmp . '/demo-v7.sqlite';
-    \App\Support\DemoSqliteStore::hydrate($sqliteDst, $sqliteSrc);
+    // SQLite is only an ephemeral query cache; the private JSON snapshot is durable.
+    $sqliteDst = $tmp . '/json-runtime-v1.sqlite';
     if (getenv('DB_PATH') === false) {
         putenv('DB_PATH=' . $sqliteDst);
         $_ENV['DB_PATH'] = $sqliteDst;
@@ -74,11 +71,8 @@ if (getenv('VERCEL')) {
         }
     };
     $run(static fn () => \App\Support\Installer::ensureVercelDemo());
-    try {
-        \App\Core\Db::persistDemo();
-    } catch (Throwable $e) {
-        error_log('[brindes] persistDemo: ' . $e->getMessage());
-    }
+    \App\Support\JsonDatabase::restoreFromBlob();
+    \App\Core\Db::persistDemo();
 }
 
 mb_internal_encoding('UTF-8');

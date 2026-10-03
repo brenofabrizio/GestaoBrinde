@@ -15,7 +15,7 @@ O front das telas usa Bootstrap 5, Alpine.js e JavaScript próprio (`public/asse
 
 Não há licença paga. O código-fonte completo (incluindo `vendor/`) vai no zip de entrega. **Não é necessário Composer no servidor de produção.**
 
-A demonstração na Vercel usa SQLite só porque a Vercel não tem MySQL. **Produção da empresa = PHP + MySQL/MariaDB**, como no Manual de Instalação.
+A Vercel raiz usa SQLite apenas como cache efêmero e JSON privados no Vercel Blob para persistir o estado de demonstração/homologação; gravações concorrentes conflitantes retornam 409. Isso é limitado e **não representa prontidão transacional de produção**. Para a produção corporativa descrita neste manual, usar PHP + MySQL/MariaDB.
 
 ---
 
@@ -86,5 +86,5 @@ Não é um SPA compilado (não há npm/build obrigatório).
 ## O que não existe neste código
 
 - Framework PHP de mercado
-- Banco embutido em produção (SQLite só na demo Vercel)
+- Persistência relacional no Vercel raiz (a demo usa cache SQLite efêmero + snapshots JSON privados)
 - Dependência de conta do desenvolvedor depois que a empresa hospeda o zip + MySQL no painel dela

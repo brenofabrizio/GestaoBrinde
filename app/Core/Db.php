@@ -18,6 +18,8 @@ final class Db
     private static ?PDO $pdo = null;
     private static int $depth = 0;
     private static bool $mutated = false;
+    /** @var array<string,true> */
+    private static array $mutatedTables = [];
 
     public static function pdo(): PDO
     {
@@ -64,6 +66,7 @@ final class Db
     {
         self::$pdo = null;
         self::$depth = 0;
+        self::clearMutationState();
     }
 
     public static function query(string $sql, array $params = []): PDOStatement
@@ -94,10 +97,34 @@ final class Db
                 $attempt++;
             }
         }
-        if (preg_match('/^\s*(INSERT|UPDATE|DELETE|REPLACE|CREATE|ALTER|DROP)\b/i', $sql)) {
+        $readOnly = preg_match('/^\s*(SELECT|SHOW|DESCRIBE|PRAGMA|EXPLAIN)\b/i', $sql) === 1;
+        if (!$readOnly) {
             self::$mutated = true;
+            self::trackMutatedTable($sql);
         }
         return $stmt;
+    }
+
+    private static function trackMutatedTable(string $sql): void
+    {
+        $pattern = '/^\\s*(?:INSERT(?:\\s+OR\\s+\\w+)?\\s+INTO|REPLACE\\s+INTO|UPDATE|DELETE\\s+FROM|CREATE\\s+TABLE(?:\\s+IF\\s+NOT\\s+EXISTS)?|ALTER\\s+TABLE|DROP\\s+TABLE(?:\\s+IF\\s+EXISTS)?|TRUNCATE\\s+TABLE)\\s+[`"]?([A-Za-z_][A-Za-z0-9_]*)/i';
+        if (preg_match($pattern, $sql, $match)) {
+            self::$mutatedTables[strtolower($match[1])] = true;
+            return;
+        }
+        self::$mutatedTables['*'] = true;
+    }
+
+    /** @return list<string> */
+    public static function mutatedTables(): array
+    {
+        return array_keys(self::$mutatedTables);
+    }
+
+    public static function clearMutationState(): void
+    {
+        self::$mutated = false;
+        self::$mutatedTables = [];
     }
 
     public static function fetch(string $sql, array $params = []): ?array
@@ -178,9 +205,9 @@ final class Db
             self::$depth--;
             if (self::$depth === 0) {
                 $pdo->commit();
-                if (Env::get('JSON_DB_MIRROR', false) === true) {
+                if (Env::get('JSON_DB_MIRROR', false) === true && !Env::get('VERCEL')) {
                     try {
-                        \App\Support\JsonDatabase::mirrorFromPdo();
+                        \App\Support\JsonDatabase::mirrorFromPdo(self::mutatedTables());
                     } catch (Throwable $mirrorError) {
                         Log::error('JSON mirror failed', ['error' => $mirrorError->getMessage()]);
                     }
@@ -235,7 +262,7 @@ final class Db
         return $sql;
     }
 
-    /** Persist the Vercel demo SQLite after writes so the next lambda sees them. */
+    /** Persist changed JSON domain snapshots before acknowledging writes on Vercel. */
     public static function persistDemo(): void
     {
         if (!self::$mutated || !self::isSqlite() || !Env::get('VERCEL')) {
@@ -251,20 +278,14 @@ final class Db
             if (!$hasUsers) {
                 return;
             }
-            try {
-                // Keep the organized JSON representation in sync with the
-                // transactional runtime database for migration and inspection.
-                \App\Support\JsonDatabase::mirrorFromPdo();
-            } catch (Throwable $mirrorError) {
-                Log::error('JSON mirror failed', ['error' => $mirrorError->getMessage()]);
-            }
-            if (self::$pdo !== null) {
-                self::$pdo->exec('PRAGMA wal_checkpoint(TRUNCATE)');
-            }
-            \App\Support\DemoSqliteStore::save((string) Config::get('db.path'));
-            self::$mutated = false;
+            // SQLite is an ephemeral request cache; JSON in private Blob is durable.
+            \App\Support\JsonDatabase::mirrorFromPdo(self::mutatedTables());
+            self::clearMutationState();
         } catch (Throwable $e) {
-            Log::error('Demo sqlite persist failed', ['error' => $e->getMessage()]);
+            Log::error('JSON snapshot persist failed', ['error' => $e->getMessage()]);
+            \App\Support\JsonDatabase::invalidateLocalRevision();
+            self::clearMutationState();
+            throw $e;
         }
     }
 
