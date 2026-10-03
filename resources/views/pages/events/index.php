@@ -3,6 +3,7 @@
   <header class="page-header">
     <div><h2>Eventos</h2><p>Organize eventos, responsáveis e a alocação de brindes.</p></div>
   </header>
+  <div x-show="loadError" x-cloak class="alert alert-danger mt-3" role="alert" aria-live="polite" x-text="loadError"></div>
   <?php if (can('events.manage')): ?>
   <div class="card card-body mb-3">
     <form class="row g-2" @submit.prevent="create">
@@ -30,8 +31,12 @@ ob_start(); ?>
 <script>
 function eventsIndex() {
   return {
-    rows: [], n: { name: '', venue: '', starts_on: '', ends_on: '' },
-    async load() { this.rows = (await Api.get('/api/events')).data; },
+    rows: [], loadError: '', n: { name: '', venue: '', starts_on: '', ends_on: '' },
+    async load() {
+      this.loadError = '';
+      try { this.rows = (await Api.get('/api/events')).data; }
+      catch (e) { this.loadError = e.message || 'Não foi possível carregar os eventos.'; }
+    },
     async create() {
       try { const { data } = await Api.post('/api/events', this.n); location.href = Api.url('/eventos/' + data.id); }
       catch (e) { UI.toast(e.message, 'err'); }

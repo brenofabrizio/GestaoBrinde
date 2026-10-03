@@ -26,6 +26,8 @@ function expectNotContains(string $path, string $needle, string $label): void
     }
 }
 
+expectContains('resources/views/pages/events/index.php', 'loadError', 'Lista de eventos possui estado de erro visível');
+expectContains('resources/views/pages/events/index.php', 'catch (e) { this.loadError', 'Lista de eventos captura falha da API no load');
 expectContains('resources/views/pages/stock/index.php', 'Api.fmt.qty(m.quantity)', 'Livro de movimentações usa quantity da API');
 expectNotContains('resources/views/pages/stock/index.php', 'Api.fmt.qty(m.qty)', 'Livro de movimentações não usa chave inexistente qty');
 expectContains('resources/views/pages/trade/show.php', 'loadError', 'Detalhe TRADE possui estado de erro');
