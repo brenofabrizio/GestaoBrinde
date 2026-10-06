@@ -392,5 +392,6 @@ REPORTS    GET /api/reports/{type}?filters&format=json|csv|xlsx          (Step 3
 IMPORT     POST /api/import/{items|requests}/preview | /commit   GET /api/import/template/{type}   (Step 3)
 SEARCH     GET /api/search?q=                                             (Step 3)
 ```
+For CD receiving, `GET /api/requests` and `GET /api/requests/{id}` also accept `stock.receive` or `stock.exit_confirm`. The service scope limits these users to TRADE requests; it does not grant access to internal requests.
 Request statuses (labels/colors already in `Api.labels.requestStatus`):
 `rascunho → solicitada → aguardando_aprovacao → aprovada → em_separacao → pronta → finalizada` · `reprovada` · `cancelada`.

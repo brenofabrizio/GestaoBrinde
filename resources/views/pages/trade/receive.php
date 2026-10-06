@@ -43,13 +43,16 @@ function receivePage() {
   return {
     list: [], id: qs.get('id') || '', r: null, invoice_no: '', notes: '', invoiceFile: null, saving: false,
     async init() {
+      await this.load();
+      if (this.id) this.pick();
+    },
+    async load() {
       const { data } = await Api.get('/api/requests', {
         flow: 'trade',
         status_in: 'compra_realizada,aguardando_recebimento,recebido_cd',
         per_page: 100
       });
       this.list = data;
-      if (this.id) this.pick();
     },
     async pick() {
       if (!this.id) { this.r = null; return; }
@@ -69,7 +72,13 @@ function receivePage() {
         if (this.invoiceFile) fd.append('invoice', this.invoiceFile);
         await Api.postIdem('/api/trade/requests/' + this.id + '/receive', fd);
         UI.toast('Recebimento registrado. NF anexada e estoque atualizado.', 'ok');
-        location.href = Api.url('/solicitacoes-trade/' + this.id);
+        this.id = '';
+        this.r = null;
+        this.invoice_no = '';
+        this.notes = '';
+        this.invoiceFile = null;
+        this.$root.querySelector('input[type="file"]').value = '';
+        await this.load();
       } catch (e) { UI.toast(e.message, 'err'); }
       this.saving = false;
     }

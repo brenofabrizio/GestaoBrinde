@@ -68,8 +68,35 @@ ob_start(); ?>
         </div></div>
       </div>
       <div class="row g-3 mb-3" x-show="d.series">
-        <div class="col-lg-8"><div class="card card-body"><canvas id="chartSeries" height="120"></canvas></div></div>
-        <div class="col-lg-4"><div class="card card-body"><canvas id="chartTop" height="120"></canvas></div></div>
+        <div class="col-lg-8">
+          <section class="card dashboard-chart-card">
+            <div class="dashboard-chart-heading">
+              <div>
+                <h2>Movimentações no período</h2>
+                <p x-text="d.series.granularity === 'month' ? 'Quantidade de brindes que entraram e saíram por mês.' : 'Quantidade de brindes que entraram e saíram por dia.'"></p>
+              </div>
+              <span class="dashboard-chart-badge"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i> Unidades</span>
+            </div>
+            <div class="dashboard-chart-plot"><canvas id="chartSeries" role="img" aria-label="Gráfico de barras de entradas e saídas de brindes"></canvas></div>
+          </section>
+        </div>
+        <div class="col-lg-4">
+          <section class="card dashboard-chart-card">
+            <div class="dashboard-chart-heading">
+              <div>
+                <h2>Brindes mais movimentados</h2>
+                <p>Itens com maior volume no período.</p>
+              </div>
+            </div>
+            <div class="dashboard-chart-plot dashboard-chart-plot-compact" x-show="d.top_items && d.top_items.length">
+              <canvas id="chartTop" role="img" aria-label="Gráfico de barras dos brindes mais movimentados"></canvas>
+            </div>
+            <div class="dashboard-chart-empty" x-show="!d.top_items || !d.top_items.length">
+              <i class="bi bi-bar-chart" aria-hidden="true"></i>
+              <span>Sem movimentações neste período.</span>
+            </div>
+          </section>
+        </div>
       </div>
       <div class="row g-3">
         <div class="col-lg-5">
@@ -149,31 +176,88 @@ function dashboardPage() {
       if (!this.d || !this.d.series || !window.Chart) return;
       const color = getComputedStyle(document.documentElement).getPropertyValue('--brand-primary').trim();
       const destroy = (id) => { if (this.charts[id]) { this.charts[id].destroy(); } };
+      const formatPeriod = (value) => {
+        const [year, month, day] = String(value).split('-');
+        return day ? `${day}/${month}` : `${month}/${year}`;
+      };
+      const number = new Intl.NumberFormat('pt-BR');
       const el = document.getElementById('chartSeries');
       if (el) {
         destroy('s');
         this.charts.s = new Chart(el, {
-          type: 'line',
+          type: 'bar',
           data: {
-            labels: this.d.series.points.map(p => p.date),
+            labels: this.d.series.points.map(p => formatPeriod(p.date)),
             datasets: [
-              { label: 'Entradas', data: this.d.series.points.map(p => p.entries), borderColor: '#10b981', tension: .3 },
-              { label: 'Saídas', data: this.d.series.points.map(p => p.exits), borderColor: color, tension: .3 }
+              {
+                label: 'Entradas', data: this.d.series.points.map(p => p.entries),
+                backgroundColor: '#10b981', hoverBackgroundColor: '#059669',
+                borderRadius: 6, borderSkipped: false, maxBarThickness: 24,
+              },
+              {
+                label: 'Saídas', data: this.d.series.points.map(p => p.exits),
+                backgroundColor: color, hoverBackgroundColor: color,
+                borderRadius: 6, borderSkipped: false, maxBarThickness: 24,
+              }
             ]
           },
-          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            layout: { padding: { top: 4, right: 4, bottom: 0, left: 0 } },
+            plugins: {
+              legend: {
+                position: 'top', align: 'end',
+                labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 8, boxHeight: 8, padding: 18, color: '#64748b', font: { family: 'Segoe UI, sans-serif', size: 12 } }
+              },
+              tooltip: {
+                backgroundColor: '#0f172a', padding: 12, cornerRadius: 10,
+                titleFont: { weight: '600' },
+                callbacks: { label: (context) => ` ${context.dataset.label}: ${number.format(context.parsed.y || 0)} un.` }
+              }
+            },
+            scales: {
+              x: {
+                stacked: false,
+                grid: { display: false, drawBorder: false },
+                border: { display: false },
+                ticks: { color: '#94a3b8', maxTicksLimit: 8, maxRotation: 0, autoSkip: true, font: { size: 11 } },
+                categoryPercentage: .68, barPercentage: .82,
+              },
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(148, 163, 184, .16)', drawBorder: false },
+                border: { display: false },
+                ticks: { color: '#94a3b8', precision: 0, padding: 10, font: { size: 11 } },
+              }
+            }
+          }
         });
       }
       const top = document.getElementById('chartTop');
-      if (top && this.d.top_items) {
+      if (top && this.d.top_items && this.d.top_items.length) {
         destroy('t');
         this.charts.t = new Chart(top, {
           type: 'bar',
           data: {
-            labels: this.d.top_items.map(x => x.item.name),
-            datasets: [{ label: 'Unidades', data: this.d.top_items.map(x => x.units), backgroundColor: color }]
+            labels: this.d.top_items.map(x => x.item.name.length > 24 ? x.item.name.slice(0, 22) + '…' : x.item.name),
+            datasets: [{ label: 'Unidades', data: this.d.top_items.map(x => x.units), backgroundColor: color, hoverBackgroundColor: color, borderRadius: 6, borderSkipped: false, barThickness: 20 }]
           },
-          options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#0f172a', padding: 12, cornerRadius: 10,
+                callbacks: { label: (context) => ` ${number.format(context.parsed.x || 0)} un.` }
+              }
+            },
+            scales: {
+              x: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, .16)', drawBorder: false }, border: { display: false }, ticks: { color: '#94a3b8', precision: 0, font: { size: 10 } } },
+              y: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', font: { size: 11 } } }
+            }
+          }
         });
       }
     }

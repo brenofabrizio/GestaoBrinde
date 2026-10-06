@@ -146,10 +146,10 @@ return static function (Router $r): void {
     $r->get("/api/audit/{$id}", [AuditController::class, 'show'], ['perm' => 'audit.view']);
 
     // --- Requests -----------------------------------------------------
-    $r->get('/api/requests', [RequestsController::class, 'index'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']]);
+    $r->get('/api/requests', [RequestsController::class, 'index'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']]);
     $r->post('/api/requests', [RequestsController::class, 'store'], ['perm' => 'requests.create', 'idempotent_optional' => true]);
     $r->post('/api/requests/check-availability', [RequestsController::class, 'checkAvailability'], ['perm' => 'requests.create']);
-    $r->get("/api/requests/{$id}", [RequestsController::class, 'show'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']]);
+    $r->get("/api/requests/{$id}", [RequestsController::class, 'show'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']]);
     $r->put("/api/requests/{$id}", [RequestsController::class, 'update'], ['perm' => 'requests.create']);
     $r->post("/api/requests/{$id}/submit", [RequestsController::class, 'submit'], ['perm' => 'requests.create']);
     $r->post("/api/requests/{$id}/cancel", [RequestsController::class, 'cancel']);

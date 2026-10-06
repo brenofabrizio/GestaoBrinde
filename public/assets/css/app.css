@@ -292,6 +292,17 @@ body.is-page-loading { cursor: progress; }
 .kpi::after { content: '\f135'; font-family: 'bootstrap-icons'; float: right; color: var(--muted); font-size: 13px; margin-top: -18px; opacity: .55; }
 .kpi:hover::after { color: var(--brand-primary); opacity: 1; }
 
+.dashboard-chart-card { height: 100%; padding: 20px; overflow: hidden; }
+.dashboard-chart-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.dashboard-chart-heading h2 { margin: 0 0 3px; color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.dashboard-chart-heading p { margin: 0; color: var(--text-secondary); font-size: 12px; }
+.dashboard-chart-badge { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-subtle); color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+.dashboard-chart-badge i { color: var(--brand-primary); }
+.dashboard-chart-plot { position: relative; width: 100%; height: 270px; }
+.dashboard-chart-plot-compact { height: 270px; }
+.dashboard-chart-empty { display: flex; min-height: 220px; align-items: center; justify-content: center; flex-direction: column; gap: 9px; color: var(--muted); font-size: 12px; text-align: center; }
+.dashboard-chart-empty i { color: #cbd5e1; font-size: 26px; }
+
 /* ─── Stock Badges ─────────────────────────────────────────────────── */
 .badge-stock-ok { background: hsl(141, 78%, 93%); color: hsl(141, 72%, 24%); }
 .badge-stock-low { background: hsl(45, 96%, 90%); color: hsl(32, 86%, 28%); }
@@ -698,6 +709,10 @@ textarea.form-control { min-height: 96px; resize: vertical; }
   white-space: nowrap;
 }
 @media (max-width: 767.98px) {
+  .dashboard-chart-card { padding: 16px; }
+  .dashboard-chart-heading { margin-bottom: 10px; }
+  .dashboard-chart-plot, .dashboard-chart-plot-compact { height: 245px; }
+  .dashboard-chart-badge { font-size: 10px; }
   .item-detail-actions {
     width: 100%;
     margin-left: 0 !important;
