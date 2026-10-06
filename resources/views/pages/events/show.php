@@ -12,7 +12,7 @@ ob_start(); ?>
           <h2 class="h4 mb-1" x-text="e.name"></h2>
           <span class="badge text-bg-primary" x-text="e.status_label"></span>
         </div>
-        <div class="ms-auto d-flex gap-2">
+        <div class="event-detail-actions ms-auto d-flex flex-wrap align-items-start gap-2">
           <?php if (can(['stock.transfer', 'stock.exit'])): ?>
           <a class="btn btn-outline-primary" :href="'<?= e(url('/estoque/transferencia')) ?>'">Transferir do CD</a>
           <?php endif; ?>
@@ -34,6 +34,7 @@ ob_start(); ?>
               <option value="">Indústria</option>
               <template x-for="i in industries" :key="i.id"><option :value="i.id" x-text="i.name"></option></template>
             </select>
+            <div class="form-text text-danger" x-show="!industries.length">Cadastre uma indústria antes de incluir a cota.</div>
           </div>
           <div class="col-md-4">
             <select class="form-select" x-model="row.item_id">
@@ -97,14 +98,30 @@ function eventShow(id) {
       this.items = (await Api.get('/api/items/options')).data;
     },
     addRow() {
-      if (!this.row.industry_id || !this.row.item_id) return;
-      const ind = this.industries.find(i => i.id == this.row.industry_id);
-      const it = this.items.find(i => i.id == this.row.item_id);
-      this.allocs.push({
-        industry: { id: Number(this.row.industry_id), name: ind?.name },
-        item: { id: Number(this.row.item_id), name: it?.name, code: it?.code },
-        qty_allocated: Number(this.row.qty_allocated), qty_withdrawn: 0, saldo: Number(this.row.qty_allocated)
-      });
+      const industryId = Number(this.row.industry_id);
+      const itemId = Number(this.row.item_id);
+      const quantity = Number(this.row.qty_allocated);
+      if (!Number.isInteger(industryId) || industryId <= 0 || !Number.isInteger(itemId) || itemId <= 0) {
+        UI.toast('Selecione uma indústria e um brinde para incluir a cota.', 'err');
+        return;
+      }
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        UI.toast('Informe uma quantidade inteira maior que zero.', 'err');
+        return;
+      }
+      const ind = this.industries.find(i => Number(i.id) === industryId);
+      const it = this.items.find(i => Number(i.id) === itemId);
+      if (!ind || !it) {
+        UI.toast('Não foi possível localizar os dados selecionados.', 'err');
+        return;
+      }
+      this.allocs = this.allocs.concat([{
+        industry: { id: industryId, name: ind.name },
+        item: { id: itemId, name: it.name, code: it.code },
+        qty_allocated: quantity, qty_withdrawn: 0, saldo: quantity
+      }]);
+      this.row = { industry_id: '', item_id: '', qty_allocated: 1 };
+      UI.toast('Cota incluída. Clique em “Salvar cotas” para confirmar.', 'ok');
     },
     async saveAlloc() {
       try {

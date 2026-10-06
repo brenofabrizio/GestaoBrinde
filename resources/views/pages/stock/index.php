@@ -84,10 +84,10 @@
         <template x-for="m in rows" :key="m.id">
           <tr>
             <td x-text="Api.fmt.datetime(m.created_at)" class="text-nowrap small text-muted"></td>
-            <td>
+            <td class="journal-type-cell">
               <span class="badge" :class="badgeClass(m.type)" x-text="m.type_label"></span>
             </td>
-            <td>
+            <td class="journal-item-cell">
               <div class="fw-semibold text-dark" x-text="m.item.name"></div>
               <div class="small text-muted" x-text="m.item.code"></div>
             </td>

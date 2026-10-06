@@ -80,7 +80,7 @@ function modoEvento(id) {
       if (addrs.length) return 'Comprovante registrado para ' + addrs.join(', ') + '. No servidor de produção, com SMTP, o e-mail sai na hora.';
       return 'Protocolo gerado. Informe um e-mail válido para receber o comprovante.';
     },
-    next() { this.done = null; this.industry = null; this.lines = []; this.recv = ''; this.email = ''; this.key = Api.newKey(); this.q = ''; this.filtered = this.industries; },
+    async next() { this.done = null; this.industry = null; this.lines = []; this.recv = ''; this.email = ''; this.key = Api.newKey(); this.q = ''; this.filtered = []; await this.init(); },
     async confirm() {
       const items = this.lines.filter(l => l.qty > 0).map(l => ({ item_id: l.item.id, qty: l.qty }));
       if (!items.length) { UI.toast('Informe as quantidades.', 'err'); return; }

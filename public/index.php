@@ -10,8 +10,13 @@ use App\Support\JsonSnapshotConflict;
 
 // PHP built-in dev server: serve existing static files directly.
 if (PHP_SAPI === 'cli-server') {
-    $file = __DIR__ . parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-    if (is_file($file)) {
+    // Decode percent-encoded filenames (spaces/UTF-8) before checking static assets.
+    $requestPath = rawurldecode((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/'));
+    $publicRoot = realpath(__DIR__);
+    $file = realpath(__DIR__ . $requestPath);
+    if ($publicRoot !== false && $file !== false
+        && is_file($file)
+        && str_starts_with($file, $publicRoot . DIRECTORY_SEPARATOR)) {
         return false;
     }
 }

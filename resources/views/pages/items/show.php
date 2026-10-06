@@ -7,7 +7,7 @@ ob_start(); ?>
   </header>
   <template x-if="it">
     <div>
-      <div class="d-flex flex-wrap gap-3 mb-3">
+      <div class="item-detail-header d-flex flex-wrap align-items-start gap-3 mb-3">
         <img class="thumb" style="width:96px;height:96px" :src="it.thumb_url || <?= json_script(asset('img/placeholder.svg')) ?>" alt="">
         <div>
           <div class="text-muted" x-text="it.code"></div>
@@ -15,7 +15,7 @@ ob_start(); ?>
           <span class="badge" :class="'badge-stock-' + it.stock.level" x-text="it.stock.level_label"></span>
           <span class="badge text-bg-secondary" x-text="it.status"></span>
         </div>
-        <div class="ms-auto d-flex flex-wrap gap-2">
+        <div class="item-detail-actions ms-auto d-flex flex-wrap align-items-start gap-2">
           <?php if (can('stock.entry')): ?><a class="btn btn-outline-primary" :href="'<?= e(url('/estoque/entrada')) ?>?item_id=' + it.id">Entrada</a><?php endif; ?>
           <?php if (can('stock.exit') && !is_cd_operations()): ?><a class="btn btn-outline-primary" :href="'<?= e(url('/estoque/saida')) ?>?item_id=' + it.id">Registrar saída</a><?php endif; ?>
           <?php if (can('stock.adjust')): ?><a class="btn btn-outline-secondary" :href="'<?= e(url('/estoque/ajuste')) ?>?item_id=' + it.id">Ajuste</a><?php endif; ?>

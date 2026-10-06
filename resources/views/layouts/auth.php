@@ -18,6 +18,7 @@ $company = e($settings['company_name'] ?? 'Controle de Brindes');
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
+  <link rel="icon" type="image/png" href="<?= e(asset('img/Emefarma_Símbolo_Azul Claro.png')) ?>">
   <meta name="theme-color" content="#2563EB">
   <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap/bootstrap.min.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('vendor/bootstrap-icons/bootstrap-icons.min.css')) ?>">

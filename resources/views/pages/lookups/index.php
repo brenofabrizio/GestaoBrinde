@@ -1,7 +1,8 @@
 <?php
 $page = (string) ($app['page']['params']['type'] ?? 'categorias');
 ob_start(); ?>
-<div class="card card-body" x-data="lookupsPage()" x-init="init()" data-lookup-page="<?= e($page) ?>">
+<div x-data="lookupsPage()" x-init="init()" data-lookup-page="<?= e($page) ?>">
+  <div class="card card-body">
   <header class="section-header">
     <div><h2>Cadastros auxiliares</h2><p>Gerencie as informações de apoio usadas nos fluxos operacionais.</p></div>
   </header>
@@ -39,11 +40,12 @@ ob_start(); ?>
       </tbody>
     </table>
   </div>
-  <div class="modal fade" id="lookupModal" tabindex="-1">
-    <div class="modal-dialog"><div class="modal-content">
-      <form @submit.prevent="save">
+  </div>
+  <div class="modal fade lookup-modal-portal" id="lookupModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+      <form class="lookup-modal-form" @submit.prevent="save">
         <div class="modal-header"><h5 class="modal-title" x-text="editId ? 'Editar' : 'Novo'"></h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button></div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
         <div class="modal-body">
           <template x-for="f in fields" :key="f.name">
             <div class="mb-2">
@@ -59,7 +61,7 @@ ob_start(); ?>
             </div>
           </template>
         </div>
-        <div class="modal-footer"><button class="btn btn-primary">Salvar</button></div>
+        <div class="modal-footer"><button type="submit" class="btn btn-primary">Salvar</button></div>
       </form>
     </div></div>
   </div>
