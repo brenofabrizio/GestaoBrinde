@@ -66,11 +66,17 @@ final class TradeController
         return Response::ok(TradeService::lookup($code));
     }
 
+    public function qrInfo(Request $request): Response
+    {
+        $code = (string) ($request->query('code', '') ?: $request->input('code', ''));
+        return Response::ok(TradeService::qrInfo($code));
+    }
+
     public function qr(Request $request): Response
     {
         $row = RequestService::find($request->id());
         $code = (string) ($row['public_code'] ?? $row['code']);
-        $png = QrService::png($code);
+        $png = QrService::png(absolute_url('/consulta-trade/' . rawurlencode($code)));
         return new Response(200, [
             'Content-Type' => 'image/png',
             'Content-Length' => (string) strlen($png),

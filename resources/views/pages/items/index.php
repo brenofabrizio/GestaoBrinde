@@ -111,7 +111,7 @@ ob_start(); ?>
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex align-items-center justify-content-between" x-show="meta">
+  <div class="alpine-flex align-items-center justify-content-between" x-show="meta">
     <button class="btn btn-sm btn-outline-secondary" :disabled="!meta || meta.page<=1" @click="page--; load()">Anterior</button>
     <span class="small text-muted" x-text="meta ? ('Página ' + meta.page + ' de ' + meta.last_page + ' · ' + meta.total + ' brindes') : ''"></span>
     <button class="btn btn-sm btn-outline-secondary" :disabled="!meta || meta.page>=meta.last_page" @click="page++; load()">Próxima</button>

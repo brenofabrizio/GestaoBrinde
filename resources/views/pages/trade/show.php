@@ -3,7 +3,7 @@ $id = (int) ($app['page']['params']['id'] ?? 0);
 ob_start(); ?>
 <div x-data="tradeShow(<?= $id ?>)" x-init="load()">
   <div x-show="loading && !r" class="alert alert-info">Carregando solicitação TRADE…</div>
-  <div x-show="loadError && !r" class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+  <div x-show="loadError && !r" class="alert alert-danger alpine-flex justify-content-between align-items-center" role="alert">
     <span x-text="loadError || 'Não foi possível carregar a solicitação TRADE.'"></span>
     <button type="button" class="btn btn-sm btn-outline-danger" @click="load()">Tentar novamente</button>
   </div>
@@ -80,10 +80,14 @@ ob_start(); ?>
         <div class="col-lg-4">
           <div class="card card-body text-center">
             <div class="fw-semibold mb-2">QR Code da solicitação</div>
-            <img x-show="r.qr_png" :src="r.qr_png" alt="QR Code" width="220" height="220"
-                 class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
-            <img x-show="!r.qr_png" :src="Api.url('/api/trade/requests/' + r.id + '/qr')" alt="QR Code"
-                 width="220" height="220" class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
+            <template x-if="r.qr_png">
+              <img :src="r.qr_png" alt="QR Code da consulta TRADE" width="220" height="220"
+                   class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
+            </template>
+            <template x-if="!r.qr_png">
+              <img :src="Api.url('/api/trade/requests/' + r.id + '/qr')" alt="QR Code da consulta TRADE"
+                   width="220" height="220" class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
+            </template>
             <div class="mt-2 font-monospace" x-text="r.public_code || r.code"></div>
             <p class="small text-muted mb-0">No CD ou no evento, leia este código para identificar indústria, produto e saldo.</p>
           </div>

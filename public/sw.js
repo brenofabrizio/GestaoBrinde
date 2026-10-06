@@ -1,4 +1,4 @@
-const VERSION = 'gestao-brindes-v11';
+const VERSION = 'gestao-brindes-v14';
 const STATIC_CACHE = VERSION + '-static';
 const PAGE_CACHE = VERSION + '-pages';
 const API_CACHE = VERSION + '-api';

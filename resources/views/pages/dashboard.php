@@ -37,7 +37,7 @@ ob_start(); ?>
         <div class="col-6 col-lg-3"><a class="card kpi" href="<?= e(url('/solicitacoes')) ?>">
           <div class="label">Solicitações pendentes</div><div class="value" x-text="d.requests.pending"></div></a></div>
         <div class="col-6 col-lg-3"><a class="card kpi" href="<?= e(url('/aprovacoes')) ?>">
-          <div class="label">Aguardando aprovação</div><div class="value text-warning" x-text="d.requests.awaiting_approval"></div></a></div>
+          <div class="label">Internas aguardando aprovação</div><div class="value text-warning" x-text="d.requests.awaiting_approval"></div></a></div>
         <div class="col-6 col-lg-3" x-show="d.period_totals"><div class="card kpi">
           <div class="label">Saídas no período</div>
           <div class="value" x-text="d.period_totals ? Api.fmt.number(d.period_totals.exits_units) : '—'"></div>
@@ -52,7 +52,7 @@ ob_start(); ?>
         <div class="col-6 col-lg-3"><a class="card kpi" href="<?= e(url('/retirada')) ?>">
           <div class="label">Prontas para retirada</div><div class="value text-success" x-text="d.trade.ready"></div></a></div>
         <div class="col-6 col-lg-3"><a class="card kpi" href="<?= e(url('/solicitacoes-trade?status=solicitada')) ?>">
-          <div class="label">Aguardando aprovação</div><div class="value text-danger" x-text="d.trade.awaiting_approval"></div></a></div>
+          <div class="label">TRADE aguardando aprovação</div><div class="value text-danger" x-text="d.trade.awaiting_approval"></div></a></div>
         <div class="col-lg-6" x-show="d.trade.current_event">
           <a class="card kpi" :href="d.trade.current_event ? '<?= e(url('/eventos')) ?>/' + d.trade.current_event.id : '#'">
             <div class="label">Evento atual</div>

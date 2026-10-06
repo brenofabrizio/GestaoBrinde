@@ -136,6 +136,7 @@ return static function (Router $r): void {
     $r->post("/api/trade/requests/{$id}/delivered", [TradeController::class, 'delivered'], ['perm' => 'requests.process']);
     $r->get("/api/trade/requests/{$id}/qr", [TradeController::class, 'qr'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']]);
     $r->get('/api/trade/lookup', [TradeController::class, 'lookup']);
+    $r->get('/api/trade/qr-info', [TradeController::class, 'qrInfo'], ['perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']]);
 
     // --- Dashboard ----------------------------------------------------
     $r->get('/api/dashboard', [DashboardController::class, 'show'], ['perm' => 'dashboard.view']);

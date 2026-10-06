@@ -431,9 +431,52 @@ final class TradeService
         $out = RequestService::find((int) $row['id']);
         $out['type'] = 'request';
         $code = (string) ($out['public_code'] ?? $out['code']);
-        $out['qr_svg'] = QrService::svg($code);
-        $out['qr_png'] = $out['qr_png'] ?? QrService::pngDataUri($code, 5);
+        $target = absolute_url('/consulta-trade/' . rawurlencode($code));
+        $out['qr_svg'] = QrService::svg($target);
+        $out['qr_png'] = QrService::pngDataUri($target, 5);
         return $out;
+    }
+
+    /** Minimal, read-only information shown when a TRADE QR is opened. */
+    public static function qrInfo(string $code): array
+    {
+        $code = trim($code);
+        if ($code === '') {
+            throw HttpException::validation(['code' => 'Informe o código da solicitação.']);
+        }
+        [$scopeSql, $scopeParams] = RequestService::scope();
+        $row = Db::fetch(
+            'SELECT r.id, r.industry_id, ind.name AS industry_name FROM requests r '
+            . 'LEFT JOIN industries ind ON ind.id = r.industry_id '
+            . 'WHERE r.deleted_at IS NULL AND r.flow = ? AND (r.public_code = ? OR r.code = ?) '
+            . $scopeSql,
+            ['trade', $code, $code, ...$scopeParams]
+        );
+        if ($row === null) {
+            throw HttpException::notFound('Solicitação TRADE não encontrada ou sem permissão.');
+        }
+
+        $lines = Db::fetchAll(
+            'SELECT i.id, i.code, i.name FROM request_items ri JOIN items i ON i.id = ri.item_id WHERE ri.request_id = ? ORDER BY ri.id',
+            [(int) $row['id']]
+        );
+        $products = [];
+        foreach ($lines as $line) {
+            $itemId = (int) $line['id'];
+            $balance = (int) Db::value(
+                "SELECT COALESCE(SUM(CASE WHEN type = 'saida' THEN -qty ELSE qty END), 0) "
+                . "FROM stock_movements WHERE item_id = ? AND industry_id = ? "
+                . "AND type IN ('entrada','saida','ajuste','estorno')",
+                [$itemId, (int) $row['industry_id']]
+            );
+            $products[] = ['name' => $line['name'], 'code' => $line['code'], 'saldo' => max(0, $balance)];
+        }
+
+        return [
+            'code' => $code,
+            'industry' => $row['industry_name'],
+            'products' => $products,
+        ];
     }
 
     public static function stockByIndustry(?int $industryId = null): array
@@ -594,6 +637,7 @@ final class TradeService
             'total' => (int) ($row['total'] ?? 0),
             'awaiting_receipt' => (int) ($row['awaiting_receipt'] ?? 0),
             'ready' => (int) ($row['ready'] ?? 0),
+            'awaiting_approval' => (int) ($row['awaiting_approval'] ?? 0),
             'pending' => (int) ($row['pending'] ?? 0),
             'current_event' => $event ? [
                 'id' => (int) $event['id'],

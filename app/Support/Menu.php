@@ -15,7 +15,7 @@ final class Menu
         ['group' => 'Principal', 'items' => [
             ['label' => 'Dashboard', 'icon' => 'speedometer2', 'url' => '/dashboard', 'perm' => 'dashboard.view'],
         ]],
-        ['group' => 'TRADE', 'items' => [
+        ['group' => 'Trade', 'items' => [
             ['label' => 'Solicitações TRADE', 'icon' => 'clipboard-check', 'url' => '/solicitacoes-trade', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all'], 'hide_cd' => true],
             ['label' => 'Recebimento no CD', 'icon' => 'box-arrow-in-down', 'url' => '/recebimento', 'perm' => ['stock.receive', 'stock.entry']],
             ['label' => 'Estoque por indústria', 'icon' => 'building', 'url' => '/estoque/por-industria', 'perm' => 'stock.view'],

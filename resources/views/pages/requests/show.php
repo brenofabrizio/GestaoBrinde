@@ -6,7 +6,7 @@ ob_start(); ?>
     <div><h2>Detalhes da solicitação</h2><p>Acompanhe o histórico, os itens e as ações permitidas para este processo.</p></div>
   </header>
   <div x-show="loading && !r" class="alert alert-info">Carregando solicitação…</div>
-  <div x-show="error && !r" class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+  <div x-show="error && !r" class="alert alert-danger alpine-flex justify-content-between align-items-center" role="alert">
     <span x-text="error || 'Não foi possível carregar a solicitação.'"></span>
     <button type="button" class="btn btn-sm btn-outline-danger" @click="load()">Tentar novamente</button>
   </div>

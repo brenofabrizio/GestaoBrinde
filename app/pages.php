@@ -34,6 +34,7 @@ return [
     ['path' => '/estoque/transferencia', 'view' => 'pages/stock/transfer', 'title' => 'Transferência de estoque', 'perm' => ['stock.transfer', 'stock.exit']],
     ['path' => '/solicitacoes-trade', 'view' => 'pages/trade/index', 'title' => 'Solicitações TRADE', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']],
     ['path' => '/solicitacoes-trade/nova', 'view' => 'pages/trade/form', 'title' => 'Nova solicitação TRADE', 'perm' => 'requests.create', 'deny_cd' => true],
+    ['path' => '/consulta-trade/{code:EME-[0-9][0-9][0-9][0-9]-[0-9]+}', 'view' => 'pages/trade/qr-info', 'title' => 'Consulta TRADE', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all', 'stock.receive', 'stock.exit_confirm']],
     ['path' => '/solicitacoes-trade/{id:\d+}', 'view' => 'pages/trade/show', 'title' => 'Solicitação TRADE', 'perm' => ['requests.view_own', 'requests.view_department', 'requests.view_all']],
     ['path' => '/recebimento', 'view' => 'pages/trade/receive', 'title' => 'Recebimento no CD', 'perm' => ['stock.receive', 'stock.entry']],
     ['path' => '/retirada', 'view' => 'pages/trade/scan', 'title' => 'Retirada / QR Code', 'perm' => ['requests.process', 'stock.exit', 'events.withdraw', 'stock.exit_confirm']],

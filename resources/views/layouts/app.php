@@ -120,22 +120,29 @@ $mustChangePassword = !empty($user['must_change_password']);
         </ul>
       </div>
     </header>
-    <div class="offcanvas offcanvas-start text-bg-dark" id="mobileNav" tabindex="-1"
+    <div class="offcanvas offcanvas-start" id="mobileNav" tabindex="-1"
          aria-labelledby="mobileNavTitle">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="mobileNavTitle"><?= e($settings['company_name']) ?></h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar menu"></button>
+        <div class="offcanvas-brand">
+          <?php if (!empty($settings['logo_url'])): ?>
+            <img src="<?= e($settings['logo_url']) ?>" alt="">
+          <?php else: ?>
+            <span class="sidebar-brand-icon" aria-hidden="true"><i class="bi bi-gift"></i></span>
+          <?php endif; ?>
+          <h5 class="offcanvas-title" id="mobileNavTitle"><?= e($settings['company_name']) ?></h5>
+        </div>
+        <button class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar menu"></button>
       </div>
-      <div class="offcanvas-body">
+      <nav class="offcanvas-body" aria-label="Navegação principal">
         <?php foreach ($app['menu'] as $group): ?>
           <div class="nav-group"><?= e($group['group']) ?></div>
           <?php foreach ($group['items'] as $item): ?>
-            <a class="nav-link<?= $item['active'] ? ' active' : '' ?>" href="<?= e($item['url']) ?>">
+            <a class="nav-link<?= $item['active'] ? ' active' : '' ?>" href="<?= e($item['url']) ?>" <?= $item['active'] ? 'aria-current="page"' : '' ?>>
               <i class="bi bi-<?= e($item['icon']) ?>" aria-hidden="true"></i> <?= e($item['label']) ?>
             </a>
           <?php endforeach; ?>
         <?php endforeach; ?>
-      </div>
+      </nav>
     </div>
     <main class="page" id="main-content" tabindex="-1">
       <?= $content ?? '' ?>
