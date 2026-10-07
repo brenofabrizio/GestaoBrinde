@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Middleware\HandleCors;
 use App\Services\EnsurePermission;
 
+// Vercel functions are stateless. The web entry point only serves the welcome
+// page, and API routes do not use Laravel sessions, so do not let the default
+// database session driver block every request when the database is unavailable.
+if (getenv('VERCEL') && getenv('SESSION_DRIVER') === false) {
+    putenv('SESSION_DRIVER=array');
+    $_ENV['SESSION_DRIVER'] = 'array';
+    $_SERVER['SESSION_DRIVER'] = 'array';
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
