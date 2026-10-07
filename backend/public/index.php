@@ -17,7 +17,10 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-$app->register(\Illuminate\View\ViewServiceProvider::class);
+// The Vercel build may preload a stale provider manifest. Re-register the
+// view provider so its finder/engine bindings are present before error
+// handling or the welcome route tries to render a view.
+$app->register(\Illuminate\View\ViewServiceProvider::class, true);
 
 // The Vercel PHP runtime strips `/api` from PATH_INFO when routing to the
 // function. Laravel must receive the original public request path.
