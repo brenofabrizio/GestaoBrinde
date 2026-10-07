@@ -17,11 +17,6 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-// The Vercel build may preload a stale provider manifest. Re-register the
-// view provider so its finder/engine bindings are present before error
-// handling or the welcome route tries to render a view.
-$app->register(\Illuminate\View\ViewServiceProvider::class, true);
-
 // Keep the incoming public URL when Vercel rewrites it to api/index.php.
 // The rewrite passes the original path as an internal query parameter because
 // PHP runtimes may expose the function path instead of the requested path.
