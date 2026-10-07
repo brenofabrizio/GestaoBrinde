@@ -17,11 +17,6 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-// The Vercel PHP bundle may use a cached provider manifest that omits these
-// bindings. Register the filesystem and view providers before handling a request.
-$app->register(\Illuminate\Filesystem\FilesystemServiceProvider::class, true);
-$app->register(\Illuminate\View\ViewServiceProvider::class, true);
-
 // Keep the incoming public URL when Vercel rewrites it to api/index.php.
 // The rewrite passes the original path as an internal query parameter because
 // PHP runtimes may expose the function path instead of the requested path.

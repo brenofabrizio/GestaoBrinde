@@ -28,14 +28,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['permission' => EnsurePermission::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->report(static function (\Throwable $exception): void {
-            error_log(sprintf(
-                '[app-exception] %s: %s',
-                get_class($exception),
-                mb_substr($exception->getMessage(), 0, 500),
-            ));
-        });
-
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
