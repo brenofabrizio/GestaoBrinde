@@ -22,16 +22,18 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 // handling or the welcome route tries to render a view.
 $app->register(\Illuminate\View\ViewServiceProvider::class, true);
 
-// The Vercel PHP runtime strips `/api` from PATH_INFO when routing to the
-// function. Laravel must receive the original public request path.
-if (isset($_SERVER['REQUEST_URI'])) {
-    $requestPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Keep the incoming public URL when Vercel rewrites it to api/index.php.
+// The rewrite passes the original path as an internal query parameter because
+// PHP runtimes may expose the function path instead of the requested path.
+if (getenv('VERCEL') && isset($_GET['__vercel_path']) && is_string($_GET['__vercel_path'])) {
+    $requestPath = '/' . ltrim($_GET['__vercel_path'], '/');
+    unset($_GET['__vercel_path']);
 
-    if (is_string($requestPath) && $requestPath !== '') {
-        $_SERVER['PATH_INFO'] = $requestPath;
-        $_SERVER['SCRIPT_NAME'] = '/';
-        $_SERVER['PHP_SELF'] = '/';
-    }
+    $_SERVER['REQUEST_URI'] = $requestPath;
+    $_SERVER['PATH_INFO'] = $requestPath;
+    $_SERVER['SCRIPT_NAME'] = '/';
+    $_SERVER['PHP_SELF'] = '/';
+    $_SERVER['QUERY_STRING'] = http_build_query($_GET);
 }
 
 $app->handleRequest(Request::capture());
