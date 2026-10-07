@@ -7,6 +7,12 @@ if (getenv('VERCEL')) {
     // the deployed bundle is read-only and may not contain bootstrap/cache.
     $cacheDirectory = sys_get_temp_dir() . '/gestao-brinde/bootstrap-cache';
 
+    // Laravel's cache-path resolver recognizes root-relative Windows paths,
+    // but treats drive-prefixed paths as app-relative paths.
+    if (DIRECTORY_SEPARATOR === '\\') {
+        $cacheDirectory = (string) preg_replace('/^[A-Z]:/i', '', $cacheDirectory);
+    }
+
     if (!is_dir($cacheDirectory) && !mkdir($cacheDirectory, 0775, true) && !is_dir($cacheDirectory)) {
         throw new RuntimeException('Unable to create the Laravel runtime cache directory.');
     }
