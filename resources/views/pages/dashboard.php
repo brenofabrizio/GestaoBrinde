@@ -144,7 +144,7 @@ function dashboardPage() {
   const iso = (d) => d.toISOString().slice(0, 10);
   const today = new Date();
   return {
-    loading: true, d: null, preset: 'month',
+    loading: true, d: null, preset: 'month', loadSeq: 0,
     from: iso(new Date(today.getFullYear(), today.getMonth(), 1)),
     to: iso(today),
     charts: {},
@@ -164,38 +164,50 @@ function dashboardPage() {
       this.load();
     },
     async load() {
+      const seq = ++this.loadSeq;
       this.loading = true;
       try {
         const { data } = await Api.get('/api/dashboard', { from: this.from, to: this.to });
+        if (seq !== this.loadSeq) return;
         this.d = data;
         this.$nextTick(() => this.draw());
-      } catch (e) { UI.toast(e.message, 'err'); }
-      this.loading = false;
+      } catch (e) {
+        if (seq === this.loadSeq) UI.toast(e.message, 'err');
+      } finally {
+        if (seq === this.loadSeq) this.loading = false;
+      }
     },
     draw() {
       if (!this.d || !this.d.series || !window.Chart) return;
       const color = getComputedStyle(document.documentElement).getPropertyValue('--brand-primary').trim();
-      const destroy = (id) => { if (this.charts[id]) { this.charts[id].destroy(); } };
       const formatPeriod = (value) => {
         const [year, month, day] = String(value).split('-');
         return day ? `${day}/${month}` : `${month}/${year}`;
       };
       const number = new Intl.NumberFormat('pt-BR');
       const el = document.getElementById('chartSeries');
-      if (el) {
-        destroy('s');
+      if (el && el.isConnected && el.ownerDocument) {
+        const labels = this.d.series.points.map(p => formatPeriod(p.date));
+        const entries = this.d.series.points.map(p => p.entries);
+        const exits = this.d.series.points.map(p => p.exits);
+        if (this.charts.s && this.charts.s.canvas === el) {
+          this.charts.s.data.labels = labels;
+          this.charts.s.data.datasets[0].data = entries;
+          this.charts.s.data.datasets[1].data = exits;
+          this.charts.s.update('none');
+        } else {
         this.charts.s = new Chart(el, {
           type: 'bar',
           data: {
-            labels: this.d.series.points.map(p => formatPeriod(p.date)),
+            labels,
             datasets: [
               {
-                label: 'Entradas', data: this.d.series.points.map(p => p.entries),
+                label: 'Entradas', data: entries,
                 backgroundColor: '#10b981', hoverBackgroundColor: '#059669',
                 borderRadius: 6, borderSkipped: false, maxBarThickness: 24,
               },
               {
-                label: 'Saídas', data: this.d.series.points.map(p => p.exits),
+                label: 'Saídas', data: exits,
                 backgroundColor: color, hoverBackgroundColor: color,
                 borderRadius: 6, borderSkipped: false, maxBarThickness: 24,
               }
@@ -234,15 +246,22 @@ function dashboardPage() {
             }
           }
         });
+        }
       }
       const top = document.getElementById('chartTop');
-      if (top && this.d.top_items && this.d.top_items.length) {
-        destroy('t');
+      if (top && top.isConnected && top.ownerDocument && this.d.top_items && this.d.top_items.length) {
+        const labels = this.d.top_items.map(x => x.item.name.length > 24 ? x.item.name.slice(0, 22) + '…' : x.item.name);
+        const units = this.d.top_items.map(x => x.units);
+        if (this.charts.t && this.charts.t.canvas === top) {
+          this.charts.t.data.labels = labels;
+          this.charts.t.data.datasets[0].data = units;
+          this.charts.t.update('none');
+        } else {
         this.charts.t = new Chart(top, {
           type: 'bar',
           data: {
-            labels: this.d.top_items.map(x => x.item.name.length > 24 ? x.item.name.slice(0, 22) + '…' : x.item.name),
-            datasets: [{ label: 'Unidades', data: this.d.top_items.map(x => x.units), backgroundColor: color, hoverBackgroundColor: color, borderRadius: 6, borderSkipped: false, barThickness: 20 }]
+            labels,
+            datasets: [{ label: 'Unidades', data: units, backgroundColor: color, hoverBackgroundColor: color, borderRadius: 6, borderSkipped: false, barThickness: 20 }]
           },
           options: {
             indexAxis: 'y', responsive: true, maintainAspectRatio: false,
@@ -259,6 +278,7 @@ function dashboardPage() {
             }
           }
         });
+        }
       }
     }
   };

@@ -369,15 +369,17 @@ final class QrEncoder
         $data = (0b00 << 3) | $mask; // ECC-M = 00
         $bits = self::bchFormat($data);
         $map = [
-            [8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8],
-            [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8],
+            [0, 8], [1, 8], [2, 8], [3, 8], [4, 8], [5, 8], [7, 8], [8, 8],
+            [8, 7], [8, 5], [8, 4], [8, 3], [8, 2], [8, 1], [8, 0],
         ];
         $map2 = [
             [$size - 1, 8], [$size - 2, 8], [$size - 3, 8], [$size - 4, 8], [$size - 5, 8], [$size - 6, 8], [$size - 7, 8],
             [8, $size - 8], [8, $size - 7], [8, $size - 6], [8, $size - 5], [8, $size - 4], [8, $size - 3], [8, $size - 2], [8, $size - 1],
         ];
         for ($i = 0; $i < 15; $i++) {
-            $bit = (int) $bits[$i];
+            // QR format information is placed least-significant bit first.
+            // bchFormat() returns the value MSB first, so reverse it here.
+            $bit = (int) $bits[14 - $i];
             $g[$map[$i][0]][$map[$i][1]] = $bit;
             $g[$map2[$i][0]][$map2[$i][1]] = $bit;
         }

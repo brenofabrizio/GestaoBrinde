@@ -9,7 +9,7 @@
     <button class="btn btn-outline-secondary btn-sm" type="button" @click="toggleCam" x-text="camOn ? 'Fechar câmera' : 'Abrir câmera do celular'"></button>
     <label class="btn btn-outline-secondary btn-sm mb-0">
       Ler QR pela foto
-      <input type="file" accept="image/*" capture="environment" class="d-none" @change="fromFile($event)">
+      <input type="file" accept="image/*" class="d-none" @change="fromFile($event)">
     </label>
   </div>
   <p class="small text-danger" x-show="camErr" x-text="camErr"></p>
@@ -152,26 +152,68 @@ function scanPage() {
       UI.toast('QR lido: ' + this.code, 'ok');
       this.lookup();
     },
-    fromFile(ev) {
+    decodeQr(source, width, height) {
+      if (typeof jsQR !== 'function' || !width || !height) return null;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const baseScale = Math.min(1, 1800 / Math.max(width, height));
+      const scales = [...new Set([baseScale, Math.min(2, baseScale * 1.5), Math.min(3, baseScale * 2)])];
+      for (const angle of [0, 90, 180, 270]) {
+        for (const scale of scales) {
+          const w = Math.max(1, Math.round(width * scale));
+          const h = Math.max(1, Math.round(height * scale));
+          canvas.width = angle % 180 ? h : w;
+          canvas.height = angle % 180 ? w : h;
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(angle * Math.PI / 180);
+          ctx.drawImage(source, -w / 2, -h / 2, w, h);
+          ctx.restore();
+          try {
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const result = jsQR(pixels.data, pixels.width, pixels.height, { inversionAttempts: 'attemptBoth' });
+            if (result && result.data) return result.data;
+          } catch (e) {}
+        }
+      }
+      return null;
+    },
+    async fromFile(ev) {
       const file = ev.target.files && ev.target.files[0];
       ev.target.value = '';
       if (!file) return;
       if (typeof jsQR !== 'function') { UI.toast('Leitor de QR indisponível. Digite o código.', 'err'); return; }
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const found = jsQR(data.data, data.width, data.height, { inversionAttempts: 'attemptBoth' });
-        URL.revokeObjectURL(img.src);
-        if (found && found.data) this.gotCode(found.data);
-        else UI.toast('Não deu para ler o QR nesta foto. Tente outra ou digite o código.', 'err');
-      };
-      img.onerror = () => UI.toast('Não foi possível abrir essa imagem.', 'err');
-      img.src = URL.createObjectURL(file);
+      try {
+        let bitmap;
+        if (typeof createImageBitmap === 'function') {
+          try { bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+          catch (e) { bitmap = await createImageBitmap(file); }
+        } else {
+          bitmap = await new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            img.onload = () => { URL.revokeObjectURL(objectUrl); resolve(img); };
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Imagem não suportada')); };
+            img.src = objectUrl;
+          });
+        }
+        let raw = '';
+        if ('BarcodeDetector' in window) {
+          try {
+            const detector = new BarcodeDetector({ formats: ['qr_code'] });
+            const codes = await detector.detect(bitmap);
+            raw = codes?.[0]?.rawValue || '';
+          } catch (e) {}
+        }
+        if (!raw) raw = this.decodeQr(bitmap, bitmap.width || bitmap.naturalWidth, bitmap.height || bitmap.naturalHeight) || '';
+        if (bitmap.close) bitmap.close();
+        if (raw) this.gotCode(raw);
+        else UI.toast('Não encontrei um QR legível nessa foto. Tente uma imagem mais nítida e com o código inteiro visível.', 'err');
+      } catch (e) {
+        UI.toast('Não consegui abrir essa imagem. Escolha uma foto JPG ou PNG.', 'err');
+      } finally {
+        ev.target.value = '';
+      }
     },
     clearSig() { this.pad?.clear(); },
     async withdraw() {

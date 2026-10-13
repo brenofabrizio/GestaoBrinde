@@ -44,12 +44,6 @@
     </template>
     <div class="d-flex flex-wrap gap-2 mt-3">
       <button class="btn btn-primary" :disabled="saving || lecomStarting">Enviar solicitação de compra</button>
-      <button class="btn btn-outline-primary" type="button" @click="openLecom"
-              :disabled="saving || lecomStarting" :aria-busy="lecomStarting ? 'true' : 'false'">
-        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" x-show="lecomStarting"></span>
-        <i class="bi bi-box-arrow-up-right me-1" aria-hidden="true" x-show="!lecomStarting"></i>
-        <span x-text="lecomStarting ? 'Abrindo chamado…' : 'Abrir chamado no Lecom'"></span>
-      </button>
     </div>
   </form>
 </div>

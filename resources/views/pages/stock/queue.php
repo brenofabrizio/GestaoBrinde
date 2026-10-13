@@ -10,7 +10,7 @@
     <button class="btn btn-outline-secondary btn-sm" type="button" @click="toggleCam" x-text="camOn ? 'Fechar câmera' : 'Abrir câmera / escanear QR'"></button>
     <label class="btn btn-outline-secondary btn-sm mb-0">
       Ler QR pela foto
-      <input type="file" accept="image/*" capture="environment" class="d-none" @change="fromFile($event)">
+      <input type="file" accept="image/*" class="d-none" @change="fromFile($event)">
     </label>
   </div>
   <p class="small text-danger" x-show="camErr" x-text="camErr"></p>
@@ -68,6 +68,33 @@ function exitQueue() {
         if (c) return this.extract(c);
       } catch (e) {}
       return s.toUpperCase();
+    },
+    decodeQr(source, width, height) {
+      if (typeof jsQR !== 'function' || !width || !height) return null;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const maxSide = 1800;
+      const baseScale = Math.min(1, maxSide / Math.max(width, height));
+      const scales = [baseScale, Math.min(2, baseScale * 1.5), Math.min(3, baseScale * 2)];
+      for (const angle of [0, 90, 180, 270]) {
+        for (const scale of [...new Set(scales)]) {
+          const w = Math.max(1, Math.round(width * scale));
+          const h = Math.max(1, Math.round(height * scale));
+          canvas.width = angle % 180 ? h : w;
+          canvas.height = angle % 180 ? w : h;
+          ctx.save();
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          ctx.rotate(angle * Math.PI / 180);
+          ctx.drawImage(source, -w / 2, -h / 2, w, h);
+          ctx.restore();
+          try {
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const result = jsQR(pixels.data, pixels.width, pixels.height, { inversionAttempts: 'attemptBoth' });
+            if (result && result.data) return result.data;
+          } catch (e) {}
+        }
+      }
+      return null;
     },
     async lookup() {
       const code = this.extract(this.code);
@@ -137,21 +164,33 @@ function exitQueue() {
       }
       this.timer = requestAnimationFrame(() => this.tick());
     },
-    fromFile(ev) {
+    async fromFile(ev) {
       const f = ev.target.files && ev.target.files[0];
       if (!f) return;
-      const img = new Image();
-      img.onload = () => {
-        const c = document.getElementById('qrCanvas');
-        c.width = img.width; c.height = img.height;
-        const ctx = c.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const data = ctx.getImageData(0, 0, c.width, c.height);
-        const q = typeof jsQR === 'function' ? jsQR(data.data, data.width, data.height) : null;
-        if (q && q.data) { this.code = this.extract(q.data); this.lookup(); }
-        else UI.toast('Não li o QR nesta foto.', 'err');
-      };
-      img.src = URL.createObjectURL(f);
+      try {
+        let bitmap;
+        if (typeof createImageBitmap === 'function') {
+          try { bitmap = await createImageBitmap(f, { imageOrientation: 'from-image' }); }
+          catch (e) { bitmap = await createImageBitmap(f); }
+        }
+        else {
+          bitmap = await new Promise((resolve, reject) => {
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(f);
+            img.onload = () => { URL.revokeObjectURL(objectUrl); resolve(img); };
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Imagem não suportada')); };
+            img.src = objectUrl;
+          });
+        }
+        const raw = this.decodeQr(bitmap, bitmap.width || bitmap.naturalWidth, bitmap.height || bitmap.naturalHeight);
+        if (bitmap.close) bitmap.close();
+        if (raw) { this.code = this.extract(raw); await this.lookup(); }
+        else UI.toast('Não encontrei um QR legível nessa foto. Tente uma imagem mais nítida e com o código inteiro visível.', 'err');
+      } catch (e) {
+        UI.toast('Não consegui abrir essa imagem. Escolha uma foto JPG ou PNG.', 'err');
+      } finally {
+        ev.target.value = '';
+      }
     }
   };
 }
