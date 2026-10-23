@@ -1,19 +1,30 @@
 <?php ob_start(); ?>
-<div class="card card-body" x-data="receivePage()" x-init="init()">
+<div class="card card-body" x-data="receivePage()" x-init="init()" x-ref="receiveForm">
   <p class="text-muted">Receba somente pedidos já aprovados (com número do chamado). Anexe a NF quando o brinde chegar no CD.</p>
+  <div class="alert alert-danger" role="alert" x-show="Object.keys(fieldErrors).length > 0">
+    <div class="fw-semibold">Não foi possível confirmar o recebimento:</div>
+    <ul class="mb-0 mt-1">
+      <template x-for="entry in Object.entries(fieldErrors)" :key="entry[0]">
+        <li x-text="entry[1]"></li>
+      </template>
+    </ul>
+  </div>
   <div class="row g-3 mb-3">
     <div class="col-md-8">
       <label class="form-label">Solicitação TRADE aguardando recebimento</label>
-      <select class="form-select" x-model="id" @change="pick()">
+      <select class="form-select" x-model="id" @change="clearErrors(); pick()" :class="fieldErrors.id ? 'is-invalid' : ''">
         <option value="">Selecione</option>
         <template x-for="r in list" :key="r.id">
           <option :value="r.id" x-text="(r.public_code || r.code) + ' — ' + (r.industry?.name || '') + ' — ' + r.status_label"></option>
         </template>
       </select>
+      <div class="invalid-feedback" x-show="fieldErrors.id" x-text="fieldErrors.id"></div>
       <p class="small text-muted mt-2 mb-0" x-show="!list.length">Nenhuma solicitação aprovada aguardando chegada. O gestor precisa aprovar o pedido TRADE e informar o número do chamado antes de o CD confirmar o recebimento.</p>
     </div>
     <div class="col-md-4"><label class="form-label">Nº da NF (opcional)</label>
-      <input class="form-control" x-model="invoice_no"></div>
+      <input class="form-control" x-model="invoice_no" :class="fieldErrors.invoice_no ? 'is-invalid' : ''">
+      <div class="invalid-feedback" x-show="fieldErrors.invoice_no" x-text="fieldErrors.invoice_no"></div>
+    </div>
   </div>
   <template x-if="r">
     <div>
@@ -21,14 +32,16 @@
       <p class="text-muted" x-text="r.purpose"></p>
       <div class="mb-3">
         <label class="form-label">Anexar NF (PDF, JPG ou PNG) *</label>
-        <input class="form-control" type="file" accept=".pdf,image/jpeg,image/png,application/pdf" @change="invoiceFile = $event.target.files[0]">
+        <input class="form-control" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" @change="invoiceFile = $event.target.files[0]; clearErrors()" :class="fieldErrors.invoice ? 'is-invalid' : ''">
+        <div class="invalid-feedback" x-show="fieldErrors.invoice" x-text="fieldErrors.invoice"></div>
       </div>
       <template x-for="it in r.items" :key="it.id">
         <div class="d-flex align-items-center gap-2 mb-2">
           <span class="flex-grow-1" x-text="it.item.name + ' (solicitado ' + it.qty_requested + ', já recebido ' + it.qty_received + ')'"></span>
-          <input class="form-control" style="width:110px" type="number" min="0" x-model.number="it.qty_now" placeholder="Qtd">
+          <input class="form-control" style="width:110px" type="number" min="0" x-model.number="it.qty_now" placeholder="Qtd" :class="fieldErrors.items ? 'is-invalid' : ''" @input="clearErrors()">
         </div>
       </template>
+      <div class="invalid-feedback d-block" x-show="fieldErrors.items" x-text="fieldErrors.items"></div>
       <div class="mb-3"><label class="form-label">Observações</label><textarea class="form-control" x-model="notes"></textarea></div>
       <button class="btn btn-primary" :disabled="saving" @click="save">Confirmar chegada no CD (anexa NF e alimenta o estoque)</button>
     </div>
@@ -41,7 +54,8 @@ ob_start(); ?>
 function receivePage() {
   const qs = new URLSearchParams(location.search);
   return {
-    list: [], id: qs.get('id') || '', r: null, invoice_no: '', notes: '', invoiceFile: null, saving: false,
+    list: [], id: qs.get('id') || '', r: null, invoice_no: '', notes: '', invoiceFile: null, saving: false, fieldErrors: {},
+    clearErrors() { this.fieldErrors = {}; },
     async init() {
       await this.load();
       if (this.id) this.pick();
@@ -64,6 +78,7 @@ function receivePage() {
     async save() {
       if (!this.invoiceFile && !this.invoice_no) { UI.toast('Anexe a NF quando o brinde chegar no CD.', 'err'); return; }
       this.saving = true;
+      this.clearErrors();
       try {
         const fd = new FormData();
         fd.append('invoice_no', this.invoice_no);
@@ -79,7 +94,14 @@ function receivePage() {
         this.invoiceFile = null;
         this.$root.querySelector('input[type="file"]').value = '';
         await this.load();
-      } catch (e) { UI.toast(e.message, 'err'); }
+      } catch (e) {
+        if (e.code === 'VALIDATION_ERROR' && e.fields) {
+          this.fieldErrors = e.fields;
+          UI.toast('Verifique os campos destacados.', 'err');
+        } else {
+          UI.toast(e.message || 'Não foi possível registrar o recebimento.', 'err');
+        }
+      }
       this.saving = false;
     }
   };

@@ -125,9 +125,8 @@ final class RequestService
         $code = (string) ($out['public_code'] ?? $out['code'] ?? '');
         if ($code !== '' && ($out['flow'] ?? '') === 'trade') {
             try {
-                $target = absolute_url('/consulta-trade/' . rawurlencode($code));
-                $out['qr_svg'] = \App\Services\QrService::svg($target);
-                $out['qr_png'] = \App\Services\QrService::pngDataUri($target);
+                $out['qr_svg'] = \App\Services\QrService::svg($code);
+                $out['qr_png'] = \App\Services\QrService::pngDataUri($code);
             } catch (\Throwable) {
             }
         }

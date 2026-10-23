@@ -77,8 +77,24 @@ final class QrEncoder
         [$dataCw, $eccCw] = self::capacity($ver);
         $bits = self::byteBits($bytes, $ver, $dataCw * 8);
         $data = self::bitsToBytes($bits, $dataCw);
-        $ecc = self::rsEncode($data, $eccCw);
-        $codewords = array_merge($data, $ecc);
+        if ($ver === 4) {
+            // Version 4-M uses two 32-byte data blocks with 18 ECC bytes each.
+            $dataBlocks = array_chunk($data, 32);
+            $eccBlocks = array_map(static fn (array $block): array => self::rsEncode($block, 18), $dataBlocks);
+            $codewords = [];
+            for ($i = 0; $i < 32; $i++) {
+                foreach ($dataBlocks as $block) {
+                    $codewords[] = $block[$i];
+                }
+            }
+            for ($i = 0; $i < 18; $i++) {
+                foreach ($eccBlocks as $block) {
+                    $codewords[] = $block[$i];
+                }
+            }
+        } else {
+            $codewords = array_merge($data, self::rsEncode($data, $eccCw));
+        }
 
         $reserved = self::reserve($size);
         $grid = array_fill(0, $size, array_fill(0, $size, 0));
@@ -86,6 +102,8 @@ final class QrEncoder
         self::drawFinders($grid, $func, $size);
         self::drawTiming($grid, $func, $size);
         self::drawAlign($grid, $func, $ver);
+        // Reserve format-information modules before placing data bits.
+        self::drawFormat($grid, $func, $size, 0);
         self::placeData($grid, $func, $size, $codewords);
 
         $best = $grid;
@@ -364,24 +382,36 @@ final class QrEncoder
     }
 
     /** @param list<list<int>> $g @param list<list<int>> $f */
-    private static function drawFormat(array &$g, array $f, int $size, int $mask): void
+    private static function drawFormat(array &$g, array &$f, int $size, int $mask): void
     {
         $data = (0b00 << 3) | $mask; // ECC-M = 00
         $bits = self::bchFormat($data);
-        $map = [
-            [0, 8], [1, 8], [2, 8], [3, 8], [4, 8], [5, 8], [7, 8], [8, 8],
-            [8, 7], [8, 5], [8, 4], [8, 3], [8, 2], [8, 1], [8, 0],
-        ];
-        $map2 = [
-            [$size - 1, 8], [$size - 2, 8], [$size - 3, 8], [$size - 4, 8], [$size - 5, 8], [$size - 6, 8], [$size - 7, 8],
-            [8, $size - 8], [8, $size - 7], [8, $size - 6], [8, $size - 5], [8, $size - 4], [8, $size - 3], [8, $size - 2], [8, $size - 1],
-        ];
+        $map = [];
+        for ($i = 0; $i < 6; $i++) {
+            $map[] = [$i, 8];
+        }
+        $map[] = [7, 8];
+        $map[] = [8, 8];
+        for ($i = 8; $i < 15; $i++) {
+            $map[] = [$size - 15 + $i, 8];
+        }
+
+        $map2 = [];
+        for ($i = 0; $i < 8; $i++) {
+            $map2[] = [8, $size - $i - 1];
+        }
+        $map2[] = [8, 7];
+        for ($i = 9; $i < 15; $i++) {
+            $map2[] = [8, 15 - $i - 1];
+        }
         for ($i = 0; $i < 15; $i++) {
             // QR format information is placed least-significant bit first.
             // bchFormat() returns the value MSB first, so reverse it here.
             $bit = (int) $bits[14 - $i];
             $g[$map[$i][0]][$map[$i][1]] = $bit;
             $g[$map2[$i][0]][$map2[$i][1]] = $bit;
+            $f[$map[$i][0]][$map[$i][1]] = 1;
+            $f[$map2[$i][0]][$map2[$i][1]] = 1;
         }
     }
 

@@ -81,15 +81,28 @@ ob_start(); ?>
           <div class="card card-body text-center">
             <div class="fw-semibold mb-2">QR Code da solicitação</div>
             <template x-if="r.qr_png">
-              <img :src="r.qr_png" alt="QR Code da consulta TRADE" width="220" height="220"
-                   class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
+              <div>
+                <img :src="r.qr_png" alt="QR Code da solicitação TRADE" width="220" height="220"
+                     onerror="this.hidden=true;this.nextElementSibling.hidden=false"
+                     class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
+                <div hidden class="alert alert-warning small">QR indisponível. Abra a consulta pelo link:
+                  <a :href="'<?= e(url('/consulta-trade/')) ?>' + encodeURIComponent(r.public_code || r.code)"
+                     x-text="r.public_code || r.code"></a>
+                </div>
+              </div>
             </template>
             <template x-if="!r.qr_png">
-              <img :src="Api.url('/api/trade/requests/' + r.id + '/qr')" alt="QR Code da consulta TRADE"
-                   width="220" height="220" class="bg-white p-2 rounded mx-auto d-block" style="image-rendering:pixelated">
+              <div class="alert alert-warning small">QR indisponível. Abra a consulta pelo link:
+                <a :href="'<?= e(url('/consulta-trade/')) ?>' + encodeURIComponent(r.public_code || r.code)"
+                   x-text="r.public_code || r.code"></a>
+              </div>
             </template>
             <div class="mt-2 font-monospace" x-text="r.public_code || r.code"></div>
             <p class="small text-muted mb-0">No CD ou no evento, leia este código para identificar indústria, produto e saldo.</p>
+            <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+              <button type="button" class="btn btn-outline-primary" @click="printQr()" :disabled="!r.qr_png">Imprimir QR Code</button>
+              <button type="button" class="btn btn-outline-primary" @click="downloadQr()" :disabled="!r.qr_png">Baixar QR Code</button>
+            </div>
           </div>
         </div>
       </div>
@@ -103,6 +116,31 @@ ob_start(); ?>
 function tradeShow(id) {
   return {
     r: null, ticket: '', saving: false, loading: false, loadError: '',
+    downloadQr() {
+      if (!this.r?.qr_png) { UI.toast('QR Code indisponível para baixar.', 'err'); return; }
+      const code = String(this.r.public_code || this.r.code || 'solicitacao').replace(/[^A-Za-z0-9_-]/g, '_');
+      const link = document.createElement('a');
+      link.href = this.r.qr_png;
+      link.download = `qrcode-${code}.png`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    },
+    printQr() {
+      if (!this.r?.qr_png) { UI.toast('QR Code indisponível para impressão.', 'err'); return; }
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) { UI.toast('Permita pop-ups para imprimir o QR Code.', 'err'); return; }
+      const image = printWindow.document.createElement('img');
+      image.addEventListener('load', () => { printWindow.focus(); printWindow.print(); printWindow.close(); }, { once: true });
+      image.addEventListener('error', () => { printWindow.close(); UI.toast('Não foi possível carregar o QR Code para impressão.', 'err'); }, { once: true });
+      image.src = this.r.qr_png;
+      image.alt = 'QR Code ' + (this.r.public_code || this.r.code);
+      image.style.width = '320px';
+      const title = printWindow.document.createElement('h2');
+      title.textContent = this.r.public_code || this.r.code;
+      printWindow.document.body.append(title, image);
+    },
     async load() {
       this.loading = true;
       this.loadError = '';

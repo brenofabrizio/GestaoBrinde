@@ -76,7 +76,7 @@ final class TradeController
     {
         $row = RequestService::find($request->id());
         $code = (string) ($row['public_code'] ?? $row['code']);
-        $png = QrService::png(absolute_url('/consulta-trade/' . rawurlencode($code)));
+        $png = QrService::png($code);
         return new Response(200, [
             'Content-Type' => 'image/png',
             'Content-Length' => (string) strlen($png),

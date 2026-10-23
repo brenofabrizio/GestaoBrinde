@@ -431,9 +431,8 @@ final class TradeService
         $out = RequestService::find((int) $row['id']);
         $out['type'] = 'request';
         $code = (string) ($out['public_code'] ?? $out['code']);
-        $target = absolute_url('/consulta-trade/' . rawurlencode($code));
-        $out['qr_svg'] = QrService::svg($target);
-        $out['qr_png'] = QrService::pngDataUri($target, 5);
+        $out['qr_svg'] = QrService::svg($code);
+        $out['qr_png'] = QrService::pngDataUri($code, 5);
         return $out;
     }
 
